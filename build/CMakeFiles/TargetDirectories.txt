@@ -1,0 +1,3 @@
+/home/kaku/Documents/OS_ZXY/build/CMakeFiles/hello.dir
+/home/kaku/Documents/OS_ZXY/build/CMakeFiles/edit_cache.dir
+/home/kaku/Documents/OS_ZXY/build/CMakeFiles/rebuild_cache.dir
