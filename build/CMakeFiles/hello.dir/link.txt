@@ -1,1 +1,0 @@
-/usr/lib/ccache/c++ -rdynamic CMakeFiles/hello.dir/src/main.cpp.o CMakeFiles/hello.dir/src/just_test.cpp.o -o /home/kaku/Documents/OS_ZXY/bin/hello 
