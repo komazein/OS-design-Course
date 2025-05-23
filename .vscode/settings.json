@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*Rmd": "rmd",
+        "*rmd": "rmd",
+        "unordered_map": "cpp"
+    }
+}
