@@ -29,6 +29,7 @@ struct dinode
 
   以下三种: 普通文件, 目录, 软连接(指定的目标文件的路径)
 
+
   ```cpp
   // 文件类型
   enum TYPE
@@ -42,6 +43,16 @@ struct dinode
 - 时间:
 
   格式自定, 为日志时间的形式
+
+  **注意**: 关于Modification Time和Change Time的区别:
+
+    - Modification Time:
+
+      表示文件最后一次**内容**被修改(Modified)的时间
+
+    - Change Time:
+  
+      表示文件最后一次**元数据**被更改(Changed)的时间, 如改变权限, 链接计数等
 
 - `diblock`:
 
