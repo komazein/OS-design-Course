@@ -1,20 +1,22 @@
-#include "fs.h"
+#pragma once
+#include "fs_types.h"
 
+struct inode;        // å‰å‘å£°æ˜
+class super_block;   // å‰å‘å£°æ˜
 
+// å†…å­˜é¡¹ç¼“å­˜(ç¼“å­˜æ ‘å½¢ç›®å½•)
 class dentry
 {
 private:
-    char* d_name;          // ÎÄ¼şÃû
-    inode* d_inode;         // Ö¸ÏòÄ¿Â¼ÏîµÄ inode
-    dentry* d_parent;         // ¸¸(¹¹½¨Ê÷ĞÎ½á¹¹)
-    std::list<dentry*> d_child;     // ×Ó
-    DFALG d_flag;             // ×´Ì¬ĞÅÏ¢
-    time_t d_time;     // Èô¸É·ÃÎÊÊ±¼ä
-    uint16_t d_ref;         // ÒıÓÃ¼ÆÊı
-    //super_block d_sb;       // Ö¸ÏòËùÊôµÄÎÄ¼şÏµÍ³
-    //// ¿ÉÑ¡ÓÃ»º´æÌæ»»²ßÂÔ(Èçlru)
+    char* d_name;                  // å½“å‰ç›®å½•é¡¹å
+    inode* d_inode;                // æŒ‡å‘ inode
+    dentry* d_parent;              // çˆ¶ç›®å½•æŒ‡é’ˆ
+    std::list<dentry*> d_child;    // å­ç›®å½•åˆ—è¡¨
+    DFALG d_flag;                  // çŠ¶æ€ä¿¡æ¯
+    time_t d_time;                 // ä¿®æ”¹æ—¶é—´
+    uint16_t d_ref;                // å¼•ç”¨è®¡æ•°
 
-    // ´æ´¢Ä¿Â¼Ïî¿ÉÒÔÊ¹ÓÃ¹şÏ£±í´æ´¢, Ìá¸ß²éÕÒĞ§ÂÊ(Ò²¿ÉË³Ğò±í´æ´¢)
-    std::unordered_map<std::string, dir_entry*> entries; // ´æ´¢Ä¿Â¼Ïî
+    //super_block d_sb;           // è¶…çº§å—(å¯é€‰)
 
+    //std::unordered_map<std::string, dir_entry*> entries; // (å¤‡ç”¨æ–¹å¼)
 };

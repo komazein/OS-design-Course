@@ -1,9 +1,8 @@
-#include "../include/fs.h";
-#include "../include/superBlock.h";
+#include <fs.h>
 
 void super_block::init()
 {
-    // ³õÊ¼»¯³¬¼¶¿é
-    //wuguanlingshi DA SB
-    
+    // just test
+    std::cout << "super_block init now!" << std::endl;
+    return;
 }

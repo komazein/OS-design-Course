@@ -1,0 +1,117 @@
+#pragma once
+
+#include <string>
+#include <vector>
+#include <cstdint>
+#include <unordered_map>
+#include <list>
+#include <ctime>
+#include <iostream>
+using namespace std;
+
+extern const int INODE_SIZE;
+extern const int SUPERBLOCKSIZE;
+
+// const int INODE_SIZE = sizeof(struct inode);
+const int N_BLOCK = 12;         // inode中物理块索引
+const int BLOCKSIZE = 512;
+const int USERNUM = 8;
+const int DATANUM = 512;
+const int INODENUM = 32;
+const int S_FREE_NUM = 16;         // 空闲块数量
+const int MAXNAMESIZE = 16;
+
+// 文件类型
+enum TYPE
+{
+    SIM_FILE,
+    DIR,          // 那么这个inode中存储的就是其下的目录项(包含目录项名称, 以及他们对应的inode号)
+    LINK
+};
+
+// 文件控制信息
+enum FILEMODE
+{
+
+};
+
+// inode磁盘结构
+struct dinode
+{
+    size_t di_num;          // inode号
+    TYPE di_type;        // 文件类型
+    FILEMODE di_mode;        // file mode
+    uint8_t di_uid;           // owner_id
+    uint8_t di_gid;           // group_id
+    size_t di_size;          // file size (byte)
+    time_t	di_atime;	/* Access time */
+    time_t	di_ctime;	/* Inode Change time */
+    time_t	di_mtime;	/* Modification time */
+    time_t	di_dtime;	/* Deletion Time */
+    uint32_t di_flag;         // file flag
+    size_t di_block[N_BLOCK]; // 存储逻辑块号
+};
+
+// 内存inode
+struct inode
+{
+    size_t i_num;          // inode号
+    TYPE i_type;        // 文件类型
+    FILEMODE i_mode;        // file mode
+    uint8_t i_uid;           // owner_id
+    uint8_t i_gid;           // group_id
+    size_t i_size;          // file size
+    time_t	i_atime;
+    time_t	i_ctime;
+    time_t	i_mtime;
+    time_t	i_dtime;
+    uint32_t i_flag;         // file flag
+    uint16_t di_link_count;  // file link count(硬链接)
+    size_t i_block[N_BLOCK]; // 块地址
+};
+
+// 文件句柄结构
+struct file
+{
+    inode* f_inode;        // 指向打开文件对应的 inode
+    FILEMODE di_mode;       // mode(权限)
+    TYPE f_type;
+    string f_path;          // 文件路径
+    uint16_t f_ref;         // 引用计数
+    size_t fd;              // 文件句柄
+};
+
+// 数据块类型
+enum BTYPE
+{
+    INDEX,
+    DATA
+};
+
+// 数据块
+struct block
+{
+    BTYPE mode;          // 索引块或数据块
+};
+
+// 访问控制结构
+struct ACL
+{
+    uint8_t owner;
+    uint8_t group;
+    uint8_t other;
+};
+
+// 目录项结构
+struct dir_entry
+{
+    size_t inode_num;       // inode号
+    char name[MAXNAMESIZE]; // 名称
+    TYPE type;              // 类型(文件/目录)
+};
+
+// 目录项的状态
+union DFALG
+{
+    //..可以是在缓存中的状态(如目录项已删除, 但保留在缓存中)
+};
