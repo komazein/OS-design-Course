@@ -5,8 +5,16 @@ using namespace std;
 #include <unordered_map>
 #include <list>
 
-const int INODE_SIZE = 1000;
+
+
+const int INODE_SIZE = sizeof(struct inode);
 const int N_BLOCK = 12;         // inode中物理块索引
+const int BLOCKSIZE = 512;
+const int USERNUM = 8;
+const int DATANUM = 512;
+const int INODENUM = 32;
+const int S_FREE_NUM = 16;         // 空闲块数量
+const int MAXNAMESIZE = 16;
 
 
 // 文件类型
@@ -24,10 +32,6 @@ enum FILEMODE
 
 };
 
-// 时间类型
-struct __timestamp{
-    // 日志时间信息
-};
 
 // // 文件句柄
 // typedef struct file_handler;
@@ -43,10 +47,10 @@ struct dinode
     uint8_t di_uid;           // owner_id
     uint8_t di_gid;           // group_id
     size_t di_size;          // file size      (byte, 可以便于定位几级索引)   
-    __timestamp	di_atime;	/* Access time */
-    __timestamp	di_ctime;	/* Inode Change time */
-    __timestamp	di_mtime;	/* Modification time */
-    __timestamp	di_dtime;	/* Deletion Time */
+    time_t	di_atime;	/* Access time */
+    time_t	di_ctime;	/* Inode Change time */
+    time_t	di_mtime;	/* Modification time */
+    time_t	di_dtime;	/* Deletion Time */
     uint32_t di_flag;         // file flag
     // uint16_t di_link_count;  // file link count
     size_t di_block[N_BLOCK];        // 存储逻辑块号, 直接,   一级间接块、二级间接块、三级间接块(可拓展的混合索引模式)
@@ -64,10 +68,10 @@ struct inode
     uint8_t i_uid;           // owner_id
     uint8_t i_gid;           // group_id
     size_t i_size;          // file size      (byte)   
-    __timestamp	i_atime;	/* Access time */
-    __timestamp	i_ctime;	/* Inode Change time */
-    __timestamp	i_mtime;	/* Modification time */
-    __timestamp	i_dtime;	/* Deletion Time */
+    time_t	i_atime;	/* Access time */
+    time_t	i_ctime;	/* Inode Change time */
+    time_t	i_mtime;	/* Modification time */
+    time_t	i_dtime;	/* Deletion Time */
     uint32_t i_flag;         // file flag
     uint16_t di_link_count;  // file link count(文件共享用, 硬链接)
     size_t i_block[N_BLOCK];        // 存储逻辑块号, 直接,   一级间接块、二级间接块、三级间接块(可拓展的混合索引模式)
@@ -111,23 +115,7 @@ struct file
 // };
 
 
-class super_block{
-private:
-    size_t s_block_size;         //块大小
-    string s_fs_name;           // 文件系统名称(类型)
-    size_t s_block_num;                   // 块数
-    inode* s_root;             // 指向根节点inode
-    // size_t s_free_num;          // 空闲块数量
-    /// 成组连接法相关数据结构
 
-    
-public:
-    inode*    iget();             // 分配
-    void            idel();             // 销毁 
-
-
-
-};
 
 // // 磁盘格式
 // struct hard_disk
@@ -178,7 +166,7 @@ struct ACL
 struct dir_entry
 {
     size_t inode_num;       // inode号
-    string name;            // 名称
+    char name[MAXNAMESIZE];            // 名称
     TYPE type;              // 类型(文件还是目录)
 };
 
@@ -207,14 +195,14 @@ union DFALG
 // 自选存储的数据结构(以查找速率为原则设计)
 // 启动文件系统时, 从根('/')开始构建
 // 缓存路径, 便于下面的查找
-struct dentry
+/*struct dentry
 {
     string d_name;          // 文件名
     inode* d_inode;         // 指向目录项的 inode
     dentry* d_parent;         // 父(构建树形结构)
     std::list<dentry*> d_child;     // 子
     DFALG d_flag;             // 状态信息
-    __timestamp d_time;     // 若干访问时间
+    time_t d_time;     // 若干访问时间
     uint16_t d_ref;         // 引用计数
     super_block d_sb;       // 指向所属的文件系统
     //// 可选用缓存替换策略(如lru)
@@ -223,7 +211,7 @@ struct dentry
     std::unordered_map<std::string, dir_entry*> entries; // 存储目录项
 
 };
-
+*/
 
 
 
