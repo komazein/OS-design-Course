@@ -1,40 +1,12 @@
-#include <string>
-#include <vector>
-using namespace std;
-#include <cstdint>
-#include <unordered_map>
-#include <list>
+# 文件系统相关结构体定义
 
-const int INODE_SIZE = 1000;
-const int N_BLOCK = 12;         // inode中物理块索引
+## inode
 
+记录文件的相关信息, 与文件一一对应.
 
-// 文件类型
-enum TYPE
-{
-    FILE,
-    DIR,          // 那么这个inode中存储的就是其下的目录项(包含目录项名称, 以及他们对应的inode号)
-    LINK
-};
+### 磁盘inode
 
-
-// 文件控制信息
-enum FILEMODE
-{
-
-};
-
-// 时间类型
-struct __timestamp{
-    // 日志时间信息
-};
-
-// // 文件句柄
-// typedef struct file_handler;
-
-
-// inode
-
+```cpp
 struct dinode
 {
     size_t di_num;          // inode号
@@ -51,11 +23,41 @@ struct dinode
     // uint16_t di_link_count;  // file link count
     size_t di_block[N_BLOCK];        // 存储逻辑块号, 直接,   一级间接块、二级间接块、三级间接块(可拓展的混合索引模式)
 };
+```
 
+- 文件类型:
 
+  以下三种: 普通文件, 目录, 软连接(指定的目标文件的路径)
 
+  ```cpp
+  // 文件类型
+  enum TYPE
+  {
+      FILE,
+      DIR,          // 那么这个inode中存储的就是其下的目录项(包含目录项名称, 以及他们对应的inode号)
+      LINK
+  };
+  ```
 
-// 内存inode, 只有文件创建后才在内存中创建inode
+- 时间:
+
+  格式自定, 为日志时间的形式
+
+- `diblock`:
+
+  存储逻辑块号(用户视角看来是连续分配), 需要有地址映射机制将逻辑块号映射到物理块号从而取出数据.
+
+  大小定义为12, 前9个是直接索引, 后面一次为若干级索引
+
+- `filemode`:
+
+  记录文件中的控制信息(自定义)
+
+### 内存inode
+
+较磁盘inode添加了引用计数, 方便实现硬链接
+
+```cpp
 struct inode
 {
     size_t i_num;          // inode号
@@ -72,22 +74,13 @@ struct inode
     uint16_t di_link_count;  // file link count(文件共享用, 硬链接)
     size_t i_block[N_BLOCK];        // 存储逻辑块号, 直接,   一级间接块、二级间接块、三级间接块(可拓展的混合索引模式)
 };
+```
 
+## 文件打开表
 
-// class inode
-// {
-//     private:
-//         //...
-//     public:
-//         // 创建硬链接, 创建新目录
-// };
+文件打开表表项(描述文件当前状态), 常驻内存, open后创建并加入文件打开表
 
-
-
-
-
-// 文件打开表表项(描述文件当前状态), 常驻内存
-// open后创建并加入文件打开表
+```cpp
 struct file
 {
     inode* f_inode;        // 指向打开文件对应的 inode
@@ -99,18 +92,15 @@ struct file
     uint16_t /*file_ref_t*/ f_ref;      // 引用计数
     size_t fd;     // 文件句柄 (后续仅通过此标识访问文件而非文件名)
 };
+```
 
+用户对文件进行操作时记录相关信息, 动态的实例.
 
+可以返回一个文件句柄便于用户操作, 打开, 关闭文件仅需要此句柄即可
 
+## 超级块
 
-// 超级块, 对应一个(具体的)文件系统
-// struct super_block{
-//     size_t s_block_size;         //块大小
-//     string s_fs_name;           // 文件系统名称(类型)
-//     size_t s_block_num;                   // 块数
-// };
-
-
+```cpp 
 class super_block{
 private:
     size_t s_block_size;         //块大小
@@ -128,52 +118,13 @@ public:
 
 
 };
+```
 
-// // 磁盘格式
-// struct hard_disk
-// {
+记录文件系统的元信息, 一个文件系统对应一个超级块
 
-// };  
+## 目录表项
 
-
-
-// 数据块类型
-enum BTYPE
-{
-    INDEX,      // 索引块
-    DATA        // 数据块
-};
-
-// 数据块
-struct block
-{
-    BTYPE mode;          // 块是索引块还是数据块
-
-};
-
-// // 虚拟文件系统
-// class VFS
-// {
-// private:
-//     super_block sb;     // 超级快
-//     inode* in[INODE_SIZE];       // inode
-// };
-
-// access control访问控制
-// 保护单个文件和目录内文件
-struct ACL
-{
-    // 规定从0-3位的访问类型: 如 0000-读, 0010: 写,  
-    uint8_t owner;      
-    uint8_t group;  
-    uint8_t other;
-};
-
-
-/////////////////////////////////////////////
-// 目录
-/////////////////////////////////////////////
-
+```cpp
 // 单个目录表项
 struct dir_entry
 {
@@ -181,32 +132,15 @@ struct dir_entry
     string name;            // 名称
     TYPE type;              // 类型(文件还是目录)
 };
+```
 
+仅仅是维护inode号与文件名称的映射关系, 减少体量查找时便于减少I/O.
 
-// 目录的本质也是文件, 存储文件名<--->inode的映射关系
+- `type`: 见上面的描述
 
-// 如果一个目录的结构如下:
-// src---
-//      --- a.txt
-//      --- src2
-// | inode_num | name  | type   |
-// |-----------|-------|--------|
-// | 100       | a.txt | file   |
-// | 200       | src2  | dir    |
+## 目录
 
-
-// 目录项的状态
-union DFALG
-{
-    //..可以是在缓存中的状态(如目录项已删除, 但保留在缓存中)
-};
-
-
-// (可选)多级目录(树形)结构
-// 内存项缓存(缓存树形目录)
-// 自选存储的数据结构(以查找速率为原则设计)
-// 启动文件系统时, 从根('/')开始构建
-// 缓存路径, 便于下面的查找
+```cpp
 struct dentry
 {
     string d_name;          // 文件名
@@ -223,7 +157,13 @@ struct dentry
     std::unordered_map<std::string, dir_entry*> entries; // 存储目录项
 
 };
+```
+
+- 记录树形结构, 通过路径查找相应的目录项, 找到inode号, 从而定位到inode, 找到文件
+  - 其中的树形结构通过父子节点进行构建
+
+- 为了减少I/O频率, 可以设置缓存, 并适配相应的替换策略方式内存占用过多和查找费力
 
 
 
-
+  
