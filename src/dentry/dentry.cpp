@@ -1,13 +1,20 @@
 #include "dentry.h"
 
-// 根据目录项添加子节点
-// 需要子节点的inode, 子节点的inode可以当遍历到子节点时访问磁盘获得自己的inode再自行设置
+///////////////////////////////
+///         dentry          ///
+///////////////////////////////
+
 void dentry::add_subdir(vector<dir_entry>& dir_entries)
 {
     for(auto& dir_entry : dir_entries){
         dentry* child_dentry = new dentry(dir_entry.name, dir_entry.inode_num, this);
         d_child_[dir_entry.name] = child_dentry;
     }
+}
+
+void dentry::add_single_subdir(dentry* new_node)
+{
+    d_child_[new_node->d_name_] = new_node;     // 直接加入子节点中
 }
 
 // 查找子节点
@@ -18,6 +25,12 @@ dentry* dentry::find_subdir(string& name)
     else { return it->second; }
 }
 
+bool dentry::erase_subdir(string& name)
+{
+    size_t erasedCount = d_child_.erase(name);
+    if(erasedCount > 0) { return true; }
+    else { return false; }
+}
 
 // 添加引用计数
 void dentry::add_ref()
@@ -50,7 +63,6 @@ void dentry::set_time(time_t time)
 
 
 
-
 ///////////////////////////////
 ///         dcache          ///
 ///////////////////////////////
@@ -74,19 +86,32 @@ bool dcache::add_dentry(string& name, dentry* dentry_node, dentry* parent)
 }
 
 
+bool dcache::erase_dentry(string& name, dentry* dentry_node)
+{
+    size_t erasedCount = dentry_table_.erase({dentry_node, name});
+    if(erasedCount > 0) { return true; }
+    else { return false; }
+}
+
 
 
 ///////////////////////////////////
 ///         dirTree             ///
 ///////////////////////////////////
 
-dentry* dirTree::hash_search(string& name, dentry* parent)
+void dirTree::init_root(string root_name="/", size_t root_inode_num, inode* root_inode)
 {
-    return cache_.find_dentry(name, parent);
+    root_ = new dentry(root_name, root_inode, root_inode_num, nullptr);     // root无父节点
 }
 
 
-dentry* dirTree::name_travesal(string& path, dentry* work_dir=nullptr)
+dentry* dirTree::hash_search(string& name, dentry* parent)
+{
+    return cache_->find_dentry(name, parent);
+}
+
+
+dentry* dirTree::name_travesal(string& path, dentry* work_dir = nullptr)
 {
 
     dentry* search = root_;     // 此时默认为绝对路径
@@ -127,7 +152,7 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir=nullptr)
             }
             
             // 更新全局hash表
-            cache_.add_dentry(name, dentry_next, search);
+            cache_->add_dentry(name, dentry_next, search);
         }
 
         search = dentry_next;       // 继续寻找
@@ -139,14 +164,12 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir=nullptr)
 
 }
 
-
 bool dirTree::add_hash(string& name, dentry* parent, dentry* dentry_node)
 {
-    return cache_.add_dentry(name, dentry_node, parent);
+    return cache_->add_dentry(name, dentry_node, parent);
 }
 
-
-bool dirTree::alloc_dir(string& name, dentry* work_dir)
+bool dirTree::name_search_test(string& name, dentry* work_dir/*, bool update_hash*/)
 {
     // 首先初步利用哈希查找是否存在该目录项(保证不能重名)
     if(hash_search(name, work_dir)) { return false; }
@@ -154,12 +177,62 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir)
     // 再保证当前目录下确实无此目录
     auto sub_dir = work_dir->find_subdir(name);
 
-    if(sub_dir != nullptr)  { return false; }      
+    if(sub_dir != nullptr && sub_dir->get_flag() == FIRST_LOAD_TO_MEMORY)  { return false; }    
+    
+    // 最后保证磁盘中确实无此目录
 
+    if(sub_dir->get_flag() == CUT_SUBDIRS) {
 
+        /// 此处进行I/O操作获得子目录项存入dir_entries
+        vector<dir_entry> dir_entries;              // 假定已经返回了目录项
+
+        work_dir->add_subdir(dir_entries);       // 这时加入了新的子节点
+
+        auto new_add_dir = work_dir->find_subdir(name);
+        if(new_add_dir != nullptr)  { return false; }       // 如果此时新加入的节点中有, 则创建新目录失败
+
+    }
+
+    return true;        // 没找到同名的节点
 }
 
-bool dirTree::free_dir()
+bool dirTree::alloc_dir(string& name, dentry* work_dir)
 {
+    if(!name_search_test(name, work_dir)) { return false; }  // 如果找到了同名的, 则分配新目录失败
 
+    /////////////////// 下面是可以创建新的目录项了
+
+    // TODO:通知I/O分配新的inode
+
+    // 如果此时已经获得了inode(内存)
+    inode* new_allocate_inode;
+
+    // 完善inode的信息
+    new_allocate_inode->i_type = DIR;
+    ///  .....
+
+    dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir);
+    work_dir->add_single_subdir(new_node);      // 为当前工作路径加入新的子目录
+    // 还需要更新全局哈希
+    cache_->add_dentry(name, new_node, work_dir);
+
+    return true;
+}
+
+bool dirTree::free_dir(string& name, dentry* work_dir)
+{
+    // 首先还是一样的查找验证过程
+    if(name_search_test(name, work_dir))  { return false; }       // 如果没找到, 则删除失败
+
+    // TODO: 通知I/O回收该节点
+
+
+    if(work_dir->erase_subdir(name)){
+        // 子节点删除成功后再删除全局哈希表项
+        if(!cache_->erase_dentry(name, work_dir))   { return false; }
+    } 
+    else{ 
+        return false;       // maybe more serious
+    }
+    return true;
 }

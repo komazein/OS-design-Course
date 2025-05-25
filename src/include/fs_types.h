@@ -8,19 +8,23 @@
 #include <ctime>
 #include <iostream>
 #include <sstream>
+#include <string.h>
 using namespace std;
 
 extern const int INODE_SIZE;
 extern const int SUPERBLOCKSIZE;
 
 // const int INODE_SIZE = sizeof(struct inode);
-const int N_BLOCK = 12;         // inode中物理块索引
+const int N_BLOCK = 12;         // inode中物理块索引,inode索引规则
 const int BLOCKSIZE = 512;
 const int USERNUM = 8;
 const int DATANUM = 512;
 const int INODENUM = 32;
 const int S_FREE_NUM = 16;         // 空闲块数量
 const int MAXNAMESIZE = 16;
+const int MAXnumInBlock = 2;//限制每个磁盘最多目录项个数(包含父节点的目录项)
+const int ROOT_INODE_NUMBER = 0;        // 初始时根节点的inode号为0
+
 
 // 文件类型
 enum TYPE
@@ -33,7 +37,7 @@ enum TYPE
 // 文件控制信息
 enum FILEMODE
 {
-
+    ALL
 };
 
 // inode磁盘结构
@@ -48,7 +52,6 @@ struct dinode
     time_t	di_atime;	/* Access time */
     time_t	di_ctime;	/* Inode Change time */
     time_t	di_mtime;	/* Modification time */
-    time_t	di_dtime;	/* Deletion Time */
     uint32_t di_flag;         // file flag
     size_t di_block[N_BLOCK]; // 存储逻辑块号
 };
@@ -65,10 +68,10 @@ struct inode
     time_t	i_atime;
     time_t	i_ctime;
     time_t	i_mtime;
-    time_t	i_dtime;
     uint32_t i_flag;         // file flag
     uint16_t di_link_count;  // file link count(硬链接)
     size_t i_block[N_BLOCK]; // 块地址
+
 };
 
 // 文件句柄结构
