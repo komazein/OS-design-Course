@@ -13,9 +13,9 @@ void super_block::init()
 
     s_root=(dentry*)malloc(sizeof(dentry));
     char name[]="root";
-    dentry temp_root;
-    temp_root.init(name,temp_inode,NULL,0);///////////需要更改
-    s_root=&temp_root;
+    //dentry temp_root;
+    //temp_root.init(name,temp_inode,NULL,0);///////////需要更改
+    //s_root=&temp_root;
 }
 
 void super_block::newdisk()
@@ -69,9 +69,9 @@ void super_block::newdisk()
     struct inode*temp_inode=(struct inode*)malloc(sizeof(struct inode));
     char name[]="root";
     temp_inode=iget(1,DIR,ALL,0,00,0,0,0);
-    dentry temp_root;
-    temp_root.init(name,temp_inode,NULL,0);//////////缺参数
-    s_root=&temp_root;
+    //dentry temp_root;
+    //temp_root.init(name,temp_inode,NULL,0);//////////缺参数
+    //s_root=&temp_root;
 }
 bool super_block::getblock(int n,int a[])
 {
@@ -130,7 +130,7 @@ inode* super_block::iget(bool ifmain,TYPE type,FILEMODE i_mode,uint8_t i_uid,uin
     }
     else
     {
-        ino->i_num=s_inode_num-1;
+        ino->i_num=stack_inode[s_inode_num-1];
         s_inode_num--;
     }
     ino->i_type=type;

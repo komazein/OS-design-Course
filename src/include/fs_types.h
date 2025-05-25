@@ -8,6 +8,8 @@
 #include <ctime>
 #include <iostream>
 #include <string.h>
+#include<cmath>
+#include<queue>
 using namespace std;
 
 extern const int INODE_SIZE;
@@ -21,7 +23,7 @@ const int DATANUM = 512;
 const int INODENUM = 32;
 const int S_FREE_NUM = 16;         // 空闲块数量
 const int MAXNAMESIZE = 16;
-const int MAXnumInBlock = 2;//限制每个磁盘最多目录项个数(包含父节点的目录项)
+const int MAXnumInBlock = 3;//限制每个磁盘最多目录项个数(包含父节点的目录项)
 // 文件类型
 enum TYPE
 {

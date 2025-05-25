@@ -12,6 +12,7 @@ set(SOURCES
     src/main.cpp
     src/just_test.cpp
     src/block/superBlock.cpp            # if new *.cpp file add to the project, don't forget to add here
+    src/block/ddq.cpp
 )
 
 # 创建可执行文件
