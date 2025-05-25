@@ -1,8 +1,20 @@
 #include "test.h"
+#include <spdlog/spdlog.h>
+
 void func()
 {
-    blockScheduler a;
-    for(size_t i=0;i<100;i++)
-        cout<<i<<","<<a.cal_block_num_dir(i)<<endl;
-    
+   
+    testii a;
+    a.f();
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,0,SEEK_SET);//写回第IN快磁盘
+    fwrite(&a, sizeof(testii),1,fp);
+    fclose(fp);
+    testii b;
+    b.out();
+    fp=fopen("../disk.img","r+");
+    fseek(fp,0,SEEK_SET);//写回第IN快磁盘
+    fread(&b, sizeof(testii),1,fp);
+    fclose(fp);
+    b.out();
 }

@@ -6,16 +6,21 @@ void super_block::init()
     fseek(fp,0,SEEK_SET);
     fread(this,sizeof(super_block),1,fp);
 
-    inode*temp_inode=(inode*)malloc(sizeof(inode));
+    inode* root_inode = (inode*)malloc(sizeof(inode));
     fseek(fp,sizeof(super_block),SEEK_SET);
-    fread(temp_inode,sizeof(inode),1,fp);
+    fread(root_inode,sizeof(inode),1,fp);
     fclose(fp);
 
-    s_root=(dentry*)malloc(sizeof(dentry));
-    char name[]="root";
-    //dentry temp_root;
-    //temp_root.init(name,temp_inode,NULL,0);///////////需要更改
-    //s_root=&temp_root;
+    ///////////////////////构建根节点
+    // s_root=(dentry*)malloc(sizeof(dentry));
+    // char name[]="root";
+
+    // dentry temp_root;
+    // temp_root.init(name,temp_inode,NULL,0);///////////需要更改
+    // s_root=&temp_root;
+
+    dirtree->init_root("/", ROOT_INODE_NUMBER, root_inode);     // 创建根节点
+
 }
 
 void super_block::newdisk()
@@ -66,12 +71,17 @@ void super_block::newdisk()
             cout<<endl;
         }*/
     }
-    struct inode*temp_inode=(struct inode*)malloc(sizeof(struct inode));
+    struct inode*root_inode=(struct inode*)malloc(sizeof(struct inode));
     char name[]="root";
-    temp_inode=iget(1,DIR,ALL,0,00,0,0,0);
-    //dentry temp_root;
-    //temp_root.init(name,temp_inode,NULL,0);//////////缺参数
-    //s_root=&temp_root;
+    root_inode=iget(1,DIR,ALL,0,00,0,0,0);
+
+    // 构建根节点//////////////////////////////////////
+
+
+    dirtree->init_root("/", ROOT_INODE_NUMBER, root_inode);     // 创建根节点
+    // dentry temp_root;
+    // temp_root.init(name,temp_inode,NULL,0);//////////缺参数
+    // s_root=&temp_root;
 }
 bool super_block::getblock(int n,int a[])
 {

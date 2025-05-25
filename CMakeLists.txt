@@ -7,6 +7,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 # 包含头文件目录
 include_directories(src/include)
 
+# 包含头文件目录
+include_directories(thirdparty)
+
+
 # 源文件
 set(SOURCES
     src/main.cpp

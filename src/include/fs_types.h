@@ -7,6 +7,7 @@
 #include <list>
 #include <ctime>
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include<cmath>
 #include<queue>
@@ -24,6 +25,9 @@ const int INODENUM = 32;
 const int S_FREE_NUM = 16;         // 空闲块数量
 const int MAXNAMESIZE = 16;
 const int MAXnumInBlock = 3;//限制每个磁盘最多目录项个数(包含父节点的目录项)
+const int ROOT_INODE_NUMBER = 0;        // 初始时根节点的inode号为0
+
+
 // 文件类型
 enum TYPE
 {
@@ -113,7 +117,12 @@ struct dir_entry
 };
 
 // 目录项的状态
-union DFALG
+enum DFALG
 {
     //..可以是在缓存中的状态(如目录项已删除, 但保留在缓存中)
+    FIRST_LOAD_TO_MEMORY,       // 首次加载入内存, 
+                //由于加载入内存中已经把他的子目录项中的内容初步分配并初始化为dentry节点链入树中, 所以保留了其子目录结构
+    CUT_SUBDIRS,                // 此时它的子目录被剪枝(说明如果发现此时无子目录项, 需要再次遍历此dentry节点时, 还需要进行磁盘I/O)
+
+
 };

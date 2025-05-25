@@ -8,10 +8,13 @@ class super_block {
 private:
     size_t s_block_size;                 // 块大小
     size_t s_block_num;                  // 块数量
-    dentry* s_root;                      // 根目录指针
+    // dentry* s_root;                      // 根目录指针   统一使用dirTree作为目录的对外接口, 此时获取s_root即为dirtree->get_root()
     int s_free_num[S_FREE_NUM];          // 空闲数据块数量列表
     size_t s_inode_num;
     int stack_inode[INODENUM];
+
+    // 其他模块的接口
+    dirTree* dirtree;
 
 
 public:

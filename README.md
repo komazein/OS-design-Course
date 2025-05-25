@@ -57,5 +57,19 @@ losetup -a          # 检查生成的.img的loop号
 sudo losetup -d /dev/loopN      # 如果号为loopN, 则删除记录
 ```
 
+## 使用spdlog进行日志打印
+
+详情见https://github.com/gabime/spdlog.git
+
+
+Third-party components:
+
+This project includes code from [spdlog](https://github.com/gabime/spdlog), 
+which is licensed under the MIT License.
+
+Copyright (c) 2016 Gabi Melman
+See third_party/spdlog/LICENSE.txt for full license text.
+
+
 
 
