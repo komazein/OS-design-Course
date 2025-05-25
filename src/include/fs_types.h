@@ -7,6 +7,7 @@
 #include <list>
 #include <ctime>
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 extern const int INODE_SIZE;
@@ -111,7 +112,12 @@ struct dir_entry
 };
 
 // 目录项的状态
-union DFALG
+enum DFALG
 {
     //..可以是在缓存中的状态(如目录项已删除, 但保留在缓存中)
+    FIRST_LOAD_TO_MEMORY,       // 首次加载入内存, 
+                //由于加载入内存中已经把他的子目录项中的内容初步分配并初始化为dentry节点链入树中, 所以保留了其子目录结构
+    CUT_SUBDIRS,                // 此时它的子目录被剪枝(说明如果发现此时无子目录项, 需要再次遍历此dentry节点时, 还需要进行磁盘I/O)
+
+
 };
