@@ -123,18 +123,66 @@ class LRUReplacer
 {
 public:
 
-    void Insert(const dentry* dentry_node);
+    explicit LRUReplacer(size_t max_size = 1024) : max_size_(max_size) {}
 
-    bool Victim(dentry* dentry_node);
 
-    bool Erase(const dentry* dentry_node);
+    /**
+     * 
+     * @brief 将节点插入到`lru_list`的首部,
+     * 如果存在于链表中, 则将其移动到链表的首部
+     * 
+     * @param dentry_node 待插入lru链表中的节点
+     * 
+     */
+    void Insert(dentry* dentry_node);
+
+
+    /**
+     * 
+     * @brief 将当前节点以及其父辈的节点插入到`lru_list`的首部,
+     * 适用于剪枝操作时, 由于一个访问时间较近的节点不能被替换出去, 也就是说明其父辈节点也不能换出
+     * 所以将其沿着父辈方向的节点依次插入`lru_list`
+     * 
+     * 
+     */
+    void InsertDir(dentry* dentry_node);
+
+    /**
+     * 
+     * @brief 优先替换出`lrulist`中的尾部元素
+     * 
+     * @return `false` 没有可以替换出的节点, 说明此事lru_list为空
+     * 
+     */
+    bool Victim();
+
+    /**
+     * 
+     * @brief 就是指定需要移除的节点, 即无理由替换
+     * 
+     * @param dentry_node 强制替换出的节点
+     * 
+     * @return `ture` 如果在表中并替换成功
+     * 
+     */
+    bool Erase(dentry* dentry_node);
+
+
+    /**
+     * 
+     * @brief 可以动态的更新最大链表的限制
+     * 
+     */
+    void set_max_size(size_t max_size) { max_size_ = max_size; }
 
 private:
     
-    list<dentry*> active_lists;     // 活跃链表, 经常访问的节点
-    list<dentry*> inactive_lists;   // 不活跃链表     
+    // 由于本文件系统只考虑到了单进程, 所以不存在引用计数的问题, 
+    // 所以只需要一个链表记录缓存节点即可
+    // 其替换的优先级就是LRU
+    list<dentry*> lru_list;     // lru链表 
     
-    // size_t 
+    size_t max_size_;           // 最大的链表大小
 };
 
 
@@ -227,6 +275,14 @@ public:
      * 
      */
     void init_root(string root_name, size_t root_inode_num, inode* root_inode);
+
+    /**
+     * 
+     * @brief 删除根节点root_, 必须要先调用free_dir是传入的是"/"才能调用,
+     * 因为仅仅是简单的释放根的空间, 直接调用可能会引发内存泄漏
+     * 
+     */
+    void del_root() { delete root_; }
 
     /**
      * 
@@ -348,13 +404,49 @@ public:
      */
     bool free_dir(string& name, dentry* work_dir);
 
+
     time_t get_time() { return cur_time; }
+
+    /**
+     * 
+     * @brief 释放指定的dentry空间, 并不是删除, 而是释放此dentry占用的空间
+     * 
+     * 此函数也是递归删除以dentry_node为根节点的子树
+     * 
+     * @return `true`释放成功
+     */
+    bool cut_dir(dentry* dentry_node);
+
+    /**
+     * 
+     * @brief 如果达到了某个阈值(或者通过手动指定释放空间), 则触发释放一些dcache空间
+     * 此操作不会改变目录树的结构, 仅仅会减少dcache的表项, 减少的空间主要为目录的名称
+     * 
+     * @return 成功释放的存储的目录项(dentry)的个数, 如果为0则说明释放失败
+     * 
+     */
+    size_t shrink_dcache();
+
+
+    /**
+     * 
+     * @brief 如果达到了某个阈值(或者通过手动指定释放空间), 则触发释放一些目录树空间,
+     * 会修剪掉一些不常用的目录项为根的子树, 为了方便管理, 同时也会释放相应的dcache
+     * 此操作会改变原先的树形结构, 会根本的释放dentry节点, 释放的原则就是最不常用的目录项
+     * 并且要注意, 如果一个节点处于较为靠近头的位置, 其父辈节点也处于高的优先级, 同样不能置换
+     * 
+     * @return 成功释放的存储的目录项(dentry)的个数, 如果为0则说明释放失败
+     * 
+     */
+    size_t cut_dirTree();
 
 private:
 
     dentry* root_;                      // 目录树根节点
     
-    LRUReplacer* replacer_;             // 替换策略
+    LRUReplacer* dcache_replacer_;             // 替换策略(dache释放)
+
+    LRUReplacer* dentry_replacer_;             // 替换策略(树剪枝)
 
     dcache* cache_;                     // 目录项缓存
 

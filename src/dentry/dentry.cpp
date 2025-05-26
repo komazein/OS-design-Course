@@ -200,7 +200,12 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir = nullptr)
             
             // 更新全局hash表
             cache_->add_dentry(name, dentry_next, search);
+
         }
+
+        // 此时添加进入lru_list, 因为此时算上一次最新的访问
+        dentry_replacer_->InsertDir(search);
+        dcache_replacer_->Insert(search);
 
         search = dentry_next;       // 继续寻找
 
@@ -305,6 +310,10 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir)
     // 还需要更新全局哈希
     cache_->add_dentry(name, new_node, work_dir);
 
+    // 加入到lru_list中
+    dentry_replacer_->InsertDir(new_node);
+    dcache_replacer_->Insert(new_node);
+
     spdlog::info("Allocated new directory '{}' under '{}', inode={}", 
                  name, work_dir->get_name(), new_allocate_inode->i_num);
     return true;
@@ -332,6 +341,8 @@ void dirTree::del_tree(dentry* dentry_root)
     for (auto& [name, child_node] : sub_dirs) {
         del_tree(child_node);
         cache_->erase_dentry(name, dentry_root);  // 在 child 被 delete 前移除哈希映射
+        dcache_replacer_->Erase(child_node);
+        dentry_replacer_->Erase(child_node);
     }
 }
 
@@ -341,7 +352,7 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
 
         spdlog::info("Delete the root, clear the file system.");
         /// TODO_finish: 调用I/O的清空操作
-        bs->new_disk();
+        // bs->new_disk();
 
         return true;
     }
@@ -355,9 +366,14 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
     // 所以需要通过其父节点删除work_dir和在父节点中移除其表项
     dentry* parent_node = work_dir->get_parent();
 
-    if(parent_node == nullptr)  { // 此时不应该发生, 如果发生则是错误
-        spdlog::error("{} occur error!",  __func__);
-        exit(1);
+    // if(parent_node == nullptr)  { // 此时不应该发生, 如果发生则是错误
+    //     spdlog::error("{} occur error!",  __func__);
+    //     exit(1);
+    // }
+
+    if(parent_node == nullptr){
+        // 此时为根节点
+
     }
 
     parent_node->erase_subdir(work_dir->get_name());        // 待删除节点的根节点移除此项
@@ -368,4 +384,21 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
     spdlog::debug("Deleted subdir '{}' under '{}'", name, parent_node->get_name());
 
     return true;
+}
+
+bool dirTree::cut_dir(dentry* dentry_node)
+{
+    if(dentry_node) {}
+}
+
+
+size_t dirTree::shrink_dcache()
+{
+
+}
+
+
+size_t dirTree::cut_dirTree()
+{
+
 }
