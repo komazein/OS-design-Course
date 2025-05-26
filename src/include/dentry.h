@@ -350,6 +350,13 @@ public:
 
     time_t get_time() { return cur_time; }
 
+    /**
+     * @brief 获取根目录
+     * 
+     * @return 根目录dentry
+     */
+    dentry* get_root() { return root_; }
+
 private:
 
     dentry* root_;                      // 目录树根节点

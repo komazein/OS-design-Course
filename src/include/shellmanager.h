@@ -4,16 +4,15 @@
 class shell_manager{
 
     private:
-        fs* file_system_;  // 文件系统指针
+        dirTree* dir_tree_;  // 目录树指针
         dentry* current_dir_;  // 当前目录项
         
     
     public:
-        shell_manager(fs* file_system) :file_system_(file_system), current_dir_(nullptr) {
+        shell_manager(dirTree* dir_tree) : dir_tree_(dir_tree), current_dir_(nullptr) {
             // 初始化当前目录为根目录
-            current_dir_ = file_system_->get_root_dentry();
+            current_dir_ = dir_tree_->get_root();
         }
-
         // execute shell command for dir only
         void command_mkdir(const std::string& dirname);
 
@@ -43,6 +42,4 @@ class shell_manager{
 
         void help();
 
-
-        
 };
