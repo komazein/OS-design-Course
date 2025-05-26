@@ -83,13 +83,13 @@ void super_block::newdisk()
     // temp_root.init(name,temp_inode,NULL,0);//////////缺参数
     // s_root=&temp_root;
 }
-bool super_block::getblock(int n,int a[])
+bool super_block::getblock(int n,vector<size_t>&a)
 {
     if(n>s_block_num)
         return 0;
     for(int i=0;i<n;i++)
     {
-        a[i]=s_free_num[s_free_num[0]];
+        a.push_back((size_t)s_free_num[s_free_num[0]]);
         //cout<<"("<<s_free_num[0]<<","<<a[i]<<")";
         if(s_free_num[0]==1)
         {
@@ -104,7 +104,7 @@ bool super_block::getblock(int n,int a[])
     }
     return 1;
 }//需根据更改的具体参数，以及具体情况进行更改
-void super_block::releaseblock(int n,int a[])
+void super_block::releaseblock(int n,vector<size_t>&a)
 {
     for(int i=0;i<n;i++)
     {
@@ -123,7 +123,8 @@ void super_block::releaseblock(int n,int a[])
             */
         }
         s_free_num[0]++;
-        s_free_num[s_free_num[0]]=a[i];
+        s_free_num[s_free_num[0]]=a[a.size()-1];
+        a.erase(a.end()-1);
     }
 }//需根据更改的具体参数，以及具体情况进行更改
 inode* super_block::iget(bool ifmain,TYPE type,FILEMODE i_mode,uint8_t i_uid,uint8_t i_gid,size_t i_size,uint32_t i_flag,uint16_t di_link_count)

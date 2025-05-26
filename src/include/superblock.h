@@ -21,7 +21,7 @@ public:
     inode*iget(bool ifmain,TYPE type,FILEMODE i_mode,uint8_t i_uid,uint8_t i_gid,size_t i_size,uint32_t i_flag,uint16_t di_link_count);// 分配 inode
     void idel();         // 删除 inode
     void init();         // 初始化超级块
-    bool getblock(int n,int a[]);
-    void releaseblock(int n,int a[]);
+    bool getblock(int n,vector<size_t>&a);
+    void releaseblock(int n,vector<size_t>&a);
     void newdisk();
 };

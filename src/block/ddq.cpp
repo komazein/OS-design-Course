@@ -1,5 +1,5 @@
 #include<fs.h>
-void blockScheduler::loadchild(vector<dir_entry>&a,inode id)
+void blockScheduler::loadchild(vector<dir_entry>&a,inode &id)
 {
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+id.i_block[0]*512,SEEK_SET);
@@ -118,7 +118,7 @@ void blockScheduler::ftree(size_t block_id,size_t n,vector<dir_entry>&a)
         tree.pop();
     }
 }
-size_t blockScheduler::cal_block_num_dir(size_t n_dir)
+size_t blockScheduler::cal_block_num_dir(size_t n_dir)//only child
 {
     n_dir++;//现在包含父节点的个数
     if(n_dir<3*MAXnumInBlock)
@@ -147,5 +147,583 @@ size_t blockScheduler::cal_block_num_dir(size_t n_dir)
         RZ+=1;
         RZ+=(n_dir+MAXnumInBlock-2)/(MAXnumInBlock-1);
         return RZ;
+    }
+}
+void blockScheduler::writeBlockIDdir(size_t n,inode &id)//only child, old num
+{
+    if(cal_block_num_dir(n)==cal_block_num_dir(n+1))//cal:only child
+        return;
+    n++;// now with parent
+    vector<size_t>temp_vec;
+    sb->getblock(1,temp_vec);
+    size_t block_id_temp=temp_vec[0];
+    if(n<3*MAXnumInBlock)
+    {
+        id.i_block[n/MAXnumInBlock]=(size_t)block_id_temp;
+        return;
+    }
+    n-=MAXnumInBlock;
+    if(n>=MAXnumInBlock+MAXnumInBlock*MAXnumInBlock&&n<2*MAXnumInBlock*MAXnumInBlock)
+    {
+        changeDirentryToblockID(id.i_block[1],n-MAXnumInBlock*MAXnumInBlock,(size_t)block_id_temp);
+        return;
+    }
+    if(n<MAXnumInBlock+MAXnumInBlock*MAXnumInBlock)
+    {
+        changeDirentryToblockID(id.i_block[2],n-MAXnumInBlock,(size_t)block_id_temp);
+        return;
+    }
+    if(n>=2*MAXnumInBlock*MAXnumInBlock)
+    {
+        changeDirentryToblockID(id.i_block[2],n-MAXnumInBlock*MAXnumInBlock,(size_t)block_id_temp);
+        return;
+    }
+}
+
+void blockScheduler::changeDirentryToblockID(size_t now_block_id,size_t n,size_t block_id)//n with parent
+{
+    FILE *fp=fopen("../disk.img","r+");
+    //if(n<MAXnumInBlock)不会存在该情况
+    fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+now_block_id*512,SEEK_SET);
+    double avg=log(double(n)/double(MAXnumInBlock))/log(double(MAXnumInBlock));
+    size_t intavg=floor(avg);
+    size_t treenum=fastpow(intavg,MAXnumInBlock);
+    if(treenum*MAXnumInBlock>n)
+    {
+        treenum=1;
+        while(treenum*MAXnumInBlock<=n)
+            treenum=treenum*MAXnumInBlock;
+    }
+    int mayMx=n/(treenum*MAXnumInBlock);
+    int mayx=MAXnumInBlock-mayMx;
+    int mayH=0;
+    if(mayMx*(treenum*MAXnumInBlock)+mayx*treenum<n)
+    {
+        mayx--;
+        mayH++;
+    }
+    else if(mayMx*(treenum*MAXnumInBlock)+mayx*treenum>n)
+    {
+        mayMx--;
+        mayH++;
+    }
+    size_t temp_block_id;
+    if(treenum==1)//寻找此时不会存在残差块
+    {
+        fseek(fp,sizeof(dir_entry)*mayx-sizeof(size_t),SEEK_CUR);
+        fwrite(&block_id,sizeof(size_t),1,fp);
+        fclose(fp);
+        return;
+    }
+    if(mayH)
+    {
+        fseek(fp,mayx*sizeof(dir_entry)+sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+        size_t temp;
+        fread(&temp,sizeof(size_t),1,fp);
+        fclose(fp);
+        changeDirentryToblockID(temp,(size_t)(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx),block_id);
+        return;
+    }
+    else
+    {
+        fseek(fp,mayx*sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+        size_t temp;
+        fread(&temp,sizeof(size_t),1,fp);
+        fclose(fp);
+        changeDirentryToblockID(temp,(size_t)(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx),block_id);
+        return;
+    }
+}
+
+size_t blockScheduler::getlastblockID(size_t now_block_id,size_t n,inode &id)
+{
+    n++;
+    if(n<3*MAXnumInBlock)
+        return id.i_block[n/MAXnumInBlock];
+    else if(n<2*MAXnumInBlock+MAXnumInBlock*MAXnumInBlock)
+        return treeFindLastBlock(id.i_block[2],n-2*MAXnumInBlock);
+    else if(n<MAXnumInBlock+2*MAXnumInBlock*MAXnumInBlock)
+        return treeFindLastBlock(id.i_block[1],n-MAXnumInBlock-MAXnumInBlock*MAXnumInBlock);
+    else
+        return treeFindLastBlock(id.i_block[2],n-MAXnumInBlock-MAXnumInBlock*MAXnumInBlock);
+}
+size_t blockScheduler::treeFindLastBlock(size_t now_block_id,size_t n)
+{
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+now_block_id*512,SEEK_SET);
+    double avg=log(double(n)/double(MAXnumInBlock))/log(double(MAXnumInBlock));
+    size_t intavg=floor(avg);
+    size_t treenum=fastpow(intavg,MAXnumInBlock);
+    if(treenum*MAXnumInBlock>n)
+    {
+        treenum=1;
+        while(treenum*MAXnumInBlock<=n)
+            treenum=treenum*MAXnumInBlock;
+    }
+    int mayMx=n/(treenum*MAXnumInBlock);
+    int mayx=MAXnumInBlock-mayMx;
+    int mayH=0;
+    if(mayMx*(treenum*MAXnumInBlock)+mayx*treenum<n)
+    {
+        mayx--;
+        mayH++;
+    }
+    else if(mayMx*(treenum*MAXnumInBlock)+mayx*treenum>n)
+    {
+        mayMx--;
+        mayH++;
+    }
+    size_t temp_block_id;
+    fseek(fp,mayx*sizeof(dir_entry)+sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+    size_t temp;
+    fread(&temp,sizeof(size_t),1,fp);
+    fclose(fp);
+    if(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx==2)
+        return temp;
+    else
+        return treeFindLastBlock(temp,n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx);
+}
+
+void blockScheduler::writechild(dir_entry par,vector<dir_entry>&a,inode &id,size_t num)
+{
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+id.i_block[0]*512,SEEK_SET);
+    fwrite(&par,sizeof(dir_entry),1,fp);
+    fwrite(&num,sizeof(size_t),1,fp);
+    for(int i=0;i<min(num,(size_t)MAXnumInBlock-1);i++)
+    {
+        fwrite(&a[a.size()-1],sizeof(dir_entry),1,fp);
+        a.erase(a.end()-1);
+    }   
+    num-=min(num,(size_t)MAXnumInBlock-1);
+    fclose(fp);
+    if(num==0)
+        return;
+    if(num<=MAXnumInBlock*(MAXnumInBlock+1))
+    {
+        fwtree(id.i_block[1],min((size_t)MAXnumInBlock,num),a);
+        num-=min((size_t)MAXnumInBlock,num);
+        if(num==0)
+            return ;
+        fwtree(id.i_block[2],num,a);
+    }
+    else if(num>MAXnumInBlock*(MAXnumInBlock+1)&&num<=2*MAXnumInBlock*MAXnumInBlock)
+    {
+        fwtree(id.i_block[1],num-MAXnumInBlock*MAXnumInBlock,a);
+        fwtree(id.i_block[2],MAXnumInBlock*MAXnumInBlock,a);
+    }
+    else
+    {
+        fwtree(id.i_block[1],MAXnumInBlock*MAXnumInBlock,a);
+        fwtree(id.i_block[2],num-MAXnumInBlock*MAXnumInBlock,a);
+    }
+}
+void blockScheduler::fwtree(size_t block_id,size_t n,vector<dir_entry>&a)
+{
+    queue<pair<size_t,size_t>>tree;//防止递归产生文件错误
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+block_id*512,SEEK_SET);
+    if(n<=MAXnumInBlock)
+    {
+        for(size_t i=0;i<n;i++)
+        {
+            fwrite(&a[a.size()-1],sizeof(dir_entry),1,fp);
+            a.erase(a.end()-1);
+        }
+        fclose(fp);
+        return;
+    }
+    double avg=log(double(n)/double(MAXnumInBlock))/log(double(MAXnumInBlock));
+    size_t intavg=floor(avg);
+    size_t treenum=fastpow(intavg,MAXnumInBlock);
+    if(treenum*MAXnumInBlock>n)
+    {
+        treenum=1;
+        while(treenum*MAXnumInBlock<=n)
+            treenum=treenum*MAXnumInBlock;
+    }
+    int mayMx=n/(treenum*MAXnumInBlock);
+    int mayx=MAXnumInBlock-mayMx;
+    int mayH=0;
+    if(mayMx*(treenum*MAXnumInBlock)+mayx*treenum<n)
+    {
+        mayx--;
+        mayH++;
+    }
+    else if(mayMx*(treenum*MAXnumInBlock)+mayx*treenum>n)
+    {
+        mayMx--;
+        mayH++;
+    }
+    size_t temp_block_id;
+    for(int i=0;i<mayx;i++)
+    {
+        if(treenum==1)
+        {
+            fwrite(&a[a.size()-1],sizeof(dir_entry),1,fp);
+            a.erase(a.end()-1);
+        }
+        else
+        {
+            fseek(fp,sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+            fread(&temp_block_id,sizeof(size_t),1,fp);
+            tree.push({temp_block_id,(size_t)treenum});
+        }
+    }
+    if(mayH)
+    {
+        fseek(fp,sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+        fread(&temp_block_id,sizeof(size_t),1,fp);
+        tree.push({temp_block_id,(size_t)(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx)});
+    }
+    for(int i=0;i<mayMx;i++)
+    {
+        fseek(fp,sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+        fread(&temp_block_id,sizeof(size_t),1,fp);
+        tree.push({temp_block_id,(size_t)(treenum*MAXnumInBlock)});
+    }
+    fclose(fp);
+    while(!tree.empty())
+    {
+        fwtree(tree.front().first,tree.front().second,a);
+        tree.pop();
+    }
+}
+void blockScheduler::getallBlockDIR(inode &id,size_t num,vector<size_t>&a)
+{
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+id.i_block[0]*512,SEEK_SET);
+    fseek(fp,sizeof(dir_entry),SEEK_CUR);
+    fwrite(&num,sizeof(size_t),1,fp);
+    fseek(fp,min(num,(size_t)MAXnumInBlock-1),SEEK_CUR);   
+    num-=min(num,(size_t)MAXnumInBlock-1);
+    fclose(fp);
+    if(num==0)
+        return;
+    vector<size_t>notneed;
+    if(num<=MAXnumInBlock*(MAXnumInBlock+1))
+    {
+        getblockTree(id.i_block[1],min((size_t)MAXnumInBlock,num),a,notneed,id.i_type);
+        num-=min((size_t)MAXnumInBlock,num);
+        if(num==0)
+            return ;
+        getblockTree(id.i_block[2],num,a,notneed,id.i_type);
+    }
+    else if(num>MAXnumInBlock*(MAXnumInBlock+1)&&num<=2*MAXnumInBlock*MAXnumInBlock)
+    {
+        getblockTree(id.i_block[1],num-MAXnumInBlock*MAXnumInBlock,a,notneed,id.i_type);
+        getblockTree(id.i_block[2],MAXnumInBlock*MAXnumInBlock,a,notneed,id.i_type);
+    }
+    else
+    {
+        getblockTree(id.i_block[1],MAXnumInBlock*MAXnumInBlock,a,notneed,id.i_type);
+        getblockTree(id.i_block[2],num-MAXnumInBlock*MAXnumInBlock,a,notneed,id.i_type);
+    }
+}
+void blockScheduler::getblockTree(size_t block_id,size_t n,vector<size_t>&a,vector<size_t>&forSIMfile,TYPE type)
+{
+    queue<pair<size_t,size_t>>tree;//防止递归产生文件错误
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+block_id*512,SEEK_SET);
+    dir_entry temp;
+    if(n<=MAXnumInBlock)
+    {
+        if(type==SIM_FILE)
+        {
+            for(size_t i=0;i<n;i++)
+            {
+                size_t blk_id;
+                fread(&blk_id,sizeof(size_t),1,fp);
+                a.push_back(blk_id);
+                forSIMfile.push_back(blk_id);
+            }
+        }
+        fclose(fp);
+        return;
+    }
+    double avg=log(double(n)/double(MAXnumInBlock))/log(double(MAXnumInBlock));
+    size_t intavg=floor(avg);
+    size_t treenum=fastpow(intavg,MAXnumInBlock);
+    if(treenum*MAXnumInBlock>n)
+    {
+        treenum=1;
+        while(treenum*MAXnumInBlock<=n)
+            treenum=treenum*MAXnumInBlock;
+    }
+    int mayMx=n/(treenum*MAXnumInBlock);
+    int mayx=MAXnumInBlock-mayMx;
+    int mayH=0;
+    if(mayMx*(treenum*MAXnumInBlock)+mayx*treenum<n)
+    {
+        mayx--;
+        mayH++;
+    }
+    else if(mayMx*(treenum*MAXnumInBlock)+mayx*treenum>n)
+    {
+        mayMx--;
+        mayH++;
+    }
+    size_t temp_block_id;
+    for(int i=0;i<mayx;i++)
+    {
+        if(treenum==1)
+        {
+            if(type==SIM_FILE)
+            {
+                fread(&temp_block_id,sizeof(size_t),1,fp);
+                a.push_back(temp_block_id);
+                forSIMfile.push_back(temp_block_id);
+            }
+            else
+            {
+                fseek(fp,mayx*sizeof(dir_entry),SEEK_CUR);
+                break;
+            }
+        }
+        else
+        {
+            if(type==DIR)
+                fseek(fp,sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+            fread(&temp_block_id,sizeof(size_t),1,fp);
+            tree.push({temp_block_id,(size_t)treenum});
+            a.push_back(temp_block_id);
+        }
+    }
+    if(mayH)
+    {
+        if(type==DIR)
+            fseek(fp,sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+        fread(&temp_block_id,sizeof(size_t),1,fp);
+        tree.push({temp_block_id,(size_t)(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx)});
+        a.push_back(temp_block_id);
+    }
+    for(int i=0;i<mayMx;i++)
+    {
+        if(type==DIR)
+            fseek(fp,sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+        fread(&temp_block_id,sizeof(size_t),1,fp);
+        tree.push({temp_block_id,(size_t)(treenum*MAXnumInBlock)});
+        a.push_back(temp_block_id);
+    }
+    fclose(fp);
+    while(!tree.empty())
+    {
+        getblockTree(tree.front().first,tree.front().second,forSIMfile,a,type);
+        tree.pop();
+    }
+}
+void blockScheduler::getallBlockSIM(inode &id,vector<size_t>&a,vector<size_t>&forSIMfile)
+{
+    size_t num=(id.i_size+511)/512;
+    for(size_t i=0;i<min((size_t)ONLY_DIRECT_SIM,num);i++)
+    {
+        a.push_back(id.i_block[i]);
+        forSIMfile.push_back(id.i_block[i]);
+    }
+    num-=min((size_t)ONLY_DIRECT_SIM,num);
+    if(num==0)
+        return;
+    if(num<=MAXnumInBlock*ABLE_ONE_SIM)
+    {
+        for(size_t i=ONLY_DIRECT_SIM;i<ABLE_DIRECT_SIM;i++)
+        {
+            size_t TEMPNUM=1;
+            if(TEMPNUM+(ABLE_DIRECT_SIM-1-ONLY_DIRECT_SIM)*MAXnumInBlock>num)
+            {
+                TEMPNUM=MAXnumInBlock;
+                if(TEMPNUM+(ABLE_DIRECT_SIM-1-ONLY_DIRECT_SIM)*MAXnumInBlock<num)
+                    TEMPNUM=num-(ABLE_DIRECT_SIM-1-ONLY_DIRECT_SIM)*MAXnumInBlock;
+            }
+            if(TEMPNUM==1)
+            {
+                forSIMfile.push_back(id.i_block[i]);
+                a.push_back(id.i_block[i]);
+            }
+            else
+            {
+                a.push_back(id.i_block[i]);
+                getblockTree(id.i_block[i],TEMPNUM,a,forSIMfile,SIM_FILE);
+            }
+            num-=TEMPNUM;
+            if(num==0)
+                return;
+        }
+    }
+    for(size_t i=ONLY_DIRECT_SIM;i<ONLY_DIRECT_SIM+ONLY_ONE_SIM;i++)
+    {
+        a.push_back(id.i_block[i]);
+        getblockTree(id.i_block[i],MAXnumInBlock,a,forSIMfile,SIM_FILE);
+        num-=MAXnumInBlock;
+    }
+    a.push_back(id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM]);
+    getblockTree(id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM],num,a,forSIMfile,SIM_FILE);
+}
+char*blockScheduler::readSIMfromBLOCK(inode&id)
+{
+    vector<size_t>mid;
+    vector<size_t>real_block_id;
+    getallBlockSIM(id,mid,real_block_id);
+    char*a=(char*)calloc(id.i_size+10,sizeof(char));
+    FILE *fp=fopen("../disk.img","r+");
+    size_t num=id.i_size;
+    size_t delta=0;
+    for(size_t i=0;i<real_block_id.size();i++)
+    {
+        fseek(fp,real_block_id[i]*512+sizeof(super_block)+sizeof(inode)*INODENUM,SEEK_CUR);
+        fread(a+delta,sizeof(char),min((size_t)512,num),fp);
+        delta+=min((size_t)512,num);
+        num-=min((size_t)512,num);
+    }
+    return a;
+}
+size_t blockScheduler::calSIMblockNUM(size_t blockNUM)
+{
+    if(blockNUM<=ABLE_DIRECT_SIM)
+        return blockNUM;
+    return blockNUM+(blockNUM-ABLE_DIRECT_SIM+MAXnumInBlock-2)/(MAXnumInBlock-1);
+}
+bool blockScheduler::writeSIMfromBLOCK(inode&id,char*a)
+{
+    vector<size_t>all;
+    vector<size_t>real_block_id;
+    getallBlockSIM(id,all,real_block_id);
+    id.i_size=strlen(a);
+    size_t num_block_need=(id.i_size+511)/512;
+    size_t need_num=calSIMblockNUM(num_block_need);
+    bool ablegetblock=0;
+    if(need_num>all.size())
+    {
+        ablegetblock=sb->getblock(need_num-all.size(),all);
+        if(ablegetblock==0)
+            return false;
+    }
+    if(need_num<all.size())
+        sb->releaseblock(all.size()-need_num,all);
+    
+    return true;
+}
+void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id)
+{
+    size_t num=(id.i_size+511)/512;
+    vector<size_t>newlist;
+    for(size_t i=0;i<min((size_t)ONLY_DIRECT_SIM,num);i++)
+    {
+        id.i_block[i]=all[all.size()-1];
+        newlist.push_back(all[all.size()-1]);
+        all.erase(all.end()-1);
+    }
+    num-=min((size_t)ONLY_DIRECT_SIM,num);
+    if(num==0)
+        return;
+    if(num<=MAXnumInBlock*ABLE_ONE_SIM)
+    {
+        for(size_t i=ONLY_DIRECT_SIM;i<ABLE_DIRECT_SIM;i++)
+        {
+            size_t TEMPNUM=1;
+            if(TEMPNUM+(ABLE_DIRECT_SIM-1-ONLY_DIRECT_SIM)*MAXnumInBlock>num)
+            {
+                TEMPNUM=MAXnumInBlock;
+                if(TEMPNUM+(ABLE_DIRECT_SIM-1-ONLY_DIRECT_SIM)*MAXnumInBlock<num)
+                    TEMPNUM=num-(ABLE_DIRECT_SIM-1-ONLY_DIRECT_SIM)*MAXnumInBlock;
+            }
+            if(TEMPNUM==1)
+            {
+                newlist.push_back(all[all.size()-1]);
+                id.i_block[i]=all[all.size()-1];
+                all.erase(all.end()-1);
+            }
+            else
+            {
+                id.i_block[i]=all[all.size()-1];
+                all.erase(all.end()-1);
+                simwriteTree(id.i_block[i],all,TEMPNUM,newlist);
+            }
+            num-=TEMPNUM;
+            if(num==0)
+                return;
+        }
+    }
+    for(size_t i=ONLY_DIRECT_SIM;i<ONLY_DIRECT_SIM+ONLY_ONE_SIM;i++)
+    {
+        id.i_block[i]=all[all.size()-1];
+        all.erase(all.end()-1);
+        simwriteTree(id.i_block[i],all,MAXnumInBlock,newlist);
+        num-=MAXnumInBlock;
+    }
+    id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM]=all[all.size()-1];
+    all.erase(all.end()-1);
+    simwriteTree(id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM],all,MAXnumInBlock,newlist);
+}
+void blockScheduler::simwriteTree(size_t block_id,vector<size_t>&all,size_t n,vector<size_t>newlist)
+{
+    queue<pair<size_t,size_t>>tree;//防止递归产生文件错误
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+block_id*512,SEEK_SET);
+    dir_entry temp;
+    if(n<=MAXnumInBlock)
+    {
+        for(size_t i=0;i<n;i++)
+        {
+            fwrite(&all[all.size()-1],sizeof(size_t),1,fp);
+            newlist.push_back(all[all.size()-1]);
+            all.erase(all.end());
+        }
+        fclose(fp);
+        return;
+    }
+    double avg=log(double(n)/double(MAXnumInBlock))/log(double(MAXnumInBlock));
+    size_t intavg=floor(avg);
+    size_t treenum=fastpow(intavg,MAXnumInBlock);
+    if(treenum*MAXnumInBlock>n)
+    {
+        treenum=1;
+        while(treenum*MAXnumInBlock<=n)
+            treenum=treenum*MAXnumInBlock;
+    }
+    int mayMx=n/(treenum*MAXnumInBlock);
+    int mayx=MAXnumInBlock-mayMx;
+    int mayH=0;
+    if(mayMx*(treenum*MAXnumInBlock)+mayx*treenum<n)
+    {
+        mayx--;
+        mayH++;
+    }
+    else if(mayMx*(treenum*MAXnumInBlock)+mayx*treenum>n)
+    {
+        mayMx--;
+        mayH++;
+    }
+    for(int i=0;i<mayx;i++)
+    {
+        if(treenum==1)
+        {
+            fwrite(&all[all.size()-1],sizeof(size_t),1,fp);
+            newlist.push_back(all[all.size()-1]);
+            all.erase(all.end());
+        }
+        else
+        {
+            fwrite(&all[all.size()-1],sizeof(size_t),1,fp);
+            tree.push({all[all.size()-1],(size_t)treenum});
+            all.erase(all.end());
+        }
+    }
+    if(mayH)
+    {
+        fwrite(&all[all.size()-1],sizeof(size_t),1,fp);
+        tree.push({all[all.size()-1],(size_t)(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx)});
+        all.erase(all.end());
+    }
+    for(int i=0;i<mayMx;i++)
+    {
+        fwrite(&all[all.size()-1],sizeof(size_t),1,fp);
+        tree.push({all[all.size()-1],(size_t)(treenum*MAXnumInBlock)});
+        all.erase(all.end());
+    }
+    fclose(fp);
+    while(!tree.empty())
+    {
+        simwriteTree(tree.front().first,all,tree.front().second,newlist);
+        tree.pop();
     }
 }
