@@ -14,6 +14,10 @@ public:
     size_t getlastblockID(size_t now_block_id,size_t n,inode &id);//n with pwrent,old num,用之前确认是否需要释放块
     size_t treeFindLastBlock(size_t now_block_id,size_t n);
     
+    inode* iget(bool ifroot);               // 分配inode节点, 如果if_root为true则为根节点
+
+    void new_disk();
+    
     size_t cal_block_num_dir(size_t n_dir);//only child
     
     size_t fastpow(size_t di,int x);

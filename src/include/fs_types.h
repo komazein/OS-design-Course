@@ -75,7 +75,7 @@ struct inode
     time_t	i_ctime;
     time_t	i_mtime;
     uint32_t i_flag;         // file flag
-    uint16_t di_link_count;  // file link count(硬链接)
+    uint16_t di_link_count { 0 };  // file link count(硬链接)
     size_t i_block[N_BLOCK]; // 块地址
 
 };
