@@ -1,5 +1,6 @@
 #include "dentry.h"
 #include <spdlog/spdlog.h>
+#include"ddq.h"
 
 
 ///////////////////////////////
@@ -89,6 +90,8 @@ void dentry::set_time(time_t time)
 dentry* dcache::find_dentry(string& name, dentry* parent)
 {
     auto it = dentry_table_.find({parent, name});
+
+
     if(it == dentry_table_.end())   { 
         spdlog::warn("Dentry '{}' miss in cache for parent '{}'", name, parent->get_name());    
         return nullptr; 
@@ -134,10 +137,12 @@ bool dcache::erase_dentry(const string& name, dentry* dentry_node)
 ///         dirTree             ///
 ///////////////////////////////////
 
-void dirTree::init_root(string root_name="/", size_t root_inode_num, inode* root_inode)
+void dirTree::init_root(string root_name, size_t root_inode_num, inode* root_inode)
 {
     root_ = new dentry(root_name, root_inode, root_inode_num, nullptr);     // root无父节点
+
     root_inode->i_type = DIR;
+
 
     auto cur_time = get_time();
     root_inode->i_atime = cur_time;
@@ -155,9 +160,8 @@ dentry* dirTree::hash_search(string& name, dentry* parent)
 }
 
 
-dentry* dirTree::name_travesal(string& path, dentry* work_dir = nullptr)
+dentry* dirTree::name_travesal(string& path, dentry* work_dir)
 {
-
     dentry* search = root_;     // 此时默认为绝对路径
     if(work_dir != nullptr){
         search = work_dir;      // 否则是相对路径, 从此处开始查找
@@ -228,6 +232,9 @@ bool dirTree::name_search_test(string& name, dentry* work_dir/*, bool update_has
     // 首先初步利用哈希查找是否存在该目录项(保证不能重名)
     if(hash_search(name, work_dir)) { return false; }
 
+
+
+
     // 再保证当前目录下确实无此目录
     auto sub_dir = work_dir->find_subdir(name);
 
@@ -281,8 +288,7 @@ bool dirTree::has_child_test(dentry* dentry_node)
     }
 
 }
-
-bool dirTree::alloc_dir(string& name, dentry* work_dir)
+bool dirTree::alloc_dir(string& name, dentry* work_dir,inode*new_allocate_inode)
 {
     if(!name_search_test(name, work_dir)) { 
         spdlog::warn("Directory allocation failed: '{}' already exists in '{}'", name, work_dir->get_name());
@@ -293,12 +299,17 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir)
 
     /// TODO_finish:通知I/O分配新的inode
 
-    auto new_allocate_inode = bs->iget(false);
-
+    inode* temp= bs->iget(false);
+    (*new_allocate_inode)=(*temp);
     /// TODO: 完善inode的信息
     auto cur_time = get_time();
+    // new_allocate_inode.i_type = DIR;
+    // new_allocate_inode.i_size = 0;//=1
+    // new_allocate_inode.i_atime = cur_time;
+    // new_allocate_inode.i_ctime = cur_time;
+    // new_allocate_inode.i_mtime = cur_time;
     new_allocate_inode->i_type = DIR;
-    new_allocate_inode->i_size = 1;
+    new_allocate_inode->i_size = 0;//=1
     new_allocate_inode->i_atime = cur_time;
     new_allocate_inode->i_ctime = cur_time;
     new_allocate_inode->i_mtime = cur_time;
@@ -316,6 +327,7 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir)
 
     spdlog::info("Allocated new directory '{}' under '{}', inode={}", 
                  name, work_dir->get_name(), new_allocate_inode->i_num);
+    cout<<"x"<<new_allocate_inode->i_size<<endl;
     return true;
 }
 
@@ -324,7 +336,7 @@ void dirTree::del_tree(dentry* dentry_root)
     if(!dentry_root) { return; }        // 仅仅是保证安全性, 应该不会执行此语句
     if(!has_child_test(dentry_root)){
         // 此时已经到达叶子节点
-
+        
         /// TODO: 1. 通知I/O回收此块
 
         spdlog::info("Letting blockScheduler to recycle the '{}' children's inode and thier blocks", dentry_root->get_name());

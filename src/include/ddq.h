@@ -1,13 +1,25 @@
 #include"fs_types.h"
+#include"superblock.h"
+// #include"dentry.h"
 class blockScheduler
 {
 public:
-    void loadchild(vector<dir_entry>&a,inode id);
+    blockScheduler(dirTree* dirtree)
+    {
+        dirtree_ = dirtree;
+        sb = new super_block(dirtree_);
+    }
+    void loadchild(vector<dir_entry>&a,inode &id);//////////////
     void ftree(size_t block_id,size_t n,vector<dir_entry>&a);
 
-    void writechild(dir_entry par,vector<dir_entry>&a,inode id);
-    void fwtree(dir_entry par,vector<dir_entry>&a,inode id);
-    void writeBlock(int num);
+    void writechild(dir_entry par,vector<dir_entry>&a,inode &id,size_t num);////////////////
+    void fwtree(size_t block_id,size_t n,vector<dir_entry>&a);
+
+    void changeDirentryToblockID(size_t now_block_id,size_t n,size_t block_id);//n with pwrent
+    void writeBlockIDdir(size_t n,inode &id);// n noly child, old num
+    
+    size_t getlastblockID(size_t now_block_id,size_t n,inode &id);//n with pwrent,old num,用之前确认是否需要释放块
+    size_t treeFindLastBlock(size_t now_block_id,size_t n);
     
     inode* iget(bool ifroot);               // 分配inode节点, 如果if_root为true则为根节点
 
@@ -17,6 +29,18 @@ public:
     
     size_t fastpow(size_t di,int x);
 
+    void freeDirentry(inode &di,size_t n);//////////没写
+    void getallBlockDIR(inode &id,size_t n,vector<size_t>&a);//n for DIR:only child
+
+    void getblockTree(size_t block_id,size_t n,vector<size_t>&a,vector<size_t>&forSIMfile,TYPE type);
+    void getallBlockSIM(inode &id,vector<size_t>&a,vector<size_t>&forSIMfile);
+    char*readSIMfromBLOCK(inode&id);///////////////////读
+    bool writeSIMfromBLOCK(inode&id,char*a);//////////////写
+    size_t calSIMblockNUM(size_t blockNUM);
+    void writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,char*a); 
+    void simwriteTree(size_t block_id,vector<size_t>&all,size_t n,vector<size_t>newlist); 
 private:
     super_block* sb;
+    dirTree* dirtree_;
 };
+

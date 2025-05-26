@@ -1,7 +1,8 @@
 #pragma once
 #include "fs_types.h"
-
-class dentry; // 前向声明
+// #include "dentry.h"
+// class dentry; // 前向声明
+class dirTree;
 
 // 超级块结构
 class super_block {
@@ -18,10 +19,12 @@ private:
 
 
 public:
+    super_block(dirTree* dirtree) : dirtree(dirtree) {}
     inode* iget(bool ifroot);    // 分配 inode
     void idel();         // 删除 inode
     void init();         // 初始化超级块
-    bool getblock(int n,int a[]);
-    void releaseblock(int n,int a[]);
+    bool getblock(int n,vector<size_t>&a);
+    void releaseblock(int n,vector<size_t>&a);
     void newdisk();
+    void load();
 };

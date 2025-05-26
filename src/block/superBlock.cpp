@@ -1,6 +1,7 @@
 #include <fs.h>
 #include<iostream>
-void super_block::init()
+void super_block::init(){}
+void super_block::load()
 {
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,0,SEEK_SET);
@@ -59,10 +60,14 @@ void super_block::newdisk()
             cout<<endl;
             */
             base=0;
+
             FILE *fp=fopen("../disk.img","r+");
             fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+IN*512,SEEK_SET);//写回第IN快磁盘
             fwrite(s_free_num, sizeof(int),S_FREE_NUM,fp);
             fclose(fp);
+
+
+
         }
         /*else
         {
@@ -71,9 +76,13 @@ void super_block::newdisk()
             cout<<endl;
         }*/
     }
-    struct inode*root_inode=(struct inode*)malloc(sizeof(struct inode));
+    // struct inode*root_inode=(struct inode*)malloc(sizeof(struct inode));
     char name[]="root";
-    root_inode=iget(true);
+    auto root_inode=iget(true);
+
+    
+
+
 
     // 构建根节点//////////////////////////////////////
 
@@ -83,13 +92,13 @@ void super_block::newdisk()
     // temp_root.init(name,temp_inode,NULL,0);//////////缺参数
     // s_root=&temp_root;
 }
-bool super_block::getblock(int n,int a[])
+bool super_block::getblock(int n,vector<size_t>&a)
 {
     if(n>s_block_num)
         return 0;
     for(int i=0;i<n;i++)
     {
-        a[i]=s_free_num[s_free_num[0]];
+        a.push_back((size_t)s_free_num[s_free_num[0]]);
         //cout<<"("<<s_free_num[0]<<","<<a[i]<<")";
         if(s_free_num[0]==1)
         {
@@ -104,7 +113,7 @@ bool super_block::getblock(int n,int a[])
     }
     return 1;
 }//需根据更改的具体参数，以及具体情况进行更改
-void super_block::releaseblock(int n,int a[])
+void super_block::releaseblock(int n,vector<size_t>&a)
 {
     for(int i=0;i<n;i++)
     {
@@ -123,7 +132,8 @@ void super_block::releaseblock(int n,int a[])
             */
         }
         s_free_num[0]++;
-        s_free_num[s_free_num[0]]=a[i];
+        s_free_num[s_free_num[0]]=a[a.size()-1];
+        a.erase(a.end()-1);
     }
 }//需根据更改的具体参数，以及具体情况进行更改
 inode* super_block::iget(bool ifroot)
