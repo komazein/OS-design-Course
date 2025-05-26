@@ -349,6 +349,13 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     return true;
 }
 
+vector<string>& dirTree::findNameInDirtree(const string& filename, dentry* work_dir)
+{
+    
+
+}
+
+
 void dirTree::del_tree(dentry* dentry_root)
 {
     if(!dentry_root) { return; }        // 仅仅是保证安全性, 应该不会执行此语句

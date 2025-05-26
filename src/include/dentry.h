@@ -322,6 +322,14 @@ public:
     bool name_search_test(string& name, dentry* work_dir/*, bool update_hash*/);
 
 
+
+    /**
+     * 
+     * @brief 在当前目录下, 检查含有此名字的所有文件/目录
+     * 
+     * 
+     */
+
     /**
      * 
      * @brief 在进行删除目录的时候, 需要级联删除, 
