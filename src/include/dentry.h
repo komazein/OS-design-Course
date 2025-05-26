@@ -1,11 +1,10 @@
 #pragma once
 #include "fs_types.h"
-#include "ddq.h"
 #include <spdlog/logger.h>
 
 struct inode;        // 前向声明
 class super_block;   // 前向声明
-
+class blockScheduler;
 /**
  * 
  * 内存项缓存(缓存树形目录)
@@ -17,7 +16,9 @@ class dentry
 public:
     dentry(string d_name, inode* d_inode, size_t d_inode_num, dentry* d_parent) : 
         d_name_(d_name), d_inode_(d_inode), d_inode_num_(d_inode_num), d_parent_(d_parent) 
-    { }
+    { 
+                        
+    }
 
     // 父节点初始化子节点时实例化子节点
     // param: 此时了解到的子节点信息只有名称和子节点inode号
@@ -216,6 +217,12 @@ class dirTree
 {
 public:
 
+    dirTree(LRUReplacer* replacer, dcache* cache/*, blockScheduler*bs*/)
+        : replacer_(replacer), cache_(cache)
+    {
+    }
+
+    void set_bs(blockScheduler* bs) { this->bs = bs; }
     /**
      * 
      * @brief 初始化目录树的根节点
@@ -321,7 +328,7 @@ public:
      * @return `false` 如果已存在该目录, 否则正常创建
      * 可能还需要考虑如果空闲磁盘块不足而创建失败
      */
-    bool alloc_dir(string& name, dentry* work_dir);
+    bool alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode);
     
 
     /**

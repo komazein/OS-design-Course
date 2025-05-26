@@ -1,6 +1,7 @@
 #include <fs.h>
 #include<iostream>
-void super_block::init()
+void super_block::init(){}
+void super_block::load()
 {
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,0,SEEK_SET);
@@ -59,10 +60,14 @@ void super_block::newdisk()
             cout<<endl;
             */
             base=0;
+
             FILE *fp=fopen("../disk.img","r+");
             fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+IN*512,SEEK_SET);//写回第IN快磁盘
             fwrite(s_free_num, sizeof(int),S_FREE_NUM,fp);
             fclose(fp);
+
+
+
         }
         /*else
         {
@@ -71,9 +76,13 @@ void super_block::newdisk()
             cout<<endl;
         }*/
     }
-    struct inode*root_inode=(struct inode*)malloc(sizeof(struct inode));
+    // struct inode*root_inode=(struct inode*)malloc(sizeof(struct inode));
     char name[]="root";
-    root_inode=iget(true);
+    auto root_inode=iget(true);
+
+    
+
+
 
     // 构建根节点//////////////////////////////////////
 
