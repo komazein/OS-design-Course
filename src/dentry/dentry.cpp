@@ -80,7 +80,21 @@ void dentry::set_time(time_t time)
 {
     d_time_ = time;
 }
+void dentry::getDir_entry(dir_entry&par,vector<dir_entry>&child)
+{
+    par.inode_num=(size_t)get_inode_num();
+    string parname=get_name();
+    strcpy(par.name,parname.c_str());
+    par.type=get_inode()->i_type;
+    for(auto&[name, dentry_node] : get_subdir()){
 
+        dir_entry temp;
+        strcpy(temp.name,name.c_str());
+        temp.inode_num=dentry_node->get_inode_num();
+        temp.type=dentry_node->get_inode()->i_type;
+        child.push_back(temp);
+    }
+}
 
 
 ///////////////////////////////

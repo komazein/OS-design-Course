@@ -1,11 +1,12 @@
 #pragma once
 #include "fs_types.h"
+#include "ddq.h"
 #include <spdlog/logger.h>
 #include "replacer.h"
 
 struct inode;        // 前向声明
 class super_block;   // 前向声明
-class blockScheduler;
+
 /**
  * 
  * 内存项缓存(缓存树形目录)
@@ -17,9 +18,7 @@ class dentry
 public:
     dentry(string d_name, inode* d_inode, size_t d_inode_num, dentry* d_parent) : 
         d_name_(d_name), d_inode_(d_inode), d_inode_num_(d_inode_num), d_parent_(d_parent) 
-    { 
-                        
-    }
+    { }
 
     // 父节点初始化子节点时实例化子节点
     // param: 此时了解到的子节点信息只有名称和子节点inode号
