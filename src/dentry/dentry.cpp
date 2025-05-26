@@ -1,4 +1,6 @@
 #include "dentry.h"
+#include <spdlog/spdlog.h>
+
 
 ///////////////////////////////
 ///         dentry          ///
@@ -9,12 +11,20 @@ void dentry::add_subdir(vector<dir_entry>& dir_entries)
     for(auto& dir_entry : dir_entries){
         dentry* child_dentry = new dentry(dir_entry.name, dir_entry.inode_num, this);
         d_child_[dir_entry.name] = child_dentry;
+
+        // 日志显示
+        spdlog::debug("Added subdir '{}' (inode={}) under '{}'", 
+            dir_entry.name, dir_entry.inode_num, d_name_);
     }
 }
 
 void dentry::add_single_subdir(dentry* new_node)
 {
     d_child_[new_node->d_name_] = new_node;     // 直接加入子节点中
+
+    // 日志显示
+    spdlog::debug("Add single subdir '{}' under '{}'", 
+            new_node->d_name_, this->d_name_);
 }
 
 // 查找子节点
@@ -25,11 +35,21 @@ dentry* dentry::find_subdir(string& name)
     else { return it->second; }
 }
 
+bool dentry::has_subdir()
+{
+    return !d_child_.empty();
+}
+
 bool dentry::erase_subdir(string& name)
 {
     size_t erasedCount = d_child_.erase(name);
-    if(erasedCount > 0) { return true; }
-    else { return false; }
+    if(erasedCount > 0) {
+        spdlog::info("Erased subdir '{}' from '{}'", name, d_name_);
+        return true;
+    } else {
+        spdlog::warn("Failed to erase subdir '{}' from '{}': not found", name, d_name_);
+        return false;
+    }
 }
 
 // 添加引用计数
@@ -62,7 +82,6 @@ void dentry::set_time(time_t time)
 
 
 
-
 ///////////////////////////////
 ///         dcache          ///
 ///////////////////////////////
@@ -70,27 +89,43 @@ void dentry::set_time(time_t time)
 dentry* dcache::find_dentry(string& name, dentry* parent)
 {
     auto it = dentry_table_.find({parent, name});
-    if(it == dentry_table_.end())   { return nullptr; }
-    else { return it->second; }
+    if(it == dentry_table_.end())   { 
+        spdlog::warn("Dentry '{}' miss in cache for parent '{}'", name, parent->get_name());    
+        return nullptr; 
+    }
+    else {
+        spdlog::info("Dentry '{}' hit in cache for parent '{}'", name, parent->get_name());
+        return it->second; 
+    }
 }
 
 
 bool dcache::add_dentry(string& name, dentry* dentry_node, dentry* parent)
 {
     dentryKey dk = { parent, name };
-    if(dentry_table_.count(dk) != 0) { return false; }
+    if(dentry_table_.count(dk) != 0) {
+        spdlog::warn("Dentry '{}' already exists in cache for parent '{}'", name, parent->get_name());
+        return false;
+    }
 
-    dentry_table_[dk] = dentry_node;        // 成功加入
-
+    dentry_table_[dk] = dentry_node;
+    spdlog::debug("Added dentry '{}' to cache for parent '{}'", name, parent->get_name());
     return true;
 }
 
 
-bool dcache::erase_dentry(string& name, dentry* dentry_node)
+
+bool dcache::erase_dentry(const string& name, dentry* dentry_node)
 {
     size_t erasedCount = dentry_table_.erase({dentry_node, name});
-    if(erasedCount > 0) { return true; }
-    else { return false; }
+    if(erasedCount > 0) { 
+        spdlog::info("Dentry '{}' already erase from cache for parent '{}'", name, dentry_node->get_name());
+        return true; 
+    }
+    else { 
+        spdlog::warn("Dentry '{}' didn't exist in the cache for parent '{}'", name, dentry_node->get_name());
+        return false; 
+    }
 }
 
 
@@ -102,6 +137,15 @@ bool dcache::erase_dentry(string& name, dentry* dentry_node)
 void dirTree::init_root(string root_name="/", size_t root_inode_num, inode* root_inode)
 {
     root_ = new dentry(root_name, root_inode, root_inode_num, nullptr);     // root无父节点
+    root_inode->i_type = DIR;
+
+    auto cur_time = get_time();
+    root_inode->i_atime = cur_time;
+    root_inode->i_ctime = cur_time;
+    root_inode->i_mtime = cur_time;
+
+    spdlog::info("Initialize the file system root dentry node");
+
 }
 
 
@@ -137,10 +181,13 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir = nullptr)
                     return nullptr;         // 查找失败
                 } else {
                     // 说明此时为剪枝后才没有其子目录项, 需要重新进行I/O读取其子目录
-                    // TODO: 磁盘中访问 search 的 inode, 读取其中的目录项
+                    // TODO_finish: 磁盘中访问 search 的 inode, 读取其中的目录项
+                    spdlog::info("In order to ensure '{}' whether have '{}',loading it's children from disk.", search->get_name(), name);
                     
                     /// 此处进行I/O操作获得子目录项存入dir_entries
                     vector<dir_entry> dir_entries;              // 假定已经返回了目录项
+
+                    bs->loadchild(dir_entries, *search->get_inode());
 
                     search->add_subdir(dir_entries);        // 此时已经加入了, 重新查找
 
@@ -160,6 +207,8 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir = nullptr)
         // 否则继续找子节点中是否有这个路径
     }
 
+    spdlog::info("Traversal success: reached '{}'", search->get_name());
+
     return search;
 
 }
@@ -177,38 +226,78 @@ bool dirTree::name_search_test(string& name, dentry* work_dir/*, bool update_has
     // 再保证当前目录下确实无此目录
     auto sub_dir = work_dir->find_subdir(name);
 
-    if(sub_dir != nullptr && sub_dir->get_flag() == FIRST_LOAD_TO_MEMORY)  { return false; }    
+    if(sub_dir != nullptr /*&& work_dir->get_flag() == FIRST_LOAD_TO_MEMORY*/)  { return false; }    
     
     // 最后保证磁盘中确实无此目录
 
-    if(sub_dir->get_flag() == CUT_SUBDIRS) {
+    if(work_dir->get_flag() == CUT_SUBDIRS) {   
 
-        /// 此处进行I/O操作获得子目录项存入dir_entries
+        spdlog::info("In order to ensure '{}' whether have '{}',loading it's children from disk.", work_dir->get_name(), name);
+        /// TODO_finish:此处进行I/O操作获得子目录项存入dir_entries
         vector<dir_entry> dir_entries;              // 假定已经返回了目录项
+
+        bs->loadchild(dir_entries, *work_dir->get_inode());
 
         work_dir->add_subdir(dir_entries);       // 这时加入了新的子节点
 
         auto new_add_dir = work_dir->find_subdir(name);
-        if(new_add_dir != nullptr)  { return false; }       // 如果此时新加入的节点中有, 则创建新目录失败
+        if(new_add_dir != nullptr)  { return false; }       
 
     }
 
     return true;        // 没找到同名的节点
 }
 
+bool dirTree::has_child_test(dentry* dentry_node)
+{
+    // 还是一样流程, 只需要进行当前节点子检查和磁盘检查即可
+
+    // 首先扫描此节点中的所有child(如果有的话)
+    if(dentry_node->get_flag() == FIRST_LOAD_TO_MEMORY){
+        // 保证此时的child全部加载进入内存中了
+        if(!dentry_node->has_subdir()) { return true; } // 此时确实无子节点了
+        else { return false; }      // 存在则有子节点
+    }  
+    else{       // 此时得去磁盘中查找看是否有子节点
+        
+        spdlog::info("In order to ensure '{}' whether have children node, loading it's children from disk.", dentry_node->get_name());
+        /// TODO_finish:此处调用磁盘I/O控制器申请获得此目录的子目录项
+
+        // 此时如果已经获得了子目录项
+        vector<dir_entry> dir_entries;              // 假定已经返回了目录项
+
+        bs->loadchild(dir_entries, *dentry_node->get_inode());
+
+        dentry_node->add_subdir(dir_entries);       // 加入子
+
+        // 此时检查是否加入了新的
+        if(!dentry_node->has_subdir())  { return true; }
+        else { return false; }      // 加入了新的
+    }
+
+}
+
 bool dirTree::alloc_dir(string& name, dentry* work_dir)
 {
-    if(!name_search_test(name, work_dir)) { return false; }  // 如果找到了同名的, 则分配新目录失败
+    if(!name_search_test(name, work_dir)) { 
+        spdlog::warn("Directory allocation failed: '{}' already exists in '{}'", name, work_dir->get_name());
+        return false; 
+    }  // 如果找到了同名的, 则分配新目录失败
 
     /////////////////// 下面是可以创建新的目录项了
 
-    // TODO:通知I/O分配新的inode
+    /// TODO_finish:通知I/O分配新的inode
 
-    // 如果此时已经获得了inode(内存)
-    inode* new_allocate_inode;
+    auto new_allocate_inode = bs->iget(false);
 
-    // 完善inode的信息
+    /// TODO: 完善inode的信息
+    auto cur_time = get_time();
     new_allocate_inode->i_type = DIR;
+    new_allocate_inode->i_size = 1;
+    new_allocate_inode->i_atime = cur_time;
+    new_allocate_inode->i_ctime = cur_time;
+    new_allocate_inode->i_mtime = cur_time;
+
     ///  .....
 
     dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir);
@@ -216,23 +305,67 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir)
     // 还需要更新全局哈希
     cache_->add_dentry(name, new_node, work_dir);
 
+    spdlog::info("Allocated new directory '{}' under '{}', inode={}", 
+                 name, work_dir->get_name(), new_allocate_inode->i_num);
     return true;
+}
+
+void dirTree::del_tree(dentry* dentry_root)
+{
+    if(!dentry_root) { return; }        // 仅仅是保证安全性, 应该不会执行此语句
+    if(!has_child_test(dentry_root)){
+        // 此时已经到达叶子节点
+
+        /// TODO: 1. 通知I/O回收此块
+
+        spdlog::info("Letting blockScheduler to recycle the '{}' children's inode and thier blocks", dentry_root->get_name());
+        // 2. 释放此节点子节点
+
+        delete dentry_root;
+        return;
+    }
+
+    // 此时说明还有子节点
+
+    auto& sub_dirs = dentry_root->get_subdir();
+    // 遍历并递归删除所有子节点
+    for (auto& [name, child_node] : sub_dirs) {
+        del_tree(child_node);
+        cache_->erase_dentry(name, dentry_root);  // 在 child 被 delete 前移除哈希映射
+    }
 }
 
 bool dirTree::free_dir(string& name, dentry* work_dir)
 {
+    if(name == "/") { 
+
+        spdlog::info("Delete the root, clear the file system.");
+        /// TODO_finish: 调用I/O的清空操作
+        bs->new_disk();
+
+        return true;
+    }
+
     // 首先还是一样的查找验证过程
     if(name_search_test(name, work_dir))  { return false; }       // 如果没找到, 则删除失败
 
-    // TODO: 通知I/O回收该节点
+    del_tree(work_dir);     // 删除树
 
+    // 此时仅仅释放了以work_dir为根的树, 但是work_dir此时没有被释放, 因为析构函数定义的释放规则是仅释放子节点和d_child_哈希表
+    // 所以需要通过其父节点删除work_dir和在父节点中移除其表项
+    dentry* parent_node = work_dir->get_parent();
 
-    if(work_dir->erase_subdir(name)){
-        // 子节点删除成功后再删除全局哈希表项
-        if(!cache_->erase_dentry(name, work_dir))   { return false; }
-    } 
-    else{ 
-        return false;       // maybe more serious
+    if(parent_node == nullptr)  { // 此时不应该发生, 如果发生则是错误
+        spdlog::error("{} occur error!",  __func__);
+        exit(1);
     }
+
+    parent_node->erase_subdir(work_dir->get_name());        // 待删除节点的根节点移除此项
+    cache_->erase_dentry(name, parent_node);                   // 清除全局哈希
+
+    delete work_dir;                                        // 这时释放此节点即可
+
+    spdlog::debug("Deleted subdir '{}' under '{}'", name, parent_node->get_name());
+
     return true;
 }

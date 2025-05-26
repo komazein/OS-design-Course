@@ -1,5 +1,7 @@
 #pragma once
 #include "fs_types.h"
+#include "ddq.h"
+#include <spdlog/logger.h>
 
 struct inode;        // 前向声明
 class super_block;   // 前向声明
@@ -23,7 +25,7 @@ public:
         d_name_(d_name), d_inode_num_(d_inode_num), d_parent_(d_parent)   
     { } 
 
-    ~dentry()
+    ~dentry()     // 根节点管理子节点的释放
     {
         for (auto& pair : d_child_) {
             delete pair.second;
@@ -53,6 +55,9 @@ public:
     // 删除子节点
     bool erase_subdir(string& name);
 
+    // 有子节点(仅仅是确定FIRST_LOAD_TO_MEMORY情况下确实无字, 但是不保证其他情况)
+    bool has_subdir();
+
     // 新增引用计数
     void add_ref();
 
@@ -70,6 +75,21 @@ public:
 
     // 获取时间
     time_t get_time() { return d_time_; }
+
+    // 获取所有子节点
+    std::unordered_map<std::string, dentry*>& get_subdir() { return d_child_; }
+
+    // 获取父节点, 如果为"/"则返回nullptr
+    dentry* get_parent() { return d_parent_; }
+
+    // 获取名称
+    string& get_name() { return d_name_; }
+
+    // 获取inode号
+    int get_inode_num() { return d_inode_num_; }
+
+    // 获取inode
+    inode* get_inode()  { return d_inode_; }
 
 
 
@@ -114,7 +134,7 @@ private:
     list<dentry*> active_lists;     // 活跃链表, 经常访问的节点
     list<dentry*> inactive_lists;   // 不活跃链表     
     
-    size_t 
+    // size_t 
 };
 
 
@@ -172,7 +192,7 @@ public:
      * 
      * 
      */
-    bool erase_dentry(string& name, dentry* dentry_node);
+    bool erase_dentry(const string& name, dentry* dentry_node);
 
 
 private:
@@ -182,7 +202,7 @@ private:
     // 维护全局 路径名<--->文件树节点的映射关系, 加速查找
     unordered_map<dentryKey, dentry*, dentryKeyHash> dentry_table_;     
 
-    LRUReplacer<>* replacer_;               // 替换策略
+    LRUReplacer* replacer_;               // 替换策略
 
     size_t dchache_max_size_;               // 限制的最大的缓存块大小
 };
@@ -240,6 +260,9 @@ public:
      */
     dentry* name_travesal(string& path, dentry* work_dir = nullptr);
 
+
+
+
     // 加入hash
     bool add_hash(string& name, dentry* parent, dentry* dentry_node);
 
@@ -273,6 +296,19 @@ public:
     bool name_search_test(string& name, dentry* work_dir/*, bool update_hash*/);
 
 
+    /**
+     * 
+     * @brief 在进行删除目录的时候, 需要级联删除, 
+     * 即如果rmdir dir后, 需要删除以dir为根的目录, 同时也要删除磁盘中的相关所有目录项,
+     * 此操作可能设计I/O操作, 所以不能使用dentry来实现功能
+     * 
+     * 
+     * @param dentry_node 待检查的节点
+     * 
+     * @return `true` 如果没有释放完所有的子, 即还有子节点项  
+     * 
+     */
+    bool has_child_test(dentry* dentry_node);
 
     /**
      * 
@@ -287,6 +323,18 @@ public:
      */
     bool alloc_dir(string& name, dentry* work_dir);
     
+
+    /**
+     * 
+     * @brief 递归删除以dentry_root为根的树
+     * 
+     * @param dentry_node 待删除的树根
+     * 
+     * 
+     */
+    void del_tree(dentry* dentry_root);
+
+
     /**
      * 
      * @brief 删除目录项, 如: `rmdir`
@@ -300,19 +348,20 @@ public:
      */
     bool free_dir(string& name, dentry* work_dir);
 
+    time_t get_time() { return cur_time; }
+
 private:
 
     dentry* root_;                      // 目录树根节点
     
-    LRUReplacer* replacer_;           // 替换策略
+    LRUReplacer* replacer_;             // 替换策略
 
-    dcache* cache_;                      // 目录项缓存
+    dcache* cache_;                     // 目录项缓存
 
-    // 与磁盘I/O调度器的接口, 此调度器可以提供给功能如下:
-    // - 可以根据inode查找其子目录项并返回vector<dir_entry> dir_entries
-    // 如
-    // blockScheduler bs;  
-};
+    blockScheduler* bs;                 // 与磁盘I/O调度器的接口
+
+    time_t cur_time;                    // 当前时间, 需要外部的全局计数器模块获取时间
+};  
 
 
 

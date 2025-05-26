@@ -73,7 +73,7 @@ void super_block::newdisk()
     }
     struct inode*root_inode=(struct inode*)malloc(sizeof(struct inode));
     char name[]="root";
-    root_inode=iget(1,DIR,ALL,0,00,0,0,0);
+    root_inode=iget(true);
 
     // 构建根节点//////////////////////////////////////
 
@@ -126,33 +126,16 @@ void super_block::releaseblock(int n,int a[])
         s_free_num[s_free_num[0]]=a[i];
     }
 }//需根据更改的具体参数，以及具体情况进行更改
-inode* super_block::iget(bool ifmain,TYPE type,FILEMODE i_mode,uint8_t i_uid,uint8_t i_gid,size_t i_size,uint32_t i_flag,uint16_t di_link_count)
+inode* super_block::iget(bool ifroot)
 {
+    inode*ino=(inode*)malloc(sizeof(inode));
+    if(ifroot){
+        ino->i_num=0;
+        return ino;
+    }
     if(s_inode_num==0)
         return NULL;
-    inode*ino=(inode*)malloc(sizeof(inode));
-    if(ifmain)
-    {
-        ino->i_num=0;
-        type=DIR;
-        i_mode=ALL;
-        i_uid=0;
-    }
-    else
-    {
-        ino->i_num=stack_inode[s_inode_num-1];
-        s_inode_num--;
-    }
-    ino->i_type=type;
-    ino->i_gid=i_gid;
-    ino->i_uid=i_uid;
-    ino->i_flag=i_flag;
-    ino->di_link_count=di_link_count;
-    if(ino->i_type==DIR)
-        ino->i_size==0;
-    else
-        ino->i_size=i_size;
-    ino->i_ctime=ino->i_mtime=time(&(ino->i_atime));
+    ino->i_num=stack_inode[s_inode_num-1];
+    s_inode_num--;
     return ino;
-    //没写完，该函数定义模糊
 }
