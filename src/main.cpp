@@ -1,9 +1,13 @@
 #include "test.h"
+int yylex();
 int main()
 {
 
 
     
-    func();
+    while(1)
+    {
+        
+    }
     return 0;
 }

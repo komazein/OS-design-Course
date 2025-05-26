@@ -2,18 +2,27 @@
 #include "tool.h"
 #include "dentry.h"
 #include "ddq.h"
+#include "filemanager.h"
 
-class shell_manager{
+class file_system_manager{
 
     private:
-        dirTree* dir_tree_;  // Ŀ¼��ָ��
-        dentry* current_dir_;  // ��ǰĿ¼��
-        
+        dirTree* dir_tree_;     
+        dentry* current_dir_;  
+        file_manager * file_manager_;
+        blockScheduler* bs_; 
     
     public:
-        shell_manager(dirTree* dir_tree) : dir_tree_(dir_tree), current_dir_(nullptr) {
-            // ��ʼ����ǰĿ¼Ϊ��Ŀ¼
-            current_dir_ = dir_tree_->get_root();
+        file_system_manager() {
+            dir_tree_ = new dirTree;
+
+            bs_ = new blockScheduler(dir_tree_);
+
+            dir_tree_->set_bs(bs_);
+
+            bs_->new_disk();
+
+            file_manager_ = new file_manager(dir_tree_, dir_tree_->get_root());
         }
         // execute shell command for dir only
 

@@ -79,3 +79,18 @@ void func2()
     dentry* parent = new dentry(name2, ino,0, nullptr);
     auto it = dentry_table_.find({parent, name});
 }
+
+int yylex();
+void testFuncMkdir()
+{
+    file_system_manager sb;
+
+    while (1)
+    {
+        printf("[");
+        sb.
+        printf("]$ ");
+        yylex();
+    }
+    
+}

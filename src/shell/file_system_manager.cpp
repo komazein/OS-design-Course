@@ -1,9 +1,9 @@
-#include "shellmanager.h"
+#include "file_system_manager.h"
 #include <spdlog/spdlog.h>
 
 
 
-void shell_manager::command_mkdir(std::string& dirname) {
+void file_system_manager::command_mkdir(std::string& dirname) {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
         exit();
@@ -19,7 +19,7 @@ void shell_manager::command_mkdir(std::string& dirname) {
 
 }
 
-void shell_manager::command_cd(std::string& dirname)
+void file_system_manager::command_cd(std::string& dirname)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
@@ -35,7 +35,7 @@ void shell_manager::command_cd(std::string& dirname)
     }
 }
 
-void shell_manager::command_ls()
+void file_system_manager::command_ls()
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot list contents");
@@ -53,7 +53,7 @@ void shell_manager::command_ls()
     }
 }
 
-void shell_manager::command_rm(std::string& dirname)
+void file_system_manager::command_rm(std::string& dirname)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
@@ -69,7 +69,7 @@ void shell_manager::command_rm(std::string& dirname)
 }
 
 //TODO: finish func of symbolic link dir
-void shell_manager::command_lkdir(std::string& dirname)
+void file_system_manager::command_lkdir(std::string& dirname)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create symbolic link '{}'", dirname);
@@ -79,7 +79,7 @@ void shell_manager::command_lkdir(std::string& dirname)
 }
 
 //TODO: finish func of hard link dir
-void shell_manager::command_lndir(std::string& dirname)
+void file_system_manager::command_lndir(std::string& dirname)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create hard link '{}'", dirname);
@@ -88,7 +88,7 @@ void shell_manager::command_lndir(std::string& dirname)
 
 }
 
-void shell_manager::command_find(std::string& filename)
+void file_system_manager::command_find(std::string& filename)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot find file '{}'", filename);
@@ -105,7 +105,7 @@ void shell_manager::command_find(std::string& filename)
 }
 
 //TODO: finish func of touch file
-void shell_manager::command_touch(std::string& filename)
+void file_system_manager::command_touch(std::string& filename)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create file '{}'", filename);
@@ -115,7 +115,7 @@ void shell_manager::command_touch(std::string& filename)
 }
 
 //TODO: finish func of delete file
-void shell_manager::command_delete(std::string& filename)
+void file_system_manager::command_delete(std::string& filename)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot delete file '{}'", filename);
@@ -125,7 +125,7 @@ void shell_manager::command_delete(std::string& filename)
 }
 
 //TODO: finish func of cat file
-void shell_manager::command_cat(std::string& filename)
+void file_system_manager::command_cat(std::string& filename)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot read file '{}'", filename);
@@ -134,7 +134,7 @@ void shell_manager::command_cat(std::string& filename)
 
 }
 
-void shell_manager::exit()
+void file_system_manager::exit()
 {
     spdlog::info("Exiting shell...");
     // Perform any necessary cleanup here
@@ -142,7 +142,7 @@ void shell_manager::exit()
     // print any manual or help information
 }
 
-void shell_manager::format()
+void file_system_manager::format()
 {
     spdlog::info("Formatting the file system...");
     // Perform formatting operations here
@@ -150,7 +150,7 @@ void shell_manager::format()
     dir_tree_->get_bs()->new_disk();  // Assuming clear() is a method to reset the root directory
 }
 
-void shell_manager::help()
+void file_system_manager::help()
 {
     showHelpMessage();
 }

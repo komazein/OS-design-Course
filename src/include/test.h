@@ -4,3 +4,5 @@
 void func();        // test function
 
 void func2();
+
+void testFuncMkdir();
