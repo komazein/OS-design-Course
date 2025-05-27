@@ -2,3 +2,4 @@
 /.vscode/
 *.img
 /bin/
+*.json

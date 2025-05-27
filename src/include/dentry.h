@@ -1,6 +1,7 @@
 #pragma once
 #include "fs_types.h"
 #include <spdlog/logger.h>
+#include "replacer.h"
 
 struct inode;        // 前向声明
 class super_block;   // 前向声明
@@ -26,13 +27,13 @@ public:
         d_name_(d_name), d_inode_num_(d_inode_num), d_parent_(d_parent)   
     { } 
 
-    ~dentry()     // 根节点管理子节点的释放
-    {
-        for (auto& pair : d_child_) {
-            delete pair.second;
-        }
-        d_child_.clear(); 
-    }
+    // ~dentry()     // 根节点管理子节点的释放
+    // {
+    //     // for (auto& pair : d_child_) {
+    //     //     delete pair.second;
+    //     // }
+    //     // d_child_.clear(); 
+    // }
 
 
     /**
@@ -80,6 +81,9 @@ public:
     // 获取所有子节点
     std::unordered_map<std::string, dentry*>& get_subdir() { return d_child_; }
 
+    // 清空d_child_容器, 必须在释放完其子节点的空间才能调用
+    void clear_child()  { d_child_.clear(); }
+    
     // 获取父节点, 如果为"/"则返回nullptr
     dentry* get_parent() { return d_parent_; }
 
@@ -91,6 +95,12 @@ public:
 
     // 获取inode
     inode* get_inode()  { return d_inode_; }
+
+    // 获取脏标志
+    bool get_dirty()    { return dirty_; }
+
+    // 设置dirty
+    void set_dirty(bool dirty_flag)    { dirty_ = dirty_flag; }
 
     void getDir_entry(dir_entry&par,vector<dir_entry>&child);
 
@@ -108,7 +118,9 @@ private:
     
     std::unordered_map<std::string, dentry*> d_child_; // 子目录(文件)字典
     
-    DFALG d_flag_;                  // 状态信息
+    DFALG d_flag_{ FIRST_LOAD_TO_MEMORY };                  // 状态信息
+
+    bool dirty_ { false };                    // 是否对此目录项进行了更改(如果更改时释放节点时需要写回磁盘)
     
     time_t d_time_;                 // 修改时间         (这个可以结合替换策略)
     
@@ -117,28 +129,14 @@ private:
 
 
 /**
- * 提供目录树过于庞大导致大量占用内存问题, 提供剪枝
- * 也针对dcache防止内存占用过大
- * (应该)可以实现dache和dentry树的替换策略
+ * 
+ * 记录此
  */
-
-class LRUReplacer
-{
-public:
-
-    void Insert(const dentry* dentry_node);
-
-    bool Victim(dentry* dentry_node);
-
-    bool Erase(const dentry* dentry_node);
-
-private:
-    
-    list<dentry*> active_lists;     // 活跃链表, 经常访问的节点
-    list<dentry*> inactive_lists;   // 不活跃链表     
-    
-    // size_t 
+struct dentryTreeCounter{
+    dentry* dentry_node;
+    size_t counter;
 };
+
 
 
 /**
@@ -170,6 +168,9 @@ struct dentryKeyHash{
         return hash<dentry*>()(key.parent) ^ hash<string>()(key.name);
     }
 };
+
+
+
 
 class dcache{
 public:
@@ -205,8 +206,6 @@ private:
     // 维护全局 路径名<--->文件树节点的映射关系, 加速查找
     unordered_map<dentryKey, dentry*, dentryKeyHash> dentry_table_;     
 
-    LRUReplacer* replacer_;               // 替换策略
-
     size_t dchache_max_size_;               // 限制的最大的缓存块大小
 };
 
@@ -219,9 +218,18 @@ class dirTree
 {
 public:
 
-    dirTree(LRUReplacer* replacer, dcache* cache/*, blockScheduler*bs*/)
-        : replacer_(replacer), cache_(cache)
+    dirTree()
+    { 
+        dcache_replacer_ = new LRUReplacer<dentryKey>();
+        dentry_replacer_ = new LRUReplacer<dentry*>();
+        cache_ = new dcache();
+    }
+
+    ~dirTree()
     {
+        delete dcache_replacer_;
+        delete dentry_replacer_;
+        delete cache_;
     }
 
     void set_bs(blockScheduler* bs) { this->bs = bs; }
@@ -236,6 +244,14 @@ public:
      * 
      */
     void init_root(string root_name, size_t root_inode_num, inode* root_inode);
+
+    /**
+     * 
+     * @brief 删除根节点root_, 必须要先调用free_dir是传入的是"/"才能调用,
+     * 因为仅仅是简单的释放根的空间, 直接调用可能会引发内存泄漏
+     * 
+     */
+    void del_root() { delete root_; }
 
     /**
      * 
@@ -327,10 +343,12 @@ public:
      * 
      * @param workdir 当前的工作路径
      * 
+     * @param type 创建的表项的类型, 文件和目录都是此目录的子目录项
+     * 
      * @return `false` 如果已存在该目录, 否则正常创建
      * 可能还需要考虑如果空闲磁盘块不足而创建失败
      */
-    bool alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode);
+    bool alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode, TYPE type);
     
 
     /**
@@ -357,13 +375,52 @@ public:
      */
     bool free_dir(string& name, dentry* work_dir);
 
+
     time_t get_time() { return cur_time; }
+
+    /**
+     * 
+     * @brief 释放指定的dentry空间, 并不是删除, 而是释放此dentry占用的空间
+     * 
+     * 此函数也是递归删除以dentry_node为根节点的子树, 但是为了考虑方便, 
+     * 只是释放其子节点以及子节点的树, 并不删除该节点
+     * 
+     * 注意: 此时还得更改`dentry_node`的DFALG标志位为`CUT_SUBDIRS`
+     * 
+     * 
+     */
+    void cut_dir(dentry* dentry_node, size_t& counter);
+
+    /**
+     * 
+     * @brief 如果达到了某个阈值(或者通过手动指定释放空间), 则触发释放一些dcache空间
+     * 此操作不会改变目录树的结构, 仅仅会减少dcache的表项, 减少的空间主要为目录的名称
+     * 
+     * @return 成功释放的存储的目录项(dentry)的个数, 如果为0则说明释放失败
+     * 
+     */
+    size_t shrink_dcache();
+
+
+    /**
+     * 
+     * @brief 如果达到了某个阈值(或者通过手动指定释放空间), 则触发释放一些目录树空间,
+     * 会修剪掉一些不常用的目录项为根的子树, 为了方便管理, 同时也会释放相应的dcache
+     * 此操作会改变原先的树形结构, 会根本的释放dentry节点, 释放的原则就是最不常用的目录项
+     * 并且要注意, 如果一个节点处于较为靠近头的位置, 其父辈节点也处于高的优先级, 同样不能置换
+     * 
+     * @return 成功释放的存储的目录项(dentry)的个数, 如果为0则说明释放失败
+     * 
+     */
+    size_t cut_dirTree();
 
 private:
 
     dentry* root_;                      // 目录树根节点
     
-    LRUReplacer* replacer_;             // 替换策略
+    LRUReplacer<dentryKey>* dcache_replacer_;             // 替换策略(dache释放)
+
+    LRUReplacer<dentry*>* dentry_replacer_;             // 替换策略(树剪枝)
 
     dcache* cache_;                     // 目录项缓存
 
