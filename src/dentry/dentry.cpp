@@ -352,11 +352,10 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
 vector<string>& dirTree::findNameInDirtree(const string& filename, dentry* work_dir)
 {
     
-
 }
 
 
-void dirTree::del_tree(dentry* dentry_root)
+void dirTree::del_tree(dentry* dentry_root,vector<pair<inode*,size_t>>&del_nodes)
 {
     if(!dentry_root) { return; }        // 仅仅是保证安全性, 应该不会执行此语句
 
@@ -364,6 +363,7 @@ void dirTree::del_tree(dentry* dentry_root)
         // 如果此时有子节点
         auto& sub_dirs = dentry_root->get_subdir();
         // 遍历并递归删除所有子节点
+        del_nodes.emplace_back(dentry_root->get_inode(),sub_dirs.size());
         for (auto& [name, child_node] : sub_dirs) {
             cache_->erase_dentry(name, dentry_root);  // 在 child 被 delete 前移除哈希映射
 
@@ -371,7 +371,7 @@ void dirTree::del_tree(dentry* dentry_root)
             dcache_replacer_->Erase({dentry_root, name});
             dentry_replacer_->Erase(child_node);
 
-            del_tree(child_node);       // 递归删除子
+            del_tree(child_node,del_nodes);       // 递归删除子
         }
 
         dentry_root->clear_child();         // 必须释放完所有的子才能调用清空child_哈希表
@@ -396,12 +396,17 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
     }
 
     // 首先还是一样的查找验证过程
-    if(name_search_test(name, work_dir))  { return false; }       // 如果没找到, 则删除失败
-
+    
+    if(name_search_test(name, work_dir))  { 
+        return false; }       // 如果没找到, 则删除失败
 
     // 此时将要释放以work_dir为根的树
     // 需要更新父的表项
     dentry* parent_node = work_dir->get_parent();
+    size_t pri_parent_num_of_children=parent_node->get_subdir().size();
+    vector<pair<inode*,size_t>>del_nodes;
+    cout<<pri_parent_num_of_children<<endl;
+    exit(0);
 
     parent_node->erase_subdir(work_dir->get_name());        // 待删除节点的根节点移除此项
     
@@ -413,8 +418,8 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
 
     dentry_replacer_->Erase(work_dir);                      // dentry_replacer清除
 
-    del_tree(work_dir);     // 此时可以删除树
-
+    del_tree(work_dir,del_nodes);     // 此时可以删除树
+    bs->freeblock(del_nodes,*parent_node->get_inode(),pri_parent_num_of_children);
     spdlog::debug("Deleted subdir '{}' under '{}'", name, parent_node->get_name());
 
     return true;

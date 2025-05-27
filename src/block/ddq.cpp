@@ -256,9 +256,9 @@ void blockScheduler::changeDirentryToblockID(size_t now_block_id,size_t n,size_t
     // }
 }
 
-size_t blockScheduler::getlastblockID(size_t now_block_id,size_t n,inode &id)
+size_t blockScheduler::getlastblockID(size_t n,inode &id)
 {
-    n++;
+    n++;//MAXnumInBlock>3，下面不用取等，取等不释放
     if(n<3*MAXnumInBlock)
         return id.i_block[n/MAXnumInBlock];
     else if(n<2*MAXnumInBlock+MAXnumInBlock*MAXnumInBlock)
@@ -304,7 +304,23 @@ size_t blockScheduler::treeFindLastBlock(size_t now_block_id,size_t n)
     else
         return treeFindLastBlock(temp,n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx);
 }
-
+void blockScheduler::freeblock(vector<pair<inode*,size_t>>&del_nodes,inode&par,size_t primsizeofchild)
+{
+    vector<size_t>need;
+    vector<size_t>emptyvec;
+    if(cal_block_num_dir(primsizeofchild)!=cal_block_num_dir(primsizeofchild-1))
+        need.push_back(getlastblockID(primsizeofchild,par));
+    for(size_t i=0;i<del_nodes.size();i++)
+    {
+        if(del_nodes[i].first->i_type==DIR)
+            getallBlockDIR(*del_nodes[i].first,del_nodes[i].second,need);
+        else
+            getallBlockSIM(*del_nodes[i].first,need,emptyvec);
+        sb->freeinode(del_nodes[i].first->i_num);
+    }
+    sb->releaseblock(need.size(),need);
+    return;
+}
 void blockScheduler::writechild(dir_entry par,vector<dir_entry>&a,inode &id,size_t num)
 {
     FILE *fp=fopen("../disk.img","r+");
@@ -420,26 +436,33 @@ void blockScheduler::getallBlockDIR(inode &id,size_t num,vector<size_t>&a)
     fwrite(&num,sizeof(size_t),1,fp);
     fseek(fp,min(num,(size_t)MAXnumInBlock-1),SEEK_CUR);   
     num-=min(num,(size_t)MAXnumInBlock-1);
+    a.push_back(id.i_block[0]);
     fclose(fp);
     if(num==0)
         return;
     vector<size_t>notneed;
     if(num<=MAXnumInBlock*(MAXnumInBlock+1))
     {
+        a.push_back(id.i_block[1]);
         getblockTree(id.i_block[1],min((size_t)MAXnumInBlock,num),a,notneed,DIR);
         num-=min((size_t)MAXnumInBlock,num);
         if(num==0)
             return ;
+        a.push_back(id.i_block[2]);
         getblockTree(id.i_block[2],num,a,notneed,DIR);
     }
     else if(num>MAXnumInBlock*(MAXnumInBlock+1)&&num<=2*MAXnumInBlock*MAXnumInBlock)
     {
+        a.push_back(id.i_block[1]);
         getblockTree(id.i_block[1],num-MAXnumInBlock*MAXnumInBlock,a,notneed,DIR);
+        a.push_back(id.i_block[2]);
         getblockTree(id.i_block[2],MAXnumInBlock*MAXnumInBlock,a,notneed,DIR);
     }
     else
     {
+        a.push_back(id.i_block[1]);
         getblockTree(id.i_block[1],MAXnumInBlock*MAXnumInBlock,a,notneed,DIR);
+        a.push_back(id.i_block[2]);
         getblockTree(id.i_block[2],num-MAXnumInBlock*MAXnumInBlock,a,notneed,DIR);
     }
 }

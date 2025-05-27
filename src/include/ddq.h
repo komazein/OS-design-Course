@@ -24,7 +24,7 @@ public:
     void writeBlockIDdir(size_t n,inode &id);// n noly child, old num
     //
 
-    size_t getlastblockID(size_t now_block_id,size_t n,inode &id);//n with pwrent,old num,用之前确认是否需要释放块
+    size_t getlastblockID(size_t n,inode &id);//n with pwrent,old num,用之前确认是否需要释放块
     size_t treeFindLastBlock(size_t now_block_id,size_t n);
     
     inode* iget(bool ifroot);               // 分配inode节点, 如果if_root为true则为根节点
@@ -34,7 +34,8 @@ public:
     size_t cal_block_num_dir(size_t n_dir);//only child
     bool creatFILE(size_t old_num_only_child,inode &parid,inode &chid);
     size_t fastpow(size_t di,int x);
-    void freeDirentry(inode &di,size_t n);//////////没写
+    void freeBlock_inode(inode &di,size_t n_child,inode &par,size_t n_parent);//
+
     void getallBlockDIR(inode &id,size_t n,vector<size_t>&a);//n for DIR:only child
 
     void getblockTree(size_t block_id,size_t n,vector<size_t>&a,vector<size_t>&forSIMfile,TYPE type);//获取所有目录项块号
@@ -52,6 +53,7 @@ public:
     bool writeSIMfromBLOCK(inode&id,char*a);//写文件的外部接口，完成重新分配磁盘块号后交由writeBlocknumFORsim实现
 
     void SIMwriteBK(vector<size_t>newlist,size_t n,char*a);//根据读取的磁盘块号获取字符串
+    void freeblock(vector<pair<inode*,size_t>>&del_nodes,inode&par,size_t primsizeofchild);
     size_t getfreeblocknum();
 private:
     super_block* sb;
