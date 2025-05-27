@@ -1,5 +1,7 @@
 #pragma once
-#include "fs.h"
+#include "tool.h"
+#include "dentry.h"
+#include "ddq.h"
 
 class shell_manager{
 

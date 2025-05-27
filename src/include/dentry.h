@@ -330,6 +330,8 @@ public:
      * 
      */
 
+    vector<string>& findNameInDirtree(const string& filename, dentry* work_dir);
+
     /**
      * 
      * @brief 在进行删除目录的时候, 需要级联删除, 
@@ -422,6 +424,8 @@ public:
      * 
      */
     size_t cut_dirTree();
+
+    blockScheduler* get_bs() { return bs; }
 
 private:
 
