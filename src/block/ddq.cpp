@@ -660,7 +660,7 @@ void blockScheduler::SIMwriteBK(vector<size_t>newlist,size_t n,char*a)
     }
     fclose(fp);
 }
-void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,char*a,char*a)
+void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,char*a)
 {
     size_t num=(id.i_size+511)/512;
     vector<size_t>newlist;
@@ -817,4 +817,18 @@ void blockScheduler::simwriteTree(size_t block_id,vector<size_t>&all,size_t n,ve
         simwriteTree(tree.front().first,all,tree.front().second,newlist);
         tree.pop();
     }
+}
+
+void blockScheduler::new_disk()
+{
+
+    sb->newdisk();
+}
+inode*blockScheduler::iget(bool ifroot)
+{
+    return sb->iget(ifroot);
+}
+size_t blockScheduler::getfreeblocknum()
+{
+    return sb->getfreeBlocknum();
 }
