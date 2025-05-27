@@ -77,7 +77,6 @@ void super_block::newdisk()
         // }
     }
     // struct inode*root_inode=(struct inode*)malloc(sizeof(struct inode));
-    char name[]="root";
     auto root_inode=iget(true);
     // 构建根节点//////////////////////////////////////
     dirtree->init_root("/", ROOT_INODE_NUMBER, root_inode);     // 创建根节点

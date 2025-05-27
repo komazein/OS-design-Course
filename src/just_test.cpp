@@ -54,7 +54,9 @@ void func()
         cout<<tempa[0]<<" ";
     cout<<endl;
     cout<<"item"<<dirtree.get_root()->get_subdir().size()<<endl;
-    dirtree.free_dir(a,dirtree.name_travesal(a,dirtree.get_root()));
+    auto subnode = dirtree.name_travesal(a,dirtree.get_root());
+    cout << subnode->get_name() << "\n";
+    dirtree.free_dir(a,dirtree.get_root());
     cout<<"item"<<dirtree.get_root()->get_subdir().size()<<endl;
 
     vector<size_t>block_num_new;

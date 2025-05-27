@@ -396,19 +396,19 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
     }
 
     // 首先还是一样的查找验证过程
-    
+
     if(name_search_test(name, work_dir))  { 
         return false; }       // 如果没找到, 则删除失败
 
-    // 此时将要释放以work_dir为根的树
+    // 此时将要释放以work_dir的以name为名的根的树
     // 需要更新父的表项
-    dentry* parent_node = work_dir->get_parent();
-    size_t pri_parent_num_of_children=parent_node->get_subdir().size();
+    dentry* parent_node = work_dir/*->get_parent()*/;
+    size_t pri_parent_num_of_children=work_dir->get_subdir().size();
     vector<pair<inode*,size_t>>del_nodes;
     cout<<pri_parent_num_of_children<<endl;
-    exit(0);
+    auto child_node = name_travesal(name, work_dir);
 
-    parent_node->erase_subdir(work_dir->get_name());        // 待删除节点的根节点移除此项
+    parent_node->erase_subdir(child_node->get_name());        // 待删除节点的根节点移除此项
     
     parent_node->set_dirty(true);                           // 设置父的节点脏位
 
@@ -416,10 +416,12 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
 
     dcache_replacer_->Erase({parent_node, name});           // dentry_replacer清除
 
-    dentry_replacer_->Erase(work_dir);                      // dentry_replacer清除
+    dentry_replacer_->Erase(child_node);                      // dentry_replacer清除
 
-    del_tree(work_dir,del_nodes);     // 此时可以删除树
+    del_tree(child_node,del_nodes);     // 此时可以删除树
+
     bs->freeblock(del_nodes,*parent_node->get_inode(),pri_parent_num_of_children);
+
     spdlog::debug("Deleted subdir '{}' under '{}'", name, parent_node->get_name());
 
     return true;
