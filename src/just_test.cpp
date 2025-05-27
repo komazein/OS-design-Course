@@ -1,7 +1,11 @@
 #include "test.h"
 #include <spdlog/spdlog.h>
+
 void func()
 {
+    // LRUReplacer dcache_replacer;
+    // LRUReplacer dentry_replacer;
+    dcache dcache;
 
     dirTree dirtree;
 
@@ -11,6 +15,8 @@ void func()
     dirtree.set_bs(&bs);
     
     bs.new_disk();
+
+
 
     string name="test";
     inode*p=(inode*)malloc(sizeof(inode)*30);

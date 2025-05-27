@@ -91,7 +91,7 @@ public:
     string& get_name() { return d_name_; }
 
     // 获取inode号
-    size_t get_inode_num() { return d_inode_num_; }
+    int get_inode_num() { return d_inode_num_; }
 
     // 获取inode
     inode* get_inode()  { return d_inode_; }
@@ -102,7 +102,8 @@ public:
     // 设置dirty
     void set_dirty(bool dirty_flag)    { dirty_ = dirty_flag; }
 
-    void getDir_entry(dir_entry&par,vector<dir_entry>&child);
+    // 获得磁盘存储格式的dir_entery
+    void getDir_entry(dir_entry& par, vector<dir_entry>& child);
 
 
 
@@ -321,6 +322,16 @@ public:
     bool name_search_test(string& name, dentry* work_dir/*, bool update_hash*/);
 
 
+
+    /**
+     * 
+     * @brief 在当前目录下, 检查含有此名字的所有文件/目录
+     * 
+     * 
+     */
+
+    vector<string>& findNameInDirtree(const string& filename, dentry* work_dir);
+
     /**
      * 
      * @brief 在进行删除目录的时候, 需要级联删除, 
@@ -413,6 +424,8 @@ public:
      * 
      */
     size_t cut_dirTree();
+
+    blockScheduler* get_bs() { return bs; }
 
 private:
 

@@ -3,6 +3,7 @@
 #include"ddq.h"
 
 
+
 ///////////////////////////////
 ///         dentry          ///
 ///////////////////////////////
@@ -80,6 +81,7 @@ void dentry::set_time(time_t time)
 {
     d_time_ = time;
 }
+
 void dentry::getDir_entry(dir_entry&par,vector<dir_entry>&child)
 {
     par.inode_num=(size_t)get_inode_num();
@@ -346,6 +348,13 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
 
     return true;
 }
+
+vector<string>& dirTree::findNameInDirtree(const string& filename, dentry* work_dir)
+{
+    
+
+}
+
 
 void dirTree::del_tree(dentry* dentry_root)
 {
