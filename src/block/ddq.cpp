@@ -3,6 +3,7 @@ void blockScheduler::loadchild(vector<dir_entry>&a,inode &id)
 {
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+id.i_block[0]*512,SEEK_SET);
+    fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+id.i_block[0]*512,SEEK_SET);
     dir_entry root;
     size_t num;
     fread(&root,sizeof(dir_entry),1,fp);
@@ -641,10 +642,21 @@ bool blockScheduler::writeSIMfromBLOCK(inode&id,char*a)
     //     cout<<all[i]<<" ";
     // cout<<endl;
     writeBlocknumFORsim(all,strlen(a),id,a);
-    for(int i=0;i<all.size();i++)
-        cout<<i<<" "<<all[i]<<endl;
-    writeBlocknumFORsim(all,strlen(a),id,a);
     return true;
+}
+void blockScheduler::SIMwriteBK(vector<size_t>newlist,size_t n,char*a)
+{
+    size_t now_byte=n;
+    FILE *fp=fopen("../disk.img","r+");
+    size_t delta=0;
+    for(int i=0;i<newlist.size();i++)
+    {
+        fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+newlist[i]*512,SEEK_SET);
+        fwrite(&a[delta],sizeof(char),min(now_byte,(size_t)512),fp);
+        delta+=min(now_byte,(size_t)512);
+        now_byte-=min(now_byte,(size_t)512);
+    }
+    fclose(fp);
 }
 void blockScheduler::SIMwriteBK(vector<size_t>newlist,size_t n,char*a)
 {
@@ -718,17 +730,8 @@ void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,ch
     }
     id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM]=all[all.size()-1];
     all.erase(all.end()-1);
-    simwriteTree(id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM],all,MAXnumInBlock,newlist);
-    size_t now_byte=n;
-    FILE *fp=fopen("../disk.img","r+");
-    for(int i=0;i<newlist.size();i++)
-        
-    for(int i=0;i<newlist.size();i++)
-    {
-        fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+newlist[i]*512,SEEK_SET);
-        fwrite(a,sizeof(char),max(now_byte,(size_t)512),fp);
-        now_byte-=max(now_byte,(size_t)512);
-    }
+    simwriteTree(id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM],all,num,newlist);
+    SIMwriteBK(newlist,id.i_size,a);
 }
 void blockScheduler::simwriteTree(size_t block_id,vector<size_t>&all,size_t n,vector<size_t>&newlist)
 {
