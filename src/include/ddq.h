@@ -34,7 +34,6 @@ public:
     size_t cal_block_num_dir(size_t n_dir);//only child
     bool creatFILE(size_t old_num_only_child,inode &parid,inode &chid);
     size_t fastpow(size_t di,int x);
-
     void freeDirentry(inode &di,size_t n);//////////没写
     void getallBlockDIR(inode &id,size_t n,vector<size_t>&a);//n for DIR:only child
 

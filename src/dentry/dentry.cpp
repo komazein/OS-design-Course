@@ -157,7 +157,7 @@ void dirTree::init_root(string root_name, size_t root_inode_num, inode* root_ino
 
     root_inode->i_type = DIR;
 
-
+    root_inode->i_block[0]=0;
     auto cur_time = get_time();
     root_inode->i_atime = cur_time;
     root_inode->i_ctime = cur_time;

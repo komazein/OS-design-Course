@@ -20,14 +20,18 @@ void func()
     {
         string newname=name+to_string(i);
         dirtree.alloc_dir(newname, dirtree.get_root(),p+i, DIR);
-        bs.creatFILE((size_t)i-1,*dirtree.get_root()->get_inode(),p[i]);
+        bs.creatFILE((size_t)i,*dirtree.get_root()->get_inode(),p[i]);
         char a[MAXNAMESIZE]={};
         newname.copy(a,newname.size());
     }
     dirtree.get_root()->getDir_entry(par,px);
-    cout<<px.size();
+    cout<<px.size()<<endl;
     bs.writechild(par,px,*dirtree.get_root()->get_inode(),px.size());
-    cout<<px.size();
+    vector<dir_entry>pz;
+    bs.loadchild(pz,*dirtree.get_root()->get_inode());
+    cout<<pz.size()<<endl;
+    for(int i=0;i<pz.size();i++)
+        cout<<pz[i].inode_num<<" "<<pz[i].name<<endl;    
 }
 
 // void func()
