@@ -1,6 +1,7 @@
 #pragma once
 #include "fs_types.h"
 #include <spdlog/logger.h>
+#include "replacer.h"
 
 struct inode;        // 前向声明
 class super_block;   // 前向声明
@@ -26,13 +27,13 @@ public:
         d_name_(d_name), d_inode_num_(d_inode_num), d_parent_(d_parent)   
     { } 
 
-    ~dentry()     // 根节点管理子节点的释放
-    {
-        for (auto& pair : d_child_) {
-            delete pair.second;
-        }
-        d_child_.clear(); 
-    }
+    // ~dentry()     // 根节点管理子节点的释放
+    // {
+    //     // for (auto& pair : d_child_) {
+    //     //     delete pair.second;
+    //     // }
+    //     // d_child_.clear(); 
+    // }
 
 
     /**
@@ -80,6 +81,9 @@ public:
     // 获取所有子节点
     std::unordered_map<std::string, dentry*>& get_subdir() { return d_child_; }
 
+    // 清空d_child_容器, 必须在释放完其子节点的空间才能调用
+    void clear_child()  { d_child_.clear(); }
+    
     // 获取父节点, 如果为"/"则返回nullptr
     dentry* get_parent() { return d_parent_; }
 
@@ -91,6 +95,12 @@ public:
 
     // 获取inode
     inode* get_inode()  { return d_inode_; }
+
+    // 获取脏标志
+    bool get_dirty()    { return dirty_; }
+
+    // 设置dirty
+    void set_dirty(bool dirty_flag)    { dirty_ = dirty_flag; }
 
 
 
@@ -106,7 +116,9 @@ private:
     
     std::unordered_map<std::string, dentry*> d_child_; // 子目录(文件)字典
     
-    DFALG d_flag_;                  // 状态信息
+    DFALG d_flag_{ FIRST_LOAD_TO_MEMORY };                  // 状态信息
+
+    bool dirty_ { false };                    // 是否对此目录项进行了更改(如果更改时释放节点时需要写回磁盘)
     
     time_t d_time_;                 // 修改时间         (这个可以结合替换策略)
     
@@ -115,76 +127,14 @@ private:
 
 
 /**
- * 提供目录树过于庞大导致大量占用内存问题, 提供剪枝
- * 也针对dcache防止内存占用过大
- * (应该)可以实现dache和dentry树的替换策略
+ * 
+ * 记录此
  */
-
-class LRUReplacer
-{
-public:
-
-    explicit LRUReplacer(size_t max_size = 1024) : max_size_(max_size) {}
-
-
-    /**
-     * 
-     * @brief 将节点插入到`lru_list`的首部,
-     * 如果存在于链表中, 则将其移动到链表的首部
-     * 
-     * @param dentry_node 待插入lru链表中的节点
-     * 
-     */
-    void Insert(dentry* dentry_node);
-
-
-    /**
-     * 
-     * @brief 将当前节点以及其父辈的节点插入到`lru_list`的首部,
-     * 适用于剪枝操作时, 由于一个访问时间较近的节点不能被替换出去, 也就是说明其父辈节点也不能换出
-     * 所以将其沿着父辈方向的节点依次插入`lru_list`
-     * 
-     * 
-     */
-    void InsertDir(dentry* dentry_node);
-
-    /**
-     * 
-     * @brief 优先替换出`lrulist`中的尾部元素
-     * 
-     * @return `false` 没有可以替换出的节点, 说明此事lru_list为空
-     * 
-     */
-    bool Victim();
-
-    /**
-     * 
-     * @brief 就是指定需要移除的节点, 即无理由替换
-     * 
-     * @param dentry_node 强制替换出的节点
-     * 
-     * @return `ture` 如果在表中并替换成功
-     * 
-     */
-    bool Erase(dentry* dentry_node);
-
-
-    /**
-     * 
-     * @brief 可以动态的更新最大链表的限制
-     * 
-     */
-    void set_max_size(size_t max_size) { max_size_ = max_size; }
-
-private:
-    
-    // 由于本文件系统只考虑到了单进程, 所以不存在引用计数的问题, 
-    // 所以只需要一个链表记录缓存节点即可
-    // 其替换的优先级就是LRU
-    list<dentry*> lru_list;     // lru链表 
-    
-    size_t max_size_;           // 最大的链表大小
+struct dentryTreeCounter{
+    dentry* dentry_node;
+    size_t counter;
 };
+
 
 
 /**
@@ -216,6 +166,9 @@ struct dentryKeyHash{
         return hash<dentry*>()(key.parent) ^ hash<string>()(key.name);
     }
 };
+
+
+
 
 class dcache{
 public:
@@ -251,8 +204,6 @@ private:
     // 维护全局 路径名<--->文件树节点的映射关系, 加速查找
     unordered_map<dentryKey, dentry*, dentryKeyHash> dentry_table_;     
 
-    LRUReplacer* replacer_;               // 替换策略
-
     size_t dchache_max_size_;               // 限制的最大的缓存块大小
 };
 
@@ -265,9 +216,18 @@ class dirTree
 {
 public:
 
-    dirTree(LRUReplacer* replacer, dcache* cache/*, blockScheduler*bs*/)
-        : replacer_(replacer), cache_(cache)
+    dirTree()
+    { 
+        dcache_replacer_ = new LRUReplacer<dentryKey>();
+        dentry_replacer_ = new LRUReplacer<dentry*>();
+        cache_ = new dcache();
+    }
+
+    ~dirTree()
     {
+        delete dcache_replacer_;
+        delete dentry_replacer_;
+        delete cache_;
     }
 
     void set_bs(blockScheduler* bs) { this->bs = bs; }
@@ -381,10 +341,12 @@ public:
      * 
      * @param workdir 当前的工作路径
      * 
+     * @param type 创建的表项的类型, 文件和目录都是此目录的子目录项
+     * 
      * @return `false` 如果已存在该目录, 否则正常创建
      * 可能还需要考虑如果空闲磁盘块不足而创建失败
      */
-    bool alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode);
+    bool alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode, TYPE type);
     
 
     /**
@@ -418,11 +380,14 @@ public:
      * 
      * @brief 释放指定的dentry空间, 并不是删除, 而是释放此dentry占用的空间
      * 
-     * 此函数也是递归删除以dentry_node为根节点的子树
+     * 此函数也是递归删除以dentry_node为根节点的子树, 但是为了考虑方便, 
+     * 只是释放其子节点以及子节点的树, 并不删除该节点
      * 
-     * @return `true`释放成功
+     * 注意: 此时还得更改`dentry_node`的DFALG标志位为`CUT_SUBDIRS`
+     * 
+     * 
      */
-    bool cut_dir(dentry* dentry_node);
+    void cut_dir(dentry* dentry_node, size_t& counter);
 
     /**
      * 
@@ -451,9 +416,9 @@ private:
 
     dentry* root_;                      // 目录树根节点
     
-    LRUReplacer* dcache_replacer_;             // 替换策略(dache释放)
+    LRUReplacer<dentryKey>* dcache_replacer_;             // 替换策略(dache释放)
 
-    LRUReplacer* dentry_replacer_;             // 替换策略(树剪枝)
+    LRUReplacer<dentry*>* dentry_replacer_;             // 替换策略(树剪枝)
 
     dcache* cache_;                     // 目录项缓存
 
