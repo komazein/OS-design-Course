@@ -357,6 +357,12 @@ public:
      */
     dentry* get_root() { return root_; }
 
+    /**
+     * @brief 获取磁盘调度管理
+     * @return 返回磁盘调度管理器的指针
+     */
+    blockScheduler* get_block_scheduler() { return bs; }
+
 private:
 
     dentry* root_;                      // 目录树根节点
