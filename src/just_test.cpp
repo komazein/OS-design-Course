@@ -3,10 +3,11 @@
 
 void func()
 {
-    LRUReplacer replacer;
+    // LRUReplacer dcache_replacer;
+    // LRUReplacer dentry_replacer;
     dcache dcache;
 
-    dirTree dirtree(&replacer, &dcache);
+    dirTree dirtree;
 
 
     blockScheduler bs(&dirtree);
@@ -22,7 +23,7 @@ void func()
 
     
 
-    dirtree.alloc_dir(name, dirtree.get_root(),p);
+    dirtree.alloc_dir(name, dirtree.get_root(),p, SIM_FILE);
     cout<<p->i_size<<endl;
     
 

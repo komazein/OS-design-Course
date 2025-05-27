@@ -18,7 +18,7 @@ set(SOURCES
     src/block/superBlock.cpp            # if new *.cpp file add to the project, don't forget to add here
     src/block/ddq.cpp
     src/dentry/dentry.cpp
-    src/dentry/replacer.cpp
+    # src/dentry/replacer.cpp
 )
 
 # 创建可执行文件

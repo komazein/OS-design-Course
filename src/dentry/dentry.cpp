@@ -209,7 +209,7 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
 
         // 此时添加进入lru_list, 因为此时算上一次最新的访问
         dentry_replacer_->InsertDir(search);
-        dcache_replacer_->Insert(search);
+        dcache_replacer_->Insert({search, name});
 
         search = dentry_next;       // 继续寻找
 
@@ -288,7 +288,7 @@ bool dirTree::has_child_test(dentry* dentry_node)
     }
 
 }
-bool dirTree::alloc_dir(string& name, dentry* work_dir,inode*new_allocate_inode)
+bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode, TYPE type)
 {
     if(!name_search_test(name, work_dir)) { 
         spdlog::warn("Directory allocation failed: '{}' already exists in '{}'", name, work_dir->get_name());
@@ -301,15 +301,12 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode*new_allocate_inode)
 
     inode* temp= bs->iget(false);
     (*new_allocate_inode)=(*temp);
-    /// TODO: 完善inode的信息
+
+    /// TODO_finish: 完善inode的信息
     auto cur_time = get_time();
-    // new_allocate_inode.i_type = DIR;
-    // new_allocate_inode.i_size = 0;//=1
-    // new_allocate_inode.i_atime = cur_time;
-    // new_allocate_inode.i_ctime = cur_time;
-    // new_allocate_inode.i_mtime = cur_time;
+
     new_allocate_inode->i_type = DIR;
-    new_allocate_inode->i_size = 0;//=1
+    new_allocate_inode->i_size = type;
     new_allocate_inode->i_atime = cur_time;
     new_allocate_inode->i_ctime = cur_time;
     new_allocate_inode->i_mtime = cur_time;
@@ -318,99 +315,179 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode*new_allocate_inode)
 
     dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir);
     work_dir->add_single_subdir(new_node);      // 为当前工作路径加入新的子目录
+
+    // 此目录被修改(因为增加了目录项), 所以设置脏位为true
+    work_dir->set_dirty(true);
+
     // 还需要更新全局哈希
     cache_->add_dentry(name, new_node, work_dir);
 
     // 加入到lru_list中
     dentry_replacer_->InsertDir(new_node);
-    dcache_replacer_->Insert(new_node);
+    dcache_replacer_->Insert({work_dir, name});
 
     spdlog::info("Allocated new directory '{}' under '{}', inode={}", 
                  name, work_dir->get_name(), new_allocate_inode->i_num);
-    cout<<"x"<<new_allocate_inode->i_size<<endl;
+
+
     return true;
 }
 
 void dirTree::del_tree(dentry* dentry_root)
 {
     if(!dentry_root) { return; }        // 仅仅是保证安全性, 应该不会执行此语句
-    if(!has_child_test(dentry_root)){
-        // 此时已经到达叶子节点
-        
-        /// TODO: 1. 通知I/O回收此块
 
-        spdlog::info("Letting blockScheduler to recycle the '{}' children's inode and thier blocks", dentry_root->get_name());
-        // 2. 释放此节点子节点
+    if(has_child_test(dentry_root)) {       // 此时已经完成了子树的完整构建
+        // 如果此时有子节点
+        auto& sub_dirs = dentry_root->get_subdir();
+        // 遍历并递归删除所有子节点
+        for (auto& [name, child_node] : sub_dirs) {
+            cache_->erase_dentry(name, dentry_root);  // 在 child 被 delete 前移除哈希映射
 
-        delete dentry_root;
-        return;
+            // 更新replacer
+            dcache_replacer_->Erase({dentry_root, name});
+            dentry_replacer_->Erase(child_node);
+
+            del_tree(child_node);       // 递归删除子
+        }
+
+        dentry_root->clear_child();         // 必须释放完所有的子才能调用清空child_哈希表
     }
 
-    // 此时说明还有子节点
+    /// TODO: 1. 通知I/O回收此块
 
-    auto& sub_dirs = dentry_root->get_subdir();
-    // 遍历并递归删除所有子节点
-    for (auto& [name, child_node] : sub_dirs) {
-        del_tree(child_node);
-        cache_->erase_dentry(name, dentry_root);  // 在 child 被 delete 前移除哈希映射
-        dcache_replacer_->Erase(child_node);
-        dentry_replacer_->Erase(child_node);
-    }
+    spdlog::info("Letting blockScheduler to recycle the '{}' children's inode and thier blocks", dentry_root->get_name());
+    // 2. 释放此节点
+    delete dentry_root;
+    
+    return;
 }
 
 bool dirTree::free_dir(string& name, dentry* work_dir)
 {
     if(name == "/") { 
 
-        spdlog::info("Delete the root, clear the file system.");
+        spdlog::warn("Delete the root, clear the file system.");
         /// TODO_finish: 调用I/O的清空操作
         // bs->new_disk();
-
-        return true;
     }
 
     // 首先还是一样的查找验证过程
     if(name_search_test(name, work_dir))  { return false; }       // 如果没找到, 则删除失败
 
-    del_tree(work_dir);     // 删除树
 
-    // 此时仅仅释放了以work_dir为根的树, 但是work_dir此时没有被释放, 因为析构函数定义的释放规则是仅释放子节点和d_child_哈希表
-    // 所以需要通过其父节点删除work_dir和在父节点中移除其表项
+    // 此时将要释放以work_dir为根的树
+    // 需要更新父的表项
     dentry* parent_node = work_dir->get_parent();
 
-    // if(parent_node == nullptr)  { // 此时不应该发生, 如果发生则是错误
-    //     spdlog::error("{} occur error!",  __func__);
-    //     exit(1);
-    // }
-
-    if(parent_node == nullptr){
-        // 此时为根节点
-
-    }
-
     parent_node->erase_subdir(work_dir->get_name());        // 待删除节点的根节点移除此项
+    
+    parent_node->set_dirty(true);                           // 设置父的节点脏位
+
     cache_->erase_dentry(name, parent_node);                   // 清除全局哈希
 
-    delete work_dir;                                        // 这时释放此节点即可
+    dcache_replacer_->Erase({parent_node, name});           // dentry_replacer清除
+
+    dentry_replacer_->Erase(work_dir);                      // dentry_replacer清除
+
+    del_tree(work_dir);     // 此时可以删除树
 
     spdlog::debug("Deleted subdir '{}' under '{}'", name, parent_node->get_name());
 
     return true;
 }
 
-bool dirTree::cut_dir(dentry* dentry_node)
+void dirTree::cut_dir(dentry* dentry_node, size_t& counter)
 {
-    if(dentry_node) {}
+
+    
+    // dentry_node->set_flag(CUT_SUBDIRS);     // 标记此节点为剪枝后的, 说明它有自己子, 只不过被换出了
+
+    if(!dentry_node) { return; }        //仅为安全性检查, 正常不会执行
+
+    if(dentry_node->has_subdir()) {
+
+        auto& sub_dirs = dentry_node->get_subdir();         // 获取其子
+        
+        // 递归删除所有的子节点
+        for (auto& [name, child_node] : sub_dirs) {
+            cache_->erase_dentry(name, dentry_node);  // 在 child 被 delete 前移除哈希映射
+
+            // 更新replacer
+            dcache_replacer_->Erase({dentry_node, name});
+            dentry_replacer_->Erase(child_node);
+
+            cut_dir(child_node, counter);           // 释放节点
+        }
+
+        dentry_node->clear_child();         // 必须释放完所有的子才能调用清空child_哈希表
+    }
+
+    // 此时根据脏位判断是否需要写回disk中
+    if(dentry_node->get_dirty()){
+
+        // dirtry : true 需要写回disk中
+        /// TODO: 通知bs刷盘
+
+
+        spdlog::info("Before recycle the '{}' node, write back to disk.", 
+                dentry_node->get_name());
+
+    }
+
+    spdlog::info("Free the '{}' node under '{}' for memory free.", 
+        dentry_node->get_name(), dentry_node->get_parent()->get_name());
+
+    delete dentry_node;
+    
+    ++counter;      // 统计删除的个数  
+
+    return;
+
 }
 
 
 size_t dirTree::shrink_dcache()
 {
+    size_t counter = 0;         // 记录释放的个数
+    while(dcache_replacer_->get_cur_size() > dcache_replacer_->get_max_size()) {
 
+        // 如果此时的链表大小超过设定最大的大小, 则进行空间释放
+        auto victim_opt = dcache_replacer_->Victim();
+        
+        if(!victim_opt.has_value()) break;
+
+        const auto& victimnode = victim_opt.value();
+
+        cache_->erase_dentry(victimnode.name, victimnode.parent);
+
+        ++counter;
+    }
+    return counter;
 }
 
 
 size_t dirTree::cut_dirTree()
 {
+    size_t counter = 0;
+    while(dentry_replacer_->get_cur_size() > dentry_replacer_->get_max_size()) {
 
+        auto vitim_opt = dentry_replacer_->Victim();        // 选出最久未使用的dentry节点, **释放其子**
+       
+        if(!vitim_opt.has_value()) break;
+
+        dentry* vitimnode = vitim_opt.value();
+
+        auto child_nodes = vitimnode->get_subdir();
+
+        for(auto& [_, node] : child_nodes){      // 释放其子节点
+            cut_dir(node, counter);
+        }
+        
+        if(counter){        // 如果释放了其子节点, 则标记为此节点被剪枝
+            vitimnode->set_flag(CUT_SUBDIRS);
+        }
+    }
+
+    return counter;
 }
