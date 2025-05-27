@@ -326,11 +326,42 @@ public:
     /**
      * 
      * @brief 在当前目录下, 检查含有此名字的所有文件/目录
+     * 遍历所有的节点(直到叶子)
+     * 
+     * @param filename 待查找的文件/目录的名称
+     * 
+     * @param work_dir 当前的工作路径(即仅查找当前工作路径下的此名称的文件)
+     * 
+     * @param 当前遍历到的节点
+     * 
+     * @param fuzzy 是否是模糊搜索, 包含(/严格符合)此名称的文件和目录全部返回
+     * 
+     * @param name_list 调用者传入string 的vector, 返回符合条件的路径
+     * 
+     * 
+     * @return string 的 vector , 将符合条件的所有的路径组合, 组成一个vector 返回到shell输出
      * 
      * 
      */
 
-    vector<string>& findNameInDirtree(const string& filename, dentry* work_dir);
+    void findNameInDirtree(const string& filename, dentry* work_dir, dentry* cur_dentry, bool fuzzy, vector<string>& name_list);
+
+
+    /**
+     * @brief 辅助函数, 模糊搜索还是精确搜索, 在name1中是否有name2, 或者name1 == name2?
+     * 
+     * @param name1 查找的文件名
+     * 
+     * @param name2 当前目录/文件的文件名
+     */
+    bool has_string(const string& name1, const string& name2, bool fuzzy);
+
+    /**
+     * @brief 辅助函数, 从当前的节点向上, 直到work_dir为止, 获取完整的路径
+     */
+    void get_full_path(string& path, dentry* work_dir, dentry* cur_dentry);
+
+
 
     /**
      * 

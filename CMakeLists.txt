@@ -10,6 +10,11 @@ include_directories(src/include)
 # 包含头文件目录
 include_directories(thirdparty)
 
+set(SDL2_ROOT ${CMAKE_SOURCE_DIR}/thirdparty/SDL2/local-install)
+
+include_directories(${SDL2_ROOT}/include/SDL2)
+link_directories(${SDL2_ROOT}/lib)
+
 
 # 源文件
 set(SOURCES
@@ -24,3 +29,5 @@ set(SOURCES
 
 # 创建可执行文件
 add_executable(main ${SOURCES})
+
+target_link_libraries(main SDL2)

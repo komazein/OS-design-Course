@@ -248,9 +248,6 @@ bool dirTree::name_search_test(string& name, dentry* work_dir/*, bool update_has
     // 首先初步利用哈希查找是否存在该目录项(保证不能重名)
     if(hash_search(name, work_dir)) { return false; }
 
-
-
-
     // 再保证当前目录下确实无此目录
     auto sub_dir = work_dir->find_subdir(name);
 
@@ -321,8 +318,13 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     /// TODO_finish: 完善inode的信息
     auto cur_time = get_time();
 
-    new_allocate_inode->i_type = DIR;
-    new_allocate_inode->i_size = type;
+    new_allocate_inode->i_type = type;
+    if(new_allocate_inode->i_type == SIM_FILE){
+        new_allocate_inode->i_size = 0;
+    }
+    if(new_allocate_inode->i_type == DIR){
+        new_allocate_inode->i_size = 1;
+    }
     new_allocate_inode->i_atime = cur_time;
     new_allocate_inode->i_ctime = cur_time;
     new_allocate_inode->i_mtime = cur_time;
@@ -349,10 +351,95 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     return true;
 }
 
-vector<string>& dirTree::findNameInDirtree(const string& filename, dentry* work_dir)
-{
-    
 
+void dirTree::findNameInDirtree(const string& filename, dentry* work_dir, dentry* cur_dentry, bool fuzzy, vector<string>& name_list)
+{
+    if(has_child_test(work_dir) == false){
+        // 如果此时已经查找到了最根部, 才算最终完成
+        if(has_string(filename, work_dir->get_name(), fuzzy)){
+            string path;
+            get_full_path(path, work_dir, cur_dentry);
+
+            if(!path.empty()){
+                if(fuzzy){
+                    spdlog::debug("Find a new file/dir name '{}' has '{}'", cur_dentry->get_name(), filename);
+                }
+                else{
+                    spdlog::debug("Find a new file/dir name '{}'", filename);
+                }
+            }
+        }
+
+        return;
+    }
+
+    // 检查当前节点是否满足名称条件
+    if(has_string(filename, work_dir->get_name(), fuzzy)){
+        string path;
+        get_full_path(path, work_dir, cur_dentry);
+
+        if(!path.empty()){
+            name_list.push_back(path);
+            if(fuzzy){
+                spdlog::debug("Find a new file/dir name '{}' has '{}'", cur_dentry->get_name(), filename);
+            }
+            else{
+                spdlog::debug("Find a new file/dir name '{}'", filename);
+            }
+            
+        }
+    }
+
+    auto sub_dir = cur_dentry->get_subdir();
+    for(auto& [name, dentry_node] : sub_dir){
+
+        // 对此节点的所有子节点进行查找
+        findNameInDirtree(filename, work_dir, cur_dentry, fuzzy, name_list);
+    }
+}
+
+
+bool dirTree::has_string(const string& name1, const string& name2, bool fuzzy)
+{
+    if(fuzzy){
+        // 进行模糊搜索
+        auto idx = name2.find(name1);
+        if(idx == string::npos){        // 不包含
+            return false;
+        }
+        else { return true; }
+    }
+    return name1 == name2;
+}
+
+
+void dirTree::get_full_path(string& path, dentry* work_dir, dentry* cur_dentry)
+{
+    auto search_dentry = cur_dentry;
+
+    if(work_dir == root_){
+        path = "/";
+        return;
+    }
+
+    if(work_dir == nullptr) { return; }
+
+    path = work_dir->get_name();
+
+    while(search_dentry != nullptr && search_dentry != work_dir){
+
+        search_dentry = search_dentry->get_parent();
+
+        path = search_dentry->get_name() + "/" + path;
+    }
+
+    if(search_dentry == nullptr) { // 保证有意外的终止条件(即向上遍历完了所有节点, 甚至在根节点之上)
+        spdlog::error("Invalid path '{}' or Invalid workdir '{}'", path, work_dir->get_name());
+        exit(1);
+        return;
+    }
+
+    path = search_dentry->get_name() + "/" + path;
 }
 
 
@@ -422,8 +509,6 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
 
 void dirTree::cut_dir(dentry* dentry_node, size_t& counter)
 {
-
-    
     // dentry_node->set_flag(CUT_SUBDIRS);     // 标记此节点为剪枝后的, 说明它有自己子, 只不过被换出了
 
     if(!dentry_node) { return; }        //仅为安全性检查, 正常不会执行
