@@ -1,9 +1,9 @@
 #pragma once
-#include <cstdio>
+#include <string>
+#include <vector>
 #include "fs_types.h"
 
-
-// Ö§³ÖµÄÑÕÉ«Ã¶¾Ù
+// Color æšä¸¾å®šä¹‰ä¿ç•™åœ¨å¤´æ–‡ä»¶ä¸­
 enum class Color {
     Red = 31,
     Green = 32,
@@ -15,56 +15,13 @@ enum class Color {
     Default = 0
 };
 
-// Êä³ö´øÑÕÉ«µÄ×Ö·û´®
-/**
- * * @brief ´òÓ¡´øÑÕÉ«µÄÎÄ±¾
- * * @param text Òª´òÓ¡µÄÎÄ±¾
- * * @param color ÑÕÉ«Ã¶¾ÙÖµ£¬Ä¬ÈÏÎªÄ¬ÈÏÑÕÉ«
- * * @param bold ÊÇ·ñ¼Ó´Ö£¬Ä¬ÈÏÎªfalse
- */
-void printColor(const std::string &text, Color color = Color::Default, bool bold = false) {
+// åªæœ‰ printColor æ˜¯ inline å‡½æ•°ï¼Œå¯ä»¥ä¿ç•™å®šä¹‰åœ¨å¤´æ–‡ä»¶
+inline void printColor(const std::string &text, Color color = Color::Default, bool bold = false) {
     std::cout << "\033[" << (bold ? "1;" : "") << static_cast<int>(color) << "m"
               << text << "\033[0m" << "  ";
 }
 
-void printLsResult(const std::string &name, TYPE type, int resultNum) {
-    if (type == DIR) {
-        printColor(name, Color::Blue, true);
-    } else if (type == SIM_FILE) {
-        printColor(name, Color::Green, false);
-    } else {
-        printColor(name, Color::Default, false);
-    }
-    if(!(resultNum%10))  cout << endl;
-
-}
-
-
-void printPath(vector<string> &path)
-{
-    if (path.empty()) {
-        spdlog::warn("Path is empty, no path to print.");
-        return;
-    }
-
-    cout << "The Paths of the found file:" << endl;
-    for(auto & p : path) {
-        cout << p << endl;
-    }
-    
-}
-
-void showHelpMessage() {
-    std::cout << "Available commands:\n";
-    std::cout << "mkdir <dirname>      - Create a new directory\n";
-    std::cout << "cd <dirname>         - Change current directory\n";
-    std::cout << "ls                   - List contents of the current directory\n";
-    std::cout << "rm <dirname>         - Remove a directory\n";
-    std::cout << "lkdir <dirname>      - Create a symbolic link to a directory (not implemented)\n";
-    std::cout << "lndir <dirname>      - Create a hard link to a directory (not implemented)\n";
-    std::cout << "find <filename>      - Find a file in the current directory and its subdirectories\n";
-    std::cout << "touch <filename>     - Create a new file (not implemented)\n";
-    std::cout << "delete <filename>    - Delete a file (not implemented)\n";
-    std::cout << "cat <filename>       - Read the contents of a file (not implemented)\n";
-    std::cout << "exit                 - Exit the shell\n";
-}
+// å…¶ä½™å‡½æ•°åªå†™å£°æ˜
+void printLsResult(const std::string &name, TYPE type, int resultNum);
+void printPath(std::vector<std::string> &path);
+void showHelpMessage();

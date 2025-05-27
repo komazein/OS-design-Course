@@ -11,6 +11,7 @@
 #include <string.h>
 #include<cmath>
 #include<queue>
+#include <optional>
 using namespace std;
 
 extern const int INODE_SIZE;
@@ -24,10 +25,14 @@ const int DATANUM = 512;
 const int INODENUM = 32;
 const int S_FREE_NUM = 16;         // 空闲块数量
 const int MAXNAMESIZE = 16;
-const int MAXnumInBlock = 3;//限制每个磁盘最多目录项个数(包含父节点的目录项)
+const int MAXnumInBlock = 3;//限制每个磁盘最多目录项个数(包含父节点的目录项),必须大于等于3
 const int ROOT_INODE_NUMBER = 0;        // 初始时根节点的inode号为0
-
-
+const int ONLY_DIRECT_SIM = 9;
+const int ONLY_ONE_SIM=2;
+const int ONLY_MULTI_SIM=1;//不能变
+const int ABLE_DIRECT_SIM = 12;
+const int ABLE_ONE_SIM=3;
+const int ABLE_MULTI_SIM=1;//不能变
 // 文件类型
 enum TYPE
 {

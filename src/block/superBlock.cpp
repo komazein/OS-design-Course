@@ -1,6 +1,7 @@
 #include <fs.h>
 #include<iostream>
-void super_block::init()
+void super_block::init(){}
+void super_block::load()
 {
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,0,SEEK_SET);
@@ -52,28 +53,36 @@ void super_block::newdisk()
         firstempty=0;
         if(LEFT)
         {
-            /*
-            cout<<"PUT IN THE "<<IN<<"-TH BLOCK"<<endl;
-            for(int i=0;i<base;i++)
-                cout<<"("<<i<<","<<s_free_num[i]<<")";
-            cout<<endl;
-            */
+            
+            // cout<<"PUT IN THE "<<IN<<"-TH BLOCK"<<endl;
+            // for(int i=0;i<base;i++)
+            //     cout<<"("<<i<<","<<s_free_num[i]<<")";
+            // cout<<endl;
+            
             base=0;
+
             FILE *fp=fopen("../disk.img","r+");
-            fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+IN*512,SEEK_SET);//写回第IN快磁盘
+            fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+IN*512,SEEK_SET);//写回第IN快磁盘
             fwrite(s_free_num, sizeof(int),S_FREE_NUM,fp);
             fclose(fp);
+
+
+
         }
-        /*else
-        {
-            for(int i=0;i<base;i++)
-                cout<<"("<<i<<","<<s_free_num[i]<<")";
-            cout<<endl;
-        }*/
+        // else
+        // {
+        //     for(int i=0;i<base;i++)
+        //         cout<<"("<<i<<","<<s_free_num[i]<<")";
+        //     cout<<endl;
+        // }
     }
-    struct inode*root_inode=(struct inode*)malloc(sizeof(struct inode));
+    // struct inode*root_inode=(struct inode*)malloc(sizeof(struct inode));
     char name[]="root";
-    root_inode=iget(true);
+    auto root_inode=iget(true);
+
+    
+
+
 
     // 构建根节点//////////////////////////////////////
 
@@ -83,18 +92,19 @@ void super_block::newdisk()
     // temp_root.init(name,temp_inode,NULL,0);//////////缺参数
     // s_root=&temp_root;
 }
-bool super_block::getblock(int n,int a[])
+bool super_block::getblock(int n,vector<size_t>&a)
 {
     if(n>s_block_num)
         return 0;
+    s_block_num-=n;
     for(int i=0;i<n;i++)
     {
-        a[i]=s_free_num[s_free_num[0]];
+        a.push_back((size_t)s_free_num[s_free_num[0]]);
         //cout<<"("<<s_free_num[0]<<","<<a[i]<<")";
         if(s_free_num[0]==1)
         {
             FILE *fp=fopen("../disk.img","r+");
-            fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+s_free_num[1]*512,SEEK_SET);
+            fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+s_free_num[1]*512,SEEK_SET);
             fread(s_free_num, sizeof(int),S_FREE_NUM,fp);
             fclose(fp);
             //从磁盘中加载第s_free_num[1]块
@@ -104,14 +114,15 @@ bool super_block::getblock(int n,int a[])
     }
     return 1;
 }//需根据更改的具体参数，以及具体情况进行更改
-void super_block::releaseblock(int n,int a[])
+void super_block::releaseblock(int n,vector<size_t>&a)
 {
+    //cout<<"free:"<<n<<endl;
     for(int i=0;i<n;i++)
     {
         if(s_free_num[0]==S_FREE_NUM-1)
         {
             FILE *fp=fopen("../disk.img","r+");
-            fseek(fp,sizeof(super_block)+INODENUM*sizeof(dinode)+a[i]*512,SEEK_SET);
+            fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+a[a.size()-1]*512,SEEK_SET);
 
             fwrite(s_free_num, sizeof(int),S_FREE_NUM,fp);
             fclose(fp);
@@ -119,12 +130,14 @@ void super_block::releaseblock(int n,int a[])
             for(int i=0;i<=s_free_num[0];i++)
                 cout<<"("<<i<<","<<s_free_num[i]<<")";
             cout<<endl;
-            s_free_num[0]=0;
             */
+            s_free_num[0]=0;
         }
         s_free_num[0]++;
-        s_free_num[s_free_num[0]]=a[i];
+        s_free_num[s_free_num[0]]=a[a.size()-1];
+        a.erase(a.end()-1);
     }
+    s_block_num+=n;
 }//需根据更改的具体参数，以及具体情况进行更改
 inode* super_block::iget(bool ifroot)
 {
@@ -138,4 +151,8 @@ inode* super_block::iget(bool ifroot)
     ino->i_num=stack_inode[s_inode_num-1];
     s_inode_num--;
     return ino;
+}
+size_t super_block::getfreeBlocknum()
+{
+    return s_block_num;
 }

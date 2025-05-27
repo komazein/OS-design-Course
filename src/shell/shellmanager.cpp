@@ -1,5 +1,6 @@
-#include "../include/shellmanager.h"
+#include "shellmanager.h"
 #include <spdlog/spdlog.h>
+
 
 
 void shell_manager::command_mkdir(std::string& dirname) {
@@ -8,7 +9,7 @@ void shell_manager::command_mkdir(std::string& dirname) {
         exit();
     }
     
-    bool result = dir_tree_->alloc_dir(dirname, current_dir_);
+    bool result = dir_tree_->alloc_dir(dirname, current_dir_, nullptr, DIR);
     if(result){
         spdlog::info("Directory '{}' created successfully in '{}'", dirname, current_dir_->get_name());
     }else
@@ -95,9 +96,9 @@ void shell_manager::command_find(std::string& filename)
     }
 
     vector<string> foundPath = dir_tree_->findNameInDirtree(filename, current_dir_);
-    if (found_file) {
+    if (foundPath.size() != 0) {
         spdlog::info("File '{}' found in '{}'", filename, current_dir_->get_name());
-        printPath(found_file);
+        printPath(foundPath);
     } else {
         spdlog::warn("File '{}' not found in '{}'", filename, current_dir_->get_name());
     }
@@ -146,7 +147,7 @@ void shell_manager::format()
     spdlog::info("Formatting the file system...");
     // Perform formatting operations here
     // This might involve clearing the directory tree and resetting the file system state
-    dir_tree_->get_block_scheduler()->new_disk();  // Assuming clear() is a method to reset the root directory
+    dir_tree_->get_bs()->new_disk();  // Assuming clear() is a method to reset the root directory
 }
 
 void shell_manager::help()

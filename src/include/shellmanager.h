@@ -1,76 +1,78 @@
 #pragma once
-#include "fs.h";
+#include "tool.h"
+#include "dentry.h"
+#include "ddq.h"
 
 class shell_manager{
 
     private:
-        dirTree* dir_tree_;  // 目录树指针
-        dentry* current_dir_;  // 当前目录项
+        dirTree* dir_tree_;  // 目录锟斤拷指锟斤拷
+        dentry* current_dir_;  // 锟斤拷前目录锟斤拷
         
     
     public:
         shell_manager(dirTree* dir_tree) : dir_tree_(dir_tree), current_dir_(nullptr) {
-            // 初始化当前目录为根目录
+            // 锟斤拷始锟斤拷锟斤拷前目录为锟斤拷目录
             current_dir_ = dir_tree_->get_root();
         }
         // execute shell command for dir only
 
         /** 
-        * @brief 创建目录命令
-        * @param dirname 目录名称
+        * @brief 锟斤拷锟斤拷目录锟斤拷锟斤拷
+        * @param dirname 目录锟斤拷锟斤拷
         */
         void command_mkdir(std::string& dirname);
 
         /**
-         * @brief 切换当前目录命令
-         * @param dirname 目录名称
+         * @brief 锟叫伙拷锟斤拷前目录锟斤拷锟斤拷
+         * @param dirname 目录锟斤拷锟斤拷
          */
         void command_cd(std::string& dirname);
         /**
-         * @brief 列出当前目录下的所有文件和子目录
+         * @brief 锟叫筹拷锟斤拷前目录锟铰碉拷锟斤拷锟斤拷锟侥硷拷锟斤拷锟斤拷目录
          */
         void command_ls();
   
         /**
-         * @brief 删除目录命令
-         * @param dirname 目录名称
+         * @brief 删锟斤拷目录锟斤拷锟斤拷
+         * @param dirname 目录锟斤拷锟斤拷
          */
         void command_rm(std::string& dirname);
 
         /**
-         * @brief 创建符号链接命令
-         * @param dirname 目标文件或目录
+         * @brief 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
+         * @param dirname 目锟斤拷锟侥硷拷锟斤拷目录
          */
         void command_lkdir(std::string& dirname);
 
         /**
-         * @brief 创建硬链接命令
-         * @param dirname 目标文件或目录
+         * @brief 锟斤拷锟斤拷硬锟斤拷锟斤拷锟斤拷锟斤拷
+         * @param dirname 目锟斤拷锟侥硷拷锟斤拷目录
          */
         void command_lndir(std::string& dirname);
 
         /**
-         * @brief 查找文件命令
-         * @param filename 文件名
+         * @brief 锟斤拷锟斤拷锟侥硷拷锟斤拷锟斤拷
+         * @param filename 锟侥硷拷锟斤拷
          */
         void command_find(std::string& filename);
 
         // execute shell command for file only
         /**
-         * @brief 创建文件命令
-         * @param filename 文件名
+         * @brief 锟斤拷锟斤拷锟侥硷拷锟斤拷锟斤拷
+         * @param filename 锟侥硷拷锟斤拷
          */
         void command_touch(std::string& filename);
 
         /**
-         * @brief 删除文件命令
-         * @param filename 文件名
+         * @brief 删锟斤拷锟侥硷拷锟斤拷锟斤拷
+         * @param filename 锟侥硷拷锟斤拷
          */
         void command_delete(std::string& filename);
 
         /**
-         * @brief 读取文件内容命令
-         * @param filename 文件名
+         * @brief 锟斤拷取锟侥硷拷锟斤拷锟斤拷锟斤拷锟斤拷
+         * @param filename 锟侥硷拷锟斤拷
          */
         void command_cat(std::string& filename);
 
