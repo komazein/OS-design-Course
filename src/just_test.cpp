@@ -36,6 +36,8 @@ void func()
 {
     // LRUReplacer dcache_replacer;
     // LRUReplacer dentry_replacer;
+    // LRUReplacer dcache_replacer;
+    // LRUReplacer dentry_replacer;
     dcache dcache;
 
     dirTree dirtree;
@@ -49,6 +51,8 @@ void func()
 
     string name="test";
     inode*p=(inode*)malloc(sizeof(inode));
+
+    
 
     dirtree.alloc_dir(name, dirtree.get_root(),p, SIM_FILE);
     cout<<p->i_size<<endl;
