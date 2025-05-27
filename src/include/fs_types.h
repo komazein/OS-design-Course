@@ -37,9 +37,16 @@ enum TYPE
 };
 
 // 文件控制信息
-enum FILEMODE
+// symbolic notification of file mode
+// ---------- 10 bit 
+struct FILEMODE
 {
-    ALL
+    // - for nomal file, d for dir, l for soft link, 
+    char file_type; // file type, 1 bit 
+    char ownerMode[4]; // owner mode, 3bit
+    char groupMode[4]; // group mode, 3bit
+    char otherMode[4]; // other mode, 3bit
+    //for all above, r for read, w for write, x for execute, - for no permission
 };
 
 // inode磁盘结构
