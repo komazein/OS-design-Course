@@ -87,10 +87,12 @@ public:
     string& get_name() { return d_name_; }
 
     // 获取inode号
-    int get_inode_num() { return d_inode_num_; }
+    size_t get_inode_num() { return d_inode_num_; }
 
     // 获取inode
     inode* get_inode()  { return d_inode_; }
+
+    void getDir_entry(dir_entry&par,vector<dir_entry>&child);
 
 
 

@@ -80,7 +80,21 @@ void dentry::set_time(time_t time)
 {
     d_time_ = time;
 }
+void dentry::getDir_entry(dir_entry&par,vector<dir_entry>&child)
+{
+    par.inode_num=(size_t)get_inode_num();
+    string parname=get_name();
+    strcpy(par.name,parname.c_str());
+    par.type=get_inode()->i_type;
+    for(auto&[name, dentry_node] : get_subdir()){
 
+        dir_entry temp;
+        strcpy(temp.name,name.c_str());
+        temp.inode_num=dentry_node->get_inode_num();
+        temp.type=dentry_node->get_inode()->i_type;
+        child.push_back(temp);
+    }
+}
 
 
 ///////////////////////////////
@@ -304,7 +318,7 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode*new_allocate_inode)
     // new_allocate_inode.i_ctime = cur_time;
     // new_allocate_inode.i_mtime = cur_time;
     new_allocate_inode->i_type = DIR;
-    new_allocate_inode->i_size = 0;//=1
+    new_allocate_inode->i_size = 1;//=1
     new_allocate_inode->i_atime = cur_time;
     new_allocate_inode->i_ctime = cur_time;
     new_allocate_inode->i_mtime = cur_time;
@@ -318,7 +332,6 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode*new_allocate_inode)
 
     spdlog::info("Allocated new directory '{}' under '{}', inode={}", 
                  name, work_dir->get_name(), new_allocate_inode->i_num);
-    cout<<"x"<<new_allocate_inode->i_size<<endl;
     return true;
 }
 

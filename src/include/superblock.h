@@ -27,4 +27,5 @@ public:
     void releaseblock(int n,vector<size_t>&a);
     void newdisk();
     void load();
+    size_t getfreeBlocknum();
 };
