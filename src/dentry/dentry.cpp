@@ -1,7 +1,7 @@
 #include "dentry.h"
 #include <spdlog/spdlog.h>
 #include"ddq.h"
-#include"ddq.h"
+
 
 
 
@@ -82,6 +82,7 @@ void dentry::set_time(time_t time)
 {
     d_time_ = time;
 }
+
 void dentry::getDir_entry(dir_entry&par,vector<dir_entry>&child)
 {
     par.inode_num=(size_t)get_inode_num();

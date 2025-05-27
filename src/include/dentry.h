@@ -102,6 +102,9 @@ public:
     // 设置dirty
     void set_dirty(bool dirty_flag)    { dirty_ = dirty_flag; }
 
+    // 获得磁盘存储格式的dir_entery
+    void getDir_entry(dir_entry& par, vector<dir_entry>& child);
+
 
 
 private:
