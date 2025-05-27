@@ -2,7 +2,6 @@
 #include "tool.h"
 #include "dentry.h"
 #include "ddq.h"
-#include "filemanager.h"
 
 class file_system_manager{
 

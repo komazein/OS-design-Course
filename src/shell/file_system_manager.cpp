@@ -2,8 +2,7 @@
 #include <spdlog/spdlog.h>
 
 
-
-void file_system_manager::command_mkdir(std::string& dirname) {
+void shell_manager::command_mkdir(std::string& dirname) {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
         exit();
