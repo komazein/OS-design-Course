@@ -159,7 +159,7 @@ void dirTree::init_root(string root_name, size_t root_inode_num, inode* root_ino
 
     root_inode->i_type = DIR;
 
-
+    root_inode->i_block[0]=0;
     auto cur_time = get_time();
     root_inode->i_atime = cur_time;
     root_inode->i_ctime = cur_time;
@@ -443,7 +443,7 @@ void dirTree::get_full_path(string& path, dentry* work_dir, dentry* cur_dentry)
 }
 
 
-void dirTree::del_tree(dentry* dentry_root)
+void dirTree::del_tree(dentry* dentry_root,vector<pair<inode*,size_t>>&del_nodes)
 {
     if(!dentry_root) { return; }        // 仅仅是保证安全性, 应该不会执行此语句
 
@@ -451,6 +451,7 @@ void dirTree::del_tree(dentry* dentry_root)
         // 如果此时有子节点
         auto& sub_dirs = dentry_root->get_subdir();
         // 遍历并递归删除所有子节点
+        del_nodes.emplace_back(dentry_root->get_inode(),sub_dirs.size());
         for (auto& [name, child_node] : sub_dirs) {
             cache_->erase_dentry(name, dentry_root);  // 在 child 被 delete 前移除哈希映射
 
@@ -458,7 +459,7 @@ void dirTree::del_tree(dentry* dentry_root)
             dcache_replacer_->Erase({dentry_root, name});
             dentry_replacer_->Erase(child_node);
 
-            del_tree(child_node);       // 递归删除子
+            del_tree(child_node,del_nodes);       // 递归删除子
         }
 
         dentry_root->clear_child();         // 必须释放完所有的子才能调用清空child_哈希表
@@ -483,26 +484,36 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
     }
 
     // 首先还是一样的查找验证过程
-    if(name_search_test(name, work_dir))  { return false; }       // 如果没找到, 则删除失败
 
+    if(name_search_test(name, work_dir))  { 
+        return false; }       // 如果没找到, 则删除失败
 
-    // 此时将要释放以work_dir为根的树
+    // 此时将要释放以work_dir的以name为名的根的树
     // 需要更新父的表项
-    dentry* parent_node = work_dir->get_parent();
+    // dentry* parent_node = work_dir/*->get_parent()*/;
 
-    parent_node->erase_subdir(work_dir->get_name());        // 待删除节点的根节点移除此项
+    size_t pri_parent_num_of_children=work_dir->get_subdir().size();
+
+    vector<pair<inode*,size_t>>del_nodes;
+
+
+    auto child_node = name_travesal(name, work_dir);
+
+    work_dir->erase_subdir(child_node->get_name());        // 待删除节点的根节点移除此项
     
-    parent_node->set_dirty(true);                           // 设置父的节点脏位
+    work_dir->set_dirty(true);                           // 设置父的节点脏位
 
-    cache_->erase_dentry(name, parent_node);                   // 清除全局哈希
+    cache_->erase_dentry(name, work_dir);                   // 清除全局哈希
 
-    dcache_replacer_->Erase({parent_node, name});           // dentry_replacer清除
+    dcache_replacer_->Erase({work_dir, name});           // dentry_replacer清除
 
-    dentry_replacer_->Erase(work_dir);                      // dentry_replacer清除
+    dentry_replacer_->Erase(child_node);                      // dentry_replacer清除
 
-    del_tree(work_dir);     // 此时可以删除树
+    del_tree(child_node,del_nodes);     // 此时可以删除树
 
-    spdlog::debug("Deleted subdir '{}' under '{}'", name, parent_node->get_name());
+    bs->freeblock(del_nodes,*work_dir->get_inode(),pri_parent_num_of_children);
+
+    spdlog::debug("Deleted subdir '{}' under '{}'", name, work_dir->get_name());
 
     return true;
 }

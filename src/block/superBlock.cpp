@@ -77,16 +77,8 @@ void super_block::newdisk()
         // }
     }
     // struct inode*root_inode=(struct inode*)malloc(sizeof(struct inode));
-    char name[]="root";
     auto root_inode=iget(true);
-
-    
-
-
-
     // 构建根节点//////////////////////////////////////
-
-
     dirtree->init_root("/", ROOT_INODE_NUMBER, root_inode);     // 创建根节点
     // dentry temp_root;
     // temp_root.init(name,temp_inode,NULL,0);//////////缺参数
@@ -155,4 +147,9 @@ inode* super_block::iget(bool ifroot)
 size_t super_block::getfreeBlocknum()
 {
     return s_block_num;
+}
+void super_block::freeinode(size_t ino)
+{
+    stack_inode[s_inode_num]=ino;
+    s_inode_num++;
 }

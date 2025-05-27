@@ -2,6 +2,7 @@
 void blockScheduler::loadchild(vector<dir_entry>&a,inode &id)
 {
     FILE *fp=fopen("../disk.img","r+");
+    cout<<"blockr:"<<id.i_block[0]<<endl;
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+id.i_block[0]*512,SEEK_SET);
     dir_entry root;
     size_t num;
@@ -12,8 +13,10 @@ void blockScheduler::loadchild(vector<dir_entry>&a,inode &id)
     {
         fread(&temp,sizeof(dir_entry),1,fp);
         a.push_back(temp);
-    }   
+    }
+    cout<<num<<endl;
     num-=min(num,(size_t)MAXnumInBlock-1);
+    cout<<num<<endl;
     fclose(fp);
     if(num==0)
         return;
@@ -48,6 +51,7 @@ size_t blockScheduler::fastpow(size_t di,int x)
 }
 void blockScheduler::ftree(size_t block_id,size_t n,vector<dir_entry>&a)
 {
+    cout<<block_id<<" "<<n<<endl;
     queue<pair<size_t,size_t>>tree;//防止递归产生文件错误
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+block_id*512,SEEK_SET);
@@ -121,36 +125,15 @@ void blockScheduler::ftree(size_t block_id,size_t n,vector<dir_entry>&a)
 size_t blockScheduler::cal_block_num_dir(size_t n_dir)//only child
 {
     n_dir++;//现在包含父节点的个数
-    if(n_dir<3*MAXnumInBlock)
+    if(n_dir<=3*MAXnumInBlock)
         return (n_dir+MAXnumInBlock-1)/MAXnumInBlock;
-    size_t RZ=1;//只有直接索引所占块数
-    n_dir-=3;//抛去直接索引的内容
-    if(n_dir<=2*MAXnumInBlock*MAXnumInBlock)//最后一块还没有进行多级索引
-    {
-        RZ+=2;//加上i_block直接指向的块数目,
-        //其余再次基础上快数目与前一次增加量分别为//{1,0_{1},0_{2},...0_{MAXnumInBlock-2}}循环
-        //相当于将之前位写磁盘块号，将其移入新磁盘，产生空闲位置MAXnumInBlock-2
-        //循环节大小为MAXnumInBlock-1,除法，向上取整
-        n_dir-=2*MAXnumInBlock;
-        RZ+=(n_dir+MAXnumInBlock-2)/(MAXnumInBlock-1);
-        return RZ;
-    }
-    else
-    {
-        RZ+=(1+MAXnumInBlock);//加上一级索引以及其对应的块数目
-        n_dir-=MAXnumInBlock*MAXnumInBlock;//减去以及索引的条目;
-        //现在形成一个完全N叉树,N=MAXnumInBlock,n_dir个子节点
-        //一个树的所有子节点都占用一个磁盘块，计算出所有节点个数n,ceil((n-1)/MAXnumInBlock)即为块号(未采用)
-        //当前MAXnumInBlock节点，(在这种情况下dir个数大于MAXnumInBlock)占一块
-        //增长方式依然{1,0_{1},0_{2},...0_{MAXnumInBlock-2}}循环
-        n_dir-=MAXnumInBlock;
-        RZ+=1;
-        RZ+=(n_dir+MAXnumInBlock-2)/(MAXnumInBlock-1);
-        return RZ;
-    }
+    size_t RZ=3;
+    n_dir-=3*MAXnumInBlock;//1,0_{1},0_{2},0_{MAXnumInblock-2}
+    return RZ+(n_dir+MAXnumInBlock-2)/(MAXnumInBlock-1);
 }
 bool blockScheduler::creatFILE(size_t old_num_only_child,inode &parid,inode &chid)
 {
+    cout<<"blocknum:"<<cal_block_num_dir(old_num_only_child)<<" "<<cal_block_num_dir(old_num_only_child+1)<<endl;
     if(sb->getfreeBlocknum()==0)
         return false;
     else if(sb->getfreeBlocknum()==1)
@@ -179,6 +162,7 @@ void blockScheduler::writeBlockIDdir(size_t n,inode &id)//only child, old num
     if(n<3*MAXnumInBlock)
     {
         id.i_block[n/MAXnumInBlock]=(size_t)block_id_temp;
+        cout<<id.i_block[n/MAXnumInBlock]<<endl;
         return ;
     }
     n-=MAXnumInBlock;
@@ -227,15 +211,16 @@ void blockScheduler::changeDirentryToblockID(size_t now_block_id,size_t n,size_t
         mayH++;
     }
     size_t temp_block_id;
-    if(treenum==1)//寻找此时不会存在残差块
+    if(mayH)///完全树中,残缺块大小会为完全树。
     {
-        fseek(fp,sizeof(dir_entry)*mayx-sizeof(size_t),SEEK_CUR);
-        fwrite(&block_id,sizeof(size_t),1,fp);
-        fclose(fp);
-        return;
-    }
-    if(mayH)
-    {
+        if(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx==1)
+        {
+
+            fseek(fp,mayx*sizeof(dir_entry)+sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+            fwrite(&block_id,sizeof(size_t),1,fp);
+            fclose(fp);
+            return;
+        }
         fseek(fp,mayx*sizeof(dir_entry)+sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
         size_t temp;
         fread(&temp,sizeof(size_t),1,fp);
@@ -243,20 +228,37 @@ void blockScheduler::changeDirentryToblockID(size_t now_block_id,size_t n,size_t
         changeDirentryToblockID(temp,(size_t)(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx),block_id);
         return;
     }
-    else
+    else if(treenum==1)
+    {
+        fseek(fp,sizeof(dir_entry)*mayx-sizeof(size_t),SEEK_CUR);
+        fwrite(&block_id,sizeof(size_t),1,fp);
+        fclose(fp);
+        return;
+    }
+    else if(treenum>1)
     {
         fseek(fp,mayx*sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
         size_t temp;
         fread(&temp,sizeof(size_t),1,fp);
         fclose(fp);
-        changeDirentryToblockID(temp,(size_t)(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx),block_id);
+        changeDirentryToblockID(temp,(size_t)treenum,block_id);
         return;
     }
+    //下面情况无
+    // else
+    // {
+    //     fseek(fp,mayx*sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
+    //     size_t temp;
+    //     fread(&temp,sizeof(size_t),1,fp);
+    //     fclose(fp);
+    //     changeDirentryToblockID(temp,(size_t)(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx),block_id);
+    //     return;
+    // }
 }
 
-size_t blockScheduler::getlastblockID(size_t now_block_id,size_t n,inode &id)
+size_t blockScheduler::getlastblockID(size_t n,inode &id)
 {
-    n++;
+    n++;//MAXnumInBlock>3，下面不用取等，取等不释放
     if(n<3*MAXnumInBlock)
         return id.i_block[n/MAXnumInBlock];
     else if(n<2*MAXnumInBlock+MAXnumInBlock*MAXnumInBlock)
@@ -302,10 +304,27 @@ size_t blockScheduler::treeFindLastBlock(size_t now_block_id,size_t n)
     else
         return treeFindLastBlock(temp,n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx);
 }
-
+void blockScheduler::freeblock(vector<pair<inode*,size_t>>&del_nodes,inode&par,size_t primsizeofchild)
+{
+    vector<size_t>need;
+    vector<size_t>emptyvec;
+    if(cal_block_num_dir(primsizeofchild)!=cal_block_num_dir(primsizeofchild-1))
+        need.push_back(getlastblockID(primsizeofchild,par));
+    for(size_t i=0;i<del_nodes.size();i++)
+    {
+        if(del_nodes[i].first->i_type==DIR)
+            getallBlockDIR(*del_nodes[i].first,del_nodes[i].second,need);
+        else
+            getallBlockSIM(*del_nodes[i].first,need,emptyvec);
+        sb->freeinode(del_nodes[i].first->i_num);
+    }
+    sb->releaseblock(need.size(),need);
+    return;
+}
 void blockScheduler::writechild(dir_entry par,vector<dir_entry>&a,inode &id,size_t num)
 {
     FILE *fp=fopen("../disk.img","r+");
+    cout<<"blockw:"<<id.i_block[0]<<endl;
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+id.i_block[0]*512,SEEK_SET);
     fwrite(&par,sizeof(dir_entry),1,fp);
     fwrite(&num,sizeof(size_t),1,fp);
@@ -313,7 +332,7 @@ void blockScheduler::writechild(dir_entry par,vector<dir_entry>&a,inode &id,size
     {
         fwrite(&a[a.size()-1],sizeof(dir_entry),1,fp);
         a.erase(a.end()-1);
-    }   
+    }
     num-=min(num,(size_t)MAXnumInBlock-1);
     fclose(fp);
     if(num==0)
@@ -339,6 +358,7 @@ void blockScheduler::writechild(dir_entry par,vector<dir_entry>&a,inode &id,size
 }
 void blockScheduler::fwtree(size_t block_id,size_t n,vector<dir_entry>&a)
 {
+    cout<<block_id<<" "<<n<<endl;
     queue<pair<size_t,size_t>>tree;//防止递归产生文件错误
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+block_id*512,SEEK_SET);
@@ -416,26 +436,33 @@ void blockScheduler::getallBlockDIR(inode &id,size_t num,vector<size_t>&a)
     fwrite(&num,sizeof(size_t),1,fp);
     fseek(fp,min(num,(size_t)MAXnumInBlock-1),SEEK_CUR);   
     num-=min(num,(size_t)MAXnumInBlock-1);
+    a.push_back(id.i_block[0]);
     fclose(fp);
     if(num==0)
         return;
     vector<size_t>notneed;
     if(num<=MAXnumInBlock*(MAXnumInBlock+1))
     {
+        a.push_back(id.i_block[1]);
         getblockTree(id.i_block[1],min((size_t)MAXnumInBlock,num),a,notneed,DIR);
         num-=min((size_t)MAXnumInBlock,num);
         if(num==0)
             return ;
+        a.push_back(id.i_block[2]);
         getblockTree(id.i_block[2],num,a,notneed,DIR);
     }
     else if(num>MAXnumInBlock*(MAXnumInBlock+1)&&num<=2*MAXnumInBlock*MAXnumInBlock)
     {
+        a.push_back(id.i_block[1]);
         getblockTree(id.i_block[1],num-MAXnumInBlock*MAXnumInBlock,a,notneed,DIR);
+        a.push_back(id.i_block[2]);
         getblockTree(id.i_block[2],MAXnumInBlock*MAXnumInBlock,a,notneed,DIR);
     }
     else
     {
+        a.push_back(id.i_block[1]);
         getblockTree(id.i_block[1],MAXnumInBlock*MAXnumInBlock,a,notneed,DIR);
+        a.push_back(id.i_block[2]);
         getblockTree(id.i_block[2],num-MAXnumInBlock*MAXnumInBlock,a,notneed,DIR);
     }
 }
