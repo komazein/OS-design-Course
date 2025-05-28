@@ -859,3 +859,21 @@ size_t blockScheduler::getfreeblocknum()
 {
     return sb->getfreeBlocknum();
 }
+void blockScheduler::ReWrinode(inode &ino,bool read)
+{
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,sizeof(super_block)+sizeof(inode)*ino.i_num,SEEK_SET);
+    if(read)
+        fread(&ino,sizeof(inode),1,fp);
+    else
+        fwrite(&ino,sizeof(inode),1,fp);
+    fclose(fp);
+    return;
+}
+void blockScheduler::writesuperblock()
+{
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,0,SEEK_SET);
+    fwrite(sb,sizeof(super_block),1,fp);
+    fclose(fp);
+}

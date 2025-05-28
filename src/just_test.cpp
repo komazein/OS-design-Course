@@ -22,7 +22,8 @@ void func()
     inode*p=(inode*)malloc(sizeof(inode)*40);
     vector<dir_entry>px;
     dir_entry par;
-    int N=19;
+    int N;
+    cin>>N;
     for(int i=0;i<N;i++)
     {
         string newname=name+to_string(i);
@@ -74,6 +75,8 @@ void func()
     cout<<pu.size()<<endl;
     for(int i=0;i<pu.size();i++)
          cout<<pu[i].inode_num<<" "<<pu[i].name<<endl;
+    
+    bs.writesuperblock();
 }
 
 // void func()
