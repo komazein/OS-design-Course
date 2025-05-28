@@ -319,7 +319,7 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     auto cur_time = get_time();
 
     new_allocate_inode->i_type = type;
-    if(new_allocate_inode->i_type == SIM_FILE){
+    if(new_allocate_inode->i_type == SIM_FILE && new_allocate_inode->i_type == LINK){
         new_allocate_inode->i_size = 0;
     }
     if(new_allocate_inode->i_type == DIR){
