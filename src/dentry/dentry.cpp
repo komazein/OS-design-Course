@@ -169,6 +169,26 @@ void dirTree::init_root(string root_name, size_t root_inode_num, inode* root_ino
     spdlog::info("Initialize the file system root dentry node");
 
 }
+void dirTree::load_root(inode*root_inode)
+{
+    string root_name="/";
+    auto node = new dentry(root_name, root_inode, root_inode->i_num, nullptr);
+    root_ = node;
+  
+        cout<<"o";
+        exit(1);
+
+    // root_ = new dentry(root_name, root_inode, root_inode->i_num, nullptr);    // root无父节点
+
+    ////////注意时间
+    auto cur_time = get_time();
+    root_inode->i_atime = cur_time;
+    root_inode->i_ctime = cur_time;
+    root_inode->i_mtime = cur_time;
+
+    spdlog::info("Initialize the file system root dentry node");
+
+}
 
 
 dentry* dirTree::hash_search(string& name, dentry* parent)
@@ -257,7 +277,7 @@ bool dirTree::name_search_test(string& name, dentry* work_dir/*, bool update_has
     
     // 最后保证磁盘中确实无此目录
 
-    if(work_dir->get_flag() == CUT_SUBDIRS) {   
+    if(work_dir->get_flag() == UNLOAD_CHILD_FROM_DISK) {   
 
         spdlog::info("In order to ensure '{}' whether have '{}',loading it's children from disk.", work_dir->get_name(), name);
         /// TODO_finish:此处进行I/O操作获得子目录项存入dir_entries
@@ -315,7 +335,10 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     /// TODO_finish:通知I/O分配新的inode
 
     inode* temp= bs->iget(false);
+    if(temp==NULL)
+        return false;//无充足inode
     (*new_allocate_inode)=(*temp);
+
 
     /// TODO_finish: 完善inode的信息
     auto cur_time = get_time();
@@ -335,7 +358,13 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     new_allocate_inode->i_mtime = cur_time;
 
     ///  .....
-    bs->creatFILE(work_dir->get_subdir().size(),*work_dir->get_inode(),*new_allocate_inode);
+    bool ableGetBlock= bs->creatFILE(work_dir->get_subdir().size(),*work_dir->get_inode(),*new_allocate_inode);
+    if(ableGetBlock==false)
+    {
+        bs->freeinode(new_allocate_inode->i_num);
+        return false;///块不够
+    }
+
     dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir);
     
     work_dir->add_single_subdir(new_node);      // 为当前工作路径加入新的子目录
@@ -621,7 +650,7 @@ size_t dirTree::cut_dirTree()
         }
         
         if(counter){        // 如果释放了其子节点, 则标记为此节点被剪枝
-            vitimnode->set_flag(CUT_SUBDIRS);
+            vitimnode->set_flag(UNLOAD_CHILD_FROM_DISK);
         }
     }
 

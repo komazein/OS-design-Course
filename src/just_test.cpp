@@ -1,36 +1,41 @@
 #include "test.h"
 #include <spdlog/spdlog.h>
-// void func()
-// {
-//     LRUReplacer replacer;
-//     dcache dcache;
-
-//     dirTree dirtree(&replacer, &dcache);
+void func()
+{
 
 
-//     blockScheduler bs(&dirtree);
+   //dirTree dirtree;
 
-//     dirtree.set_bs(&bs);
+
+    file_system_manager fs;
+    for(int i=0;i<20;i++)
+    {
+        string testdir_name="test"+to_string(i);
+        fs.command_mkdir(testdir_name);
+    }
+
     
-//     bs.new_disk();
+}
 
-//     string name="test";
-//     inode*p=(inode*)malloc(sizeof(inode)*30);
-//     vector<dir_entry>px;
-//     dir_entry par;
-//     for(int i=0;i<30;i++)
-//     {
-//         string newname=name+to_string(i);
-//         dirtree.alloc_dir(newname, dirtree.get_root(),p+i);
-//         bs.creatFILE((size_t)i-1,*dirtree.get_root()->get_inode(),p[i]);
-//         char a[MAXNAMESIZE]={};
-//         newname.copy(a,newname.size());
-//     }
-//     dirtree.get_root()->getDir_entry(par,px);
-//     cout<<px.size();
-//     bs.writechild(par,px,*dirtree.get_root()->get_inode(),px.size());
-//     cout<<px.size();
-// }
+void new_disk()
+{
+
+    dirTree* dir_tree_;     
+    dentry* current_dir_;  
+    // file_manager * file_manager_;
+    blockScheduler* bs_; 
+
+
+    dir_tree_ = new dirTree;
+
+    bs_ = new blockScheduler(dir_tree_);
+
+    dir_tree_->set_bs(bs_);
+
+    bs_->new_disk();
+    bs_->writesuperblock();
+    bs_->ReWrinode(*dir_tree_->get_root()->get_inode(),false);
+}
 
 /*
 void func()
@@ -180,27 +185,27 @@ void func()
 //     }
 // };
 
-void func2()
-{
-    unordered_map<dentryKey, dentry*, dentryKeyHash> dentry_table_;
-    string name = "test";
-    inode* ino = nullptr;
-    string name2 = "/";
-    dentry* parent = new dentry(name2, ino,0, nullptr);
-    auto it = dentry_table_.find({parent, name});
-}
+// void func2()
+// {
+//     unordered_map<dentryKey, dentry*, dentryKeyHash> dentry_table_;
+//     string name = "test";
+//     inode* ino = nullptr;
+//     string name2 = "/";
+//     dentry* parent = new dentry(name2, ino,0, nullptr);
+//     auto it = dentry_table_.find({parent, name});
+// }
 
-int yylex();
-void testFuncMkdir()
-{
-    file_system_manager sb;
+// int yylex();
+// void testFuncMkdir()
+// {
+//     file_system_manager sb;
 
-    while (1)
-    {
-        printf("[");
+//     while (1)
+//     {
+//         printf("[");
         
-        printf("]$ ");
-        yylex();
-    }
+//         printf("]$ ");
+//         yylex();
+//     }
     
-}
+// }

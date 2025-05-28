@@ -1,3 +1,4 @@
+#pragma once
 #include"fs_types.h"
 #include"superblock.h"
 // #include"dentry.h"
@@ -57,7 +58,8 @@ public:
     size_t getfreeblocknum();
     void ReWrinode(inode &ino,bool read);
     void writesuperblock();
-
+    void freeinode(size_t ino);
+    void load();
 private:
     super_block* sb;
     dirTree* dirtree_;

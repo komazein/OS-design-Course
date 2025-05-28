@@ -6,10 +6,10 @@ void super_block::load()
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,0,SEEK_SET);
     fread(this,sizeof(super_block),1,fp);
-
-    inode* root_inode = (inode*)malloc(sizeof(inode));
+    auto root_inode=iget(true);
     fseek(fp,sizeof(super_block),SEEK_SET);
     fread(root_inode,sizeof(inode),1,fp);
+    
     fclose(fp);
 
     ///////////////////////构建根节点
@@ -19,8 +19,9 @@ void super_block::load()
     // dentry temp_root;
     // temp_root.init(name,temp_inode,NULL,0);///////////需要更改
     // s_root=&temp_root;
-
-    dirtree->init_root("/", ROOT_INODE_NUMBER, root_inode);     // 创建根节点
+    
+    //dirtree->init_root("/", ROOT_INODE_NUMBER, root_inode);
+    dirtree->load_root(root_inode);     // 创建根节点
 
 }
 

@@ -2,10 +2,10 @@
 #include <spdlog/spdlog.h>
 
 
-void shell_manager::command_mkdir(std::string& dirname) {
+void file_system_manager::command_mkdir(std::string& dirname) {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
-        exit();
+        Exit();
     }
     
     bool result = dir_tree_->alloc_dir(dirname, current_dir_, nullptr, DIR);
@@ -22,7 +22,7 @@ void file_system_manager::command_cd(std::string& dirname)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
-        exit();
+        Exit();
     }
 
     dentry* new_dir = dir_tree_->name_travesal(dirname, current_dir_);
@@ -38,7 +38,7 @@ void file_system_manager::command_ls()
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot list contents");
-        exit();
+        Exit();
     }
 
     spdlog::info("Listing contents of directory '{}':", current_dir_->get_name());
@@ -56,7 +56,7 @@ void file_system_manager::command_rm(std::string& dirname)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
-        exit();
+        Exit();
     }
 
     bool result = dir_tree_->free_dir(dirname, current_dir_);
@@ -72,7 +72,7 @@ void file_system_manager::command_lkdir(std::string& dirname)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create symbolic link '{}'", dirname);
-        exit();
+        Exit();
     }
 
 }
@@ -82,7 +82,7 @@ void file_system_manager::command_lndir(std::string& dirname)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create hard link '{}'", dirname);
-        exit();
+        Exit();
     }
 
 }
@@ -91,7 +91,7 @@ void file_system_manager::command_find(std::string& filename)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot find file '{}'", filename);
-        exit();
+        Exit();
     }
 
     vector<string> foundPath;
@@ -110,7 +110,7 @@ void file_system_manager::command_touch(std::string& filename)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create file '{}'", filename);
-        exit();
+        Exit();
     }
 
 }
@@ -120,7 +120,7 @@ void file_system_manager::command_delete(std::string& filename)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot delete file '{}'", filename);
-        exit();
+        Exit();
     }
 
 }
@@ -130,12 +130,12 @@ void file_system_manager::command_cat(std::string& filename)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot read file '{}'", filename);
-        exit();
+        Exit();
     }
 
 }
 
-void file_system_manager::exit()
+void file_system_manager::Exit()
 {
     spdlog::info("Exiting shell...");
     // Perform any necessary cleanup here

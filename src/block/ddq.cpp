@@ -137,7 +137,7 @@ bool blockScheduler::creatFILE(size_t old_num_only_child,inode &parid,inode &chi
     cout<<"blocknum:"<<cal_block_num_dir(old_num_only_child)<<" "<<cal_block_num_dir(old_num_only_child+1)<<endl;
     if(sb->getfreeBlocknum()==0)
         return false;
-    else if(sb->getfreeBlocknum()==1)
+    else if(sb->getfreeBlocknum()==1&&chid.i_type==DIR)
     {
         if(cal_block_num_dir(old_num_only_child)!=cal_block_num_dir(old_num_only_child+1))//cal:only child
             return false;
@@ -325,7 +325,6 @@ void blockScheduler::freeblock(vector<pair<inode*,size_t>>&del_nodes,inode&par,s
 void blockScheduler::writechild(dir_entry par,vector<dir_entry>&a,inode &id,size_t num)
 {
     FILE *fp=fopen("../disk.img","r+");
-    cout<<"blockw:"<<id.i_block[0]<<endl;
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+id.i_block[0]*512,SEEK_SET);
     fwrite(&par,sizeof(dir_entry),1,fp);
     fwrite(&num,sizeof(size_t),1,fp);
@@ -688,7 +687,7 @@ void blockScheduler::SIMwriteBK(vector<size_t>newlist,size_t n,char*a)
     }
     fclose(fp);
 }
-void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,char*a,char*a)
+void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,char*a)
 {
     size_t num=(id.i_size+511)/512;
     vector<size_t>newlist;
@@ -877,4 +876,12 @@ void blockScheduler::writesuperblock()
     fseek(fp,0,SEEK_SET);
     fwrite(sb,sizeof(super_block),1,fp);
     fclose(fp);
+}
+void blockScheduler::freeinode(size_t ino)
+{
+    sb->freeinode(ino);
+}
+void blockScheduler::load()
+{
+    sb->load();
 }

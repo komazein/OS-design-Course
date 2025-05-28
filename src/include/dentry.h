@@ -15,10 +15,13 @@ class blockScheduler;
 class dentry
 {
 public:
-    dentry(string d_name, inode* d_inode, size_t d_inode_num, dentry* d_parent) : 
-        d_name_(d_name), d_inode_(d_inode), d_inode_num_(d_inode_num), d_parent_(d_parent) 
+    dentry(string d_name, inode* d_inode, size_t d_inode_num, dentry* d_parent) //: 
+        //d_name_(d_name), d_inode_(d_inode), d_inode_num_(d_inode_num), d_parent_(d_parent) 
     { 
-                        
+        d_name_=d_name;
+        d_inode_=d_inode;
+        d_inode_num_=d_inode_num;
+        d_parent_=d_parent; 
     }
 
     // 父节点初始化子节点时实例化子节点
@@ -119,10 +122,9 @@ private:
     
     std::unordered_map<std::string, dentry*> d_child_; // 子目录(文件)字典
     
-    DFALG d_flag_{ FIRST_LOAD_TO_MEMORY };                  // 状态信息
+    DFALG d_flag_{UNLOAD_CHILD_FROM_DISK};                  // 状态信息
 
     bool dirty_ { false };                    // 是否对此目录项进行了更改(如果更改时释放节点时需要写回磁盘)
-    
     time_t d_time_;                 // 修改时间         (这个可以结合替换策略)
     
     uint16_t d_ref_;                // 引用计数
@@ -460,9 +462,12 @@ public:
 
     blockScheduler* get_bs() { return bs; }
 
+
+    void load_root(inode*root_inode);
+
 private:
 
-    dentry* root_;                      // 目录树根节点
+    dentry* root_{nullptr};                      // 目录树根节点
     
     LRUReplacer<dentryKey>* dcache_replacer_;             // 替换策略(dache释放)
 
