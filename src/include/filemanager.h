@@ -1,63 +1,67 @@
 #pragma once
 
-#include "fs.h"
+#include "dentry.h"
 
 class file_manager {
 
     public:
 
+    file_manager(dirTree* dir_tree, dentry* current_dir) :
+        dir_tree_(dir_tree), current_dir_(current_dir) 
+    { }
     /**
-     * @brief 打开文件
-     * @param filename 文件名
-     * @param current_dir 当前目录项
+     * @brief open file
+     * @param filename the name of the file to open
+     * @param current_dir the current directory
      * open file and store the file descriptor in a structure
      * open func is used combined with close at any time
      */
-    void openFile(const std::string& filename, dentry* current_dir);
+    void openFile(std::string& filename, dentry* current_dir);
 
     /**
-     * @brief 关闭文件
-     * @param filename 文件名
-     * @param current_dir 当前目录项
+     * @brief close file
+     * @param filename name of the file to close
+     * @param current_dir the current directory
      * close file and release the file descriptor
      */
-    void closeFile(const std::string& filename, dentry* current_dir);
+    void closeFile(std::string& filename, dentry* current_dir);
     
     /**
-     * @brief 读取文件内容
-     * @param filename 文件名
-     * @param current_dir 当前目录项
+     * @brief read file
+     * @param filename the name of the file to read
+     * @param current_dir the current directory
      * read file content and print it to the console
      * the main purpose of this function is to read the file content
      * and print it to the console, not to return the content
      */
-    void readFile(const std::string& filename, dentry* current_dir);
+    void readFile(std::string& filename, dentry* current_dir);
     
     /** 
-     * @brief 写入文件内容
-     * @param filename 文件名
-     * @param content 写入的内容
-     * @param current_dir 当前目录项
+     * @brief write file
+     * @param filename file name to write
+     * @param content content to write to the file
+     * @param current_dir the current directory
      * write file content to the file
      * if the file does not exist, create it
     */
-    void writeFile(const std::string& filename, const std::string& content, dentry* current_dir);
+    void writeFile(std::string& filename, std::string& content, dentry* current_dir);
+
     
     
     private:
-        dirTree* dir_tree_;  // 目录树指针
-        dentry* current_dir_;  // 当前目录项
+        dirTree* dir_tree_;  
+        dentry* current_dir_;  
 
         
 
         /*struct file
         {
-          inode* f_inode;        // 指向打开文件对应的 inode
-          FILEMODE di_mode;       // mode(权限)
+          inode* f_inode;        //  inode
+          FILEMODE di_mode;       // mode
           TYPE f_type;
-          string f_path;          // 文件路径
-          uint16_t f_ref;         // 引用计数
-          size_t fd;              // 文件句柄
+          string f_path;          // name
+          uint16_t f_ref;         // reference count
+          size_t fd;              // file descriptor
         };
         *
         */

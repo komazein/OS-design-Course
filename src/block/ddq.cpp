@@ -4,6 +4,7 @@ void blockScheduler::loadchild(vector<dir_entry>&a,inode &id)
     FILE *fp=fopen("../disk.img","r+");
     cout<<"blockr:"<<id.i_block[0]<<endl;
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+id.i_block[0]*512,SEEK_SET);
+    fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+id.i_block[0]*512,SEEK_SET);
     dir_entry root;
     size_t num;
     fread(&root,sizeof(dir_entry),1,fp);
@@ -687,7 +688,7 @@ void blockScheduler::SIMwriteBK(vector<size_t>newlist,size_t n,char*a)
     }
     fclose(fp);
 }
-void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,char*a)
+void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,char*a,char*a)
 {
     size_t num=(id.i_size+511)/512;
     vector<size_t>newlist;

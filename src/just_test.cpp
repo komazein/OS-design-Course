@@ -1,8 +1,42 @@
 #include "test.h"
 #include <spdlog/spdlog.h>
+// void func()
+// {
+//     LRUReplacer replacer;
+//     dcache dcache;
 
+//     dirTree dirtree(&replacer, &dcache);
+
+
+//     blockScheduler bs(&dirtree);
+
+//     dirtree.set_bs(&bs);
+    
+//     bs.new_disk();
+
+//     string name="test";
+//     inode*p=(inode*)malloc(sizeof(inode)*30);
+//     vector<dir_entry>px;
+//     dir_entry par;
+//     for(int i=0;i<30;i++)
+//     {
+//         string newname=name+to_string(i);
+//         dirtree.alloc_dir(newname, dirtree.get_root(),p+i);
+//         bs.creatFILE((size_t)i-1,*dirtree.get_root()->get_inode(),p[i]);
+//         char a[MAXNAMESIZE]={};
+//         newname.copy(a,newname.size());
+//     }
+//     dirtree.get_root()->getDir_entry(par,px);
+//     cout<<px.size();
+//     bs.writechild(par,px,*dirtree.get_root()->get_inode(),px.size());
+//     cout<<px.size();
+// }
+
+/*
 void func()
 {
+    // LRUReplacer dcache_replacer;
+    // LRUReplacer dentry_replacer;
     // LRUReplacer dcache_replacer;
     // LRUReplacer dentry_replacer;
     dcache dcache;
@@ -15,8 +49,6 @@ void func()
     dirtree.set_bs(&bs);
     
     bs.new_disk();
-
-
 
     string name="test";
     inode*p=(inode*)malloc(sizeof(inode)*40);
@@ -156,4 +188,19 @@ void func2()
     string name2 = "/";
     dentry* parent = new dentry(name2, ino,0, nullptr);
     auto it = dentry_table_.find({parent, name});
+}
+
+int yylex();
+void testFuncMkdir()
+{
+    file_system_manager sb;
+
+    while (1)
+    {
+        printf("[");
+        
+        printf("]$ ");
+        yylex();
+    }
+    
 }

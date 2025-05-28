@@ -4,6 +4,7 @@
 
 
 
+
 ///////////////////////////////
 ///         dentry          ///
 ///////////////////////////////
@@ -226,6 +227,7 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
         // 此时添加进入lru_list, 因为此时算上一次最新的访问
         dentry_replacer_->InsertDir(search);
         dcache_replacer_->Insert({search, name});
+        dcache_replacer_->Insert({search, name});
 
         search = dentry_next;       // 继续寻找
 
@@ -337,6 +339,10 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir);
     
     work_dir->add_single_subdir(new_node);      // 为当前工作路径加入新的子目录
+
+    // 此目录被修改(因为增加了目录项), 所以设置脏位为true
+    work_dir->set_dirty(true);
+
 
     // 此目录被修改(因为增加了目录项), 所以设置脏位为true
     work_dir->set_dirty(true);
