@@ -354,7 +354,7 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
 
 void dirTree::findNameInDirtree(const string& filename, dentry* work_dir, dentry* cur_dentry, bool fuzzy, vector<string>& name_list)
 {
-    if(has_child_test(work_dir) == false){
+    if(work_dir != cur_dentry && has_child_test(work_dir) == false){
         // 如果此时已经查找到了最根部, 才算最终完成
         if(has_string(filename, work_dir->get_name(), fuzzy)){
             string path;
@@ -374,7 +374,7 @@ void dirTree::findNameInDirtree(const string& filename, dentry* work_dir, dentry
     }
 
     // 检查当前节点是否满足名称条件
-    if(has_string(filename, work_dir->get_name(), fuzzy)){
+    if(work_dir != cur_dentry && has_string(filename, work_dir->get_name(), fuzzy)){
         string path;
         get_full_path(path, work_dir, cur_dentry);
 

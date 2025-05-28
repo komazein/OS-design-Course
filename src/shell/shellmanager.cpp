@@ -95,7 +95,9 @@ void shell_manager::command_find(std::string& filename)
         exit();
     }
 
-    vector<string> foundPath = dir_tree_->findNameInDirtree(filename, current_dir_);
+    vector<string> foundPath;
+    bool fuzzy = false;         // 精确搜索
+    dir_tree_->findNameInDirtree(filename, current_dir_, current_dir_, fuzzy, foundPath);
     if (foundPath.size() != 0) {
         spdlog::info("File '{}' found in '{}'", filename, current_dir_->get_name());
         printPath(foundPath);
