@@ -33,6 +33,10 @@ const int ONLY_MULTI_SIM=1;//不能变
 const int ABLE_DIRECT_SIM = 12;
 const int ABLE_ONE_SIM=3;
 const int ABLE_MULTI_SIM=1;//不能变
+
+const string FILE_MODE_INIT= "-rwxr--r--";
+const string DIR_MODE_INIT = "drwxr--r--";
+
 // 文件类型
 enum TYPE
 {

@@ -55,6 +55,9 @@ public:
     void SIMwriteBK(vector<size_t>newlist,size_t n,char*a);//根据读取的磁盘块号获取字符串
     void freeblock(vector<pair<inode*,size_t>>&del_nodes,inode&par,size_t primsizeofchild);
     size_t getfreeblocknum();
+    void ReWrinode(inode &ino,bool read);
+    void writesuperblock();
+
 private:
     super_block* sb;
     dirTree* dirtree_;

@@ -321,9 +321,11 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     new_allocate_inode->i_type = type;
     if(new_allocate_inode->i_type == SIM_FILE && new_allocate_inode->i_type == LINK){
         new_allocate_inode->i_size = 0;
+        new_allocate_inode->i_mode = {'-',"rwx-","r--","r--" };
     }
     if(new_allocate_inode->i_type == DIR){
         new_allocate_inode->i_size = 1;
+        new_allocate_inode->i_mode = {'d',"rwx-","r--","r--" };
     }
     new_allocate_inode->i_atime = cur_time;
     new_allocate_inode->i_ctime = cur_time;
@@ -397,6 +399,8 @@ void dirTree::findNameInDirtree(const string& filename, dentry* work_dir, dentry
         findNameInDirtree(filename, work_dir, cur_dentry, fuzzy, name_list);
     }
 }
+
+
 
 
 bool dirTree::has_string(const string& name1, const string& name2, bool fuzzy)
@@ -548,7 +552,8 @@ void dirTree::cut_dir(dentry* dentry_node, size_t& counter)
         // dirtry : true 需要写回disk中
         /// TODO: 通知bs刷盘
 
-
+        // bs->writeBlocknumFORsim();//mulu
+        //writeinode
         spdlog::info("Before recycle the '{}' node, write back to disk.", 
                 dentry_node->get_name());
 
