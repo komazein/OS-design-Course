@@ -32,6 +32,7 @@
 //     cout<<px.size();
 // }
 
+/*
 void func()
 {
     // LRUReplacer dcache_replacer;
@@ -86,7 +87,7 @@ void func()
         }
     }
 }
-
+*/
 
 /**
  * 全局目录项缓存键值对
@@ -125,7 +126,7 @@ void testFuncMkdir()
     while (1)
     {
         printf("[");
-        sb.
+        
         printf("]$ ");
         yylex();
     }

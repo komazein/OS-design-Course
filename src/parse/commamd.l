@@ -37,7 +37,7 @@ enum TokenType{
 
 mkdir[ \t]+[a-zA-Z0-9_/.-]+   { sscanf(yytext, "mkdir %s", arg_c); fileSystem->command_mkdir(std::string arg(arg_c));}
 chdir[ \t]+[a-zA-Z0-9_/.-]+   { sscanf(yytext, "chdir %s", arg_c); fileSystem->command_cd(std::string arg(arg_c));}
-lsdir                         { command_ls();}
+lsdir                         { fileSystem->command_ls();}
 rmdir[ \t]+[a-zA-Z0-9_/.-]+   { sscanf(yytext, "rmdir %s", arg_c); fileSystem->command_rm(std::string arg(arg_c));}
 lkdir[ \t]+[a-zA-Z0-9_/.-]+   { sscanf(yytext, "lkdir %s", arg_c); fileSystem->command_lkdir(std::string arg(arg_c));}
 lndir[ \t]+[a-zA-Z0-9_/.-]+   { sscanf(yytext, "lndir %s", arg_c); fileSystem->command_lndir(std::string arg(arg_c));}
