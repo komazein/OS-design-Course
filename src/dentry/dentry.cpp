@@ -319,21 +319,23 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     auto cur_time = get_time();
 
     new_allocate_inode->i_type = type;
-    if(new_allocate_inode->i_type == SIM_FILE && new_allocate_inode->i_type == LINK){
-        new_allocate_inode->i_size = 0;
+    if(new_allocate_inode->i_type == SIM_FILE || new_allocate_inode->i_type == LINK){
+        //new_allocate_inode->i_size = 0;
         new_allocate_inode->i_mode = {'-',"rwx","r--","r--" };
     }
     if(new_allocate_inode->i_type == DIR){
-        new_allocate_inode->i_size = 1;
+        //new_allocate_inode->i_size = 1;
         new_allocate_inode->i_mode = {'d',"rwx","r--","r--" };
     }
+    new_allocate_inode->i_size = 0;
     new_allocate_inode->i_atime = cur_time;
     new_allocate_inode->i_ctime = cur_time;
     new_allocate_inode->i_mtime = cur_time;
 
     ///  .....
-
+    bs->creatFILE(work_dir->get_subdir().size(),*work_dir->get_inode(),*new_allocate_inode);
     dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir);
+    
     work_dir->add_single_subdir(new_node);      // 为当前工作路径加入新的子目录
 
     // 此目录被修改(因为增加了目录项), 所以设置脏位为true
@@ -469,7 +471,7 @@ void dirTree::del_tree(dentry* dentry_root,vector<pair<inode*,size_t>>&del_nodes
         dentry_root->clear_child();         // 必须释放完所有的子才能调用清空child_哈希表
     }
 
-    /// TODO: 1. 通知I/O回收此块
+    /// TODO——: 1. 通知I/O回收此块
 
     spdlog::info("Letting blockScheduler to recycle the '{}' children's inode and thier blocks", dentry_root->get_name());
     // 2. 释放此节点
@@ -551,8 +553,12 @@ void dirTree::cut_dir(dentry* dentry_node, size_t& counter)
 
         // dirtry : true 需要写回disk中
         /// TODO: 通知bs刷盘
-
-        // bs->writeBlocknumFORsim();//mulu
+        bs->ReWrinode(*dentry_node->get_inode(),false);
+        dir_entry par;
+        vector<dir_entry>child;
+        dentry_node->getDir_entry(par,child);
+        bs->writechild(par,child,*dentry_node->get_inode(),dentry_node->get_subdir().size());
+        // bs->writeBlocknumFOR>sim();//mulu
         //writeinode
         spdlog::info("Before recycle the '{}' node, write back to disk.", 
                 dentry_node->get_name());
