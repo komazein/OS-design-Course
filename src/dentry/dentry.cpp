@@ -175,8 +175,6 @@ void dirTree::load_root(inode*root_inode)
     auto node = new dentry(root_name, root_inode, root_inode->i_num, nullptr);
     root_ = node;
   
-        cout<<"o";
-        exit(1);
 
     // root_ = new dentry(root_name, root_inode, root_inode->i_num, nullptr);    // root无父节点
 
@@ -209,8 +207,21 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
     string name;        // 存储分割的字符串
     while(getline(ss, name, '/')){
 
+        dentry* dentry_next;
+
+        if(name == "."){
+            // 如果有当前路径的标识, 自动跳过
+            continue;
+        }
+
+        if(name == ".."){
+            // 如果有到上一级目录
+            dentry_next = search->get_parent();     // 回退到上一级
+            continue;
+        }
+
         // 还是优先哈希查找
-        auto dentry_next = hash_search(name, search);
+        dentry_next = hash_search(name, search);
 
         if(dentry_next == nullptr){
             // 没找到则直接查找本dentry的child
@@ -282,11 +293,12 @@ bool dirTree::name_search_test(string& name, dentry* work_dir/*, bool update_has
         spdlog::info("In order to ensure '{}' whether have '{}',loading it's children from disk.", work_dir->get_name(), name);
         /// TODO_finish:此处进行I/O操作获得子目录项存入dir_entries
         vector<dir_entry> dir_entries;              // 假定已经返回了目录项
-
+        
         bs->loadchild(dir_entries, *work_dir->get_inode());
-
+        work_dir->set_flag(FIRST_LOAD_TO_MEMORY);
+        
         work_dir->add_subdir(dir_entries);       // 这时加入了新的子节点
-
+        
         auto new_add_dir = work_dir->find_subdir(name);
         if(new_add_dir != nullptr)  { return false; }       
 
@@ -314,9 +326,9 @@ bool dirTree::has_child_test(dentry* dentry_node)
         vector<dir_entry> dir_entries;              // 假定已经返回了目录项
 
         bs->loadchild(dir_entries, *dentry_node->get_inode());
-
+        
         dentry_node->add_subdir(dir_entries);       // 加入子
-
+        
         // 此时检查是否加入了新的
         if(!dentry_node->has_subdir())  { return true; }
         else { return false; }      // 加入了新的
@@ -334,11 +346,17 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
 
     /// TODO_finish:通知I/O分配新的inode
 
-    inode* temp= bs->iget(false);
-    if(temp==NULL)
-        return false;//无充足inode
-    (*new_allocate_inode)=(*temp);
-
+    //inode* temp= bs->iget(false);
+    
+    // if(temp==NULL)
+    //     return false;//无充足inode  
+    // (*new_allocate_inode)=(*temp);
+    new_allocate_inode = bs->iget(false);
+    if(new_allocate_inode == nullptr){
+        spdlog::warn("NO FREE INODE");
+        return false;
+    }
+    
 
     /// TODO_finish: 完善inode的信息
     auto cur_time = get_time();
@@ -356,16 +374,19 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     new_allocate_inode->i_atime = cur_time;
     new_allocate_inode->i_ctime = cur_time;
     new_allocate_inode->i_mtime = cur_time;
-
+    
     ///  .....
     bool ableGetBlock= bs->creatFILE(work_dir->get_subdir().size(),*work_dir->get_inode(),*new_allocate_inode);
+    
     if(ableGetBlock==false)
     {
         bs->freeinode(new_allocate_inode->i_num);
+        spdlog::warn("NO FREE BLOCK");
         return false;///块不够
     }
 
     dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir);
+    new_node->set_flag(FIRST_LOAD_TO_MEMORY);
     
     work_dir->add_single_subdir(new_node);      // 为当前工作路径加入新的子目录
 
@@ -385,7 +406,6 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
 
     spdlog::info("Allocated new directory '{}' under '{}', inode={}", 
                  name, work_dir->get_name(), new_allocate_inode->i_num);
-
 
     return true;
 }
@@ -527,7 +547,8 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
     // 首先还是一样的查找验证过程
 
     if(name_search_test(name, work_dir))  { 
-        return false; }       // 如果没找到, 则删除失败
+        return false; 
+    }       // 如果没找到, 则删除失败
 
     // 此时将要释放以work_dir的以name为名的根的树
     // 需要更新父的表项
@@ -559,7 +580,7 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
     return true;
 }
 
-void dirTree::cut_dir(dentry* dentry_node, size_t& counter)
+void dirTree::cut_tree(dentry* dentry_node, size_t& counter)
 {
     // dentry_node->set_flag(CUT_SUBDIRS);     // 标记此节点为剪枝后的, 说明它有自己子, 只不过被换出了
 
@@ -577,7 +598,7 @@ void dirTree::cut_dir(dentry* dentry_node, size_t& counter)
             dcache_replacer_->Erase({dentry_node, name});
             dentry_replacer_->Erase(child_node);
 
-            cut_dir(child_node, counter);           // 释放节点
+            cut_tree(child_node, counter);           // 释放节点
         }
 
         dentry_node->clear_child();         // 必须释放完所有的子才能调用清空child_哈希表
@@ -599,10 +620,11 @@ void dirTree::cut_dir(dentry* dentry_node, size_t& counter)
                 dentry_node->get_name());
 
     }
-
-    spdlog::info("Free the '{}' node under '{}' for memory free.", 
-        dentry_node->get_name(), dentry_node->get_parent()->get_name());
-
+    if(dentry_node->get_parent() != nullptr){
+        spdlog::info("Free the '{}' node under '{}' for memory free.", 
+            dentry_node->get_name(), dentry_node->get_parent()->get_name());
+    }
+    
     delete dentry_node;
     
     ++counter;      // 统计删除的个数  
@@ -646,7 +668,7 @@ size_t dirTree::cut_dirTree()
         auto child_nodes = vitimnode->get_subdir();
 
         for(auto& [_, node] : child_nodes){      // 释放其子节点
-            cut_dir(node, counter);
+            cut_tree(node, counter);
         }
         
         if(counter){        // 如果释放了其子节点, 则标记为此节点被剪枝

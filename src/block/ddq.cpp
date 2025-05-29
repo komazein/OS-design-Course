@@ -2,8 +2,6 @@
 void blockScheduler::loadchild(vector<dir_entry>&a,inode &id)
 {
     FILE *fp=fopen("../disk.img","r+");
-    cout<<"blockr:"<<id.i_block[0]<<endl;
-    fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+id.i_block[0]*512,SEEK_SET);
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+id.i_block[0]*512,SEEK_SET);
     dir_entry root;
     size_t num;
@@ -15,12 +13,12 @@ void blockScheduler::loadchild(vector<dir_entry>&a,inode &id)
         fread(&temp,sizeof(dir_entry),1,fp);
         a.push_back(temp);
     }
-    cout<<num<<endl;
     num-=min(num,(size_t)MAXnumInBlock-1);
-    cout<<num<<endl;
     fclose(fp);
     if(num==0)
+    {
         return;
+    }
     if(num<=MAXnumInBlock*(MAXnumInBlock+1))
     {
         ftree(id.i_block[1],min((size_t)MAXnumInBlock,num),a);
@@ -134,7 +132,6 @@ size_t blockScheduler::cal_block_num_dir(size_t n_dir)//only child
 }
 bool blockScheduler::creatFILE(size_t old_num_only_child,inode &parid,inode &chid)
 {
-    cout<<"blocknum:"<<cal_block_num_dir(old_num_only_child)<<" "<<cal_block_num_dir(old_num_only_child+1)<<endl;
     if(sb->getfreeBlocknum()==0)
         return false;
     else if(sb->getfreeBlocknum()==1&&chid.i_type==DIR)
@@ -848,7 +845,6 @@ void blockScheduler::simwriteTree(size_t block_id,vector<size_t>&all,size_t n,ve
 
 void blockScheduler::new_disk()
 {
-
     sb->newdisk();
 }
 inode*blockScheduler::iget(bool ifroot)
@@ -881,7 +877,26 @@ void blockScheduler::freeinode(size_t ino)
 {
     sb->freeinode(ino);
 }
-void blockScheduler::load()
+void blockScheduler::load(dirTree*dir_tree_)
 {
-    sb->load();
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,0,SEEK_SET);
+    fread(sb,sizeof(super_block),1,fp);
+    auto root_inode=iget(true);
+    fseek(fp,sizeof(super_block),SEEK_SET);
+    fread(root_inode,sizeof(inode),1,fp);
+    
+    //fclose(fp);
+
+    ///////////////////////构建根节点
+    // s_root=(dentry*)malloc(sizeof(dentry));
+    // char name[]="root";
+
+    // dentry temp_root;
+    // temp_root.init(name,temp_inode,NULL,0);///////////需要更改
+    // s_root=&temp_root;
+    
+    //dirtree->init_root("/", ROOT_INODE_NUMBER, root_inode);
+    //dirtree->load_root(root_inode);     // 创建根节点
+    sb->load(root_inode,dir_tree_);
 }

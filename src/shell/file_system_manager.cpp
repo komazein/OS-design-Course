@@ -9,13 +9,6 @@ void file_system_manager::command_mkdir(std::string& dirname) {
     }
     
     bool result = dir_tree_->alloc_dir(dirname, current_dir_, nullptr, DIR);
-    if(result){
-        spdlog::info("Directory '{}' created successfully in '{}'", dirname, current_dir_->get_name());
-    }else
-    {
-        spdlog::warn("Directory '{}' already exists in '{}'", dirname, current_dir_->get_name());
-    }
-
 }
 
 void file_system_manager::command_cd(std::string& dirname)
@@ -24,6 +17,10 @@ void file_system_manager::command_cd(std::string& dirname)
         spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
         Exit();
     }
+
+    // 如果为空名字(即名字参数未指定, 退回到根节点
+    /// TODO: 实际上是退回到用户目录下
+    if(dirname.empty()) { current_dir_ = dir_tree_->get_root(); }       
 
     dentry* new_dir = dir_tree_->name_travesal(dirname, current_dir_);
     if (new_dir) {
@@ -44,6 +41,7 @@ void file_system_manager::command_ls()
     spdlog::info("Listing contents of directory '{}':", current_dir_->get_name());
     
     int resultNum = 0;
+    dir_tree_->has_child_test(current_dir_);                // 首先检查一下是否有子
     for (const auto& pair : current_dir_->get_subdir()) {
         std::string subdir_name = pair.first;
         dentry* subdir = pair.second;
@@ -55,14 +53,12 @@ void file_system_manager::command_ls()
 void file_system_manager::command_rm(std::string& dirname)
 {
     if (current_dir_ == nullptr) {
-        spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
+        spdlog::warn("Current directory is not set. Cannot remove directory '{}'", dirname);
         Exit();
     }
 
     bool result = dir_tree_->free_dir(dirname, current_dir_);
-    if (result) {
-        spdlog::info("Directory '{}' removed successfully from '{}'", dirname, current_dir_->get_name());
-    } else {
+    if (!result) {
         spdlog::warn("Directory '{}' not found in '{}'", dirname, current_dir_->get_name());
     }
 }
@@ -87,7 +83,7 @@ void file_system_manager::command_lndir(std::string& dirname)
 
 }
 
-void file_system_manager::command_find(std::string& filename)
+void file_system_manager::command_find(std::string& filename, bool fuzzy)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot find file '{}'", filename);
@@ -95,7 +91,7 @@ void file_system_manager::command_find(std::string& filename)
     }
 
     vector<string> foundPath;
-    bool fuzzy = false;         // 精确搜索
+
     dir_tree_->findNameInDirtree(filename, current_dir_, current_dir_, fuzzy, foundPath);
     if (foundPath.size() != 0) {
         spdlog::info("File '{}' found in '{}'", filename, current_dir_->get_name());
@@ -137,7 +133,10 @@ void file_system_manager::command_cat(std::string& filename)
 
 void file_system_manager::Exit()
 {
+    size_t counter = 0;
+    dir_tree_->cut_tree(dir_tree_->get_root(), counter);
     spdlog::info("Exiting shell...");
+    
     // Perform any necessary cleanup here
     // add any cleanup code if needed
     // print any manual or help information

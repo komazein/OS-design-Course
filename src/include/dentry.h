@@ -426,16 +426,22 @@ public:
 
     /**
      * 
-     * @brief 释放指定的dentry空间, 并不是删除, 而是释放此dentry占用的空间
+     * @brief 释放指定的dentry空间, 并不是物理磁盘删除, 而是释放此dentry占用的空间
      * 
-     * 此函数也是递归删除以dentry_node为根节点的子树, 但是为了考虑方便, 
-     * 只是释放其子节点以及子节点的树, 并不删除该节点
+     * 此函数也是递归删除以dentry_node为根节点的子树, 
      * 
      * 注意: 此时还得更改`dentry_node`的DFALG标志位为`CUT_SUBDIRS`
      * 
      * 
      */
-    void cut_dir(dentry* dentry_node, size_t& counter);
+    void cut_tree(dentry* dentry_node, size_t& counter);
+
+    // /**
+    //  * 
+    //  * @brief 释放以dentry_node为根的子树的所有子树
+    //  * 
+    //  */
+    // void cut_dir(dentry* dentry_node);
 
     /**
      * 

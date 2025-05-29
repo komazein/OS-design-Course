@@ -1,16 +1,17 @@
 #include <fs.h>
 #include<iostream>
 void super_block::init(){}
-void super_block::load()
+void super_block::load(inode*root_inode,dirTree*dir_tree_)
 {
-    FILE *fp=fopen("../disk.img","r+");
-    fseek(fp,0,SEEK_SET);
-    fread(this,sizeof(super_block),1,fp);
-    auto root_inode=iget(true);
-    fseek(fp,sizeof(super_block),SEEK_SET);
-    fread(root_inode,sizeof(inode),1,fp);
+    // FILE *fp=fopen("../disk.img","r+");
+
+    // fseek(fp,0,SEEK_SET);
+    // fread(this,sizeof(super_block),1,fp);
+    // auto root_inode=iget(true);
+    // fseek(fp,sizeof(super_block),SEEK_SET);
+    // fread(root_inode,sizeof(inode),1,fp);
     
-    fclose(fp);
+    //fclose(fp);
 
     ///////////////////////构建根节点
     // s_root=(dentry*)malloc(sizeof(dentry));
@@ -21,6 +22,7 @@ void super_block::load()
     // s_root=&temp_root;
     
     //dirtree->init_root("/", ROOT_INODE_NUMBER, root_inode);
+    dirtree=dir_tree_;
     dirtree->load_root(root_inode);     // 创建根节点
 
 }

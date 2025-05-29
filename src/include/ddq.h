@@ -59,7 +59,7 @@ public:
     void ReWrinode(inode &ino,bool read);
     void writesuperblock();
     void freeinode(size_t ino);
-    void load();
+    void load(dirTree*dir_tree_);
 private:
     super_block* sb;
     dirTree* dirtree_;

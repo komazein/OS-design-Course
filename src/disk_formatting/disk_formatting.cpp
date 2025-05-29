@@ -21,5 +21,6 @@ int main()
     dir_entry par;
     vector<dir_entry>temp;
     dir_tree_->get_root()->getDir_entry(par,temp);
+    cout<<temp.size()<<endl;
     bs_->writechild(par,temp,*dir_tree_->get_root()->get_inode(),temp.size());
 }

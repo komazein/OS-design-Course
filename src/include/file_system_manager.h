@@ -13,15 +13,14 @@ class file_system_manager{
     
     public:
         file_system_manager() {
-            
+
             dir_tree_ = new dirTree;
 
             bs_ = new blockScheduler(dir_tree_);
 
             dir_tree_->set_bs(bs_);
 
-            bs_->load();
-
+            bs_->load(dir_tree_);
             current_dir_ = dir_tree_->get_root();
 
             // file_manager_ = new file_manager(dir_tree_, dir_tree_->get_root());
@@ -66,7 +65,7 @@ class file_system_manager{
          * @brief �����ļ�����
          * @param filename �ļ���
          */
-        void command_find(std::string& filename);
+        void command_find(std::string& filename, bool fuzzy);
 
         // execute shell command for file only
         /**

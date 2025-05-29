@@ -1,22 +1,58 @@
 #include "test.h"
 #include <spdlog/spdlog.h>
-void func()
+
+
+/**
+ * 
+ * @brief mkdir testI  (I: 1~N)
+ */
+// PASS!
+void CREATE_MULTIPLE_DIRS()
 {
 
-
-   //dirTree dirtree;
-
-
     file_system_manager fs;
-    for(int i=0;i<20;i++)
+    for(int i=0;i<100;i++)
     {
         string testdir_name="test"+to_string(i);
         fs.command_mkdir(testdir_name);
     }
 
-    
 }
 
+/**
+ * 
+ * @brief   mkdir testI
+ *          cd testI
+ *          mkdir test(I+1)
+ *          cd test(I+1)
+ */
+// 
+void CREATE_MULTIPLE_DIRS_RECURSIVELY()
+{
+    file_system_manager fs;
+    for(int i = 0; i < 513; i++){
+        string test_name = "test" + to_string(i);
+        fs.command_mkdir(test_name);
+        fs.command_cd(test_name);
+    }
+
+}
+void TESTWRITEBACK()
+{
+    file_system_manager fs;
+    for(int i = 0; i < 10; i++){
+        string test_name = "test" + to_string(i);
+        fs.command_mkdir(test_name);
+    }
+    string next_root="test0";
+    fs.command_cd(next_root);
+    for(int i = 20; i < 30; i++){
+        string test_name = "test" + to_string(i);
+        fs.command_mkdir(test_name);
+    }
+    fs.Exit();
+    
+}
 void new_disk()
 {
 
@@ -198,7 +234,7 @@ void func()
 // int yylex();
 // void testFuncMkdir()
 // {
-//     file_system_manager sb;
+//     extend file_system_manager fs;
 
 //     while (1)
 //     {

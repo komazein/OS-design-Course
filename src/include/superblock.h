@@ -26,7 +26,8 @@ public:
     bool getblock(int n,vector<size_t>&a);
     void releaseblock(int n,vector<size_t>&a);
     void newdisk();
-    void load();
+    void load(inode*root_inode,dirTree*dir_tree_);
     void freeinode(size_t ino);
     size_t getfreeBlocknum();
+    
 };
