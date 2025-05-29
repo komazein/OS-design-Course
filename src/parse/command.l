@@ -112,15 +112,15 @@ edit[ \t]+([a-zA-Z0-9_\./\-]+)[ \t]+(.+) {
 
 
 exit {
-    file_system_manager->exit();
+    fileSystem->exit();
 }
 
 format {
-    file_system_manager->format();
+    fileSystem->format();
 }
 
 help {
-    file_system_manager->help();
+    fileSystem->help();
 }
 
 
