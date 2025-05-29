@@ -21,3 +21,5 @@ void TESTWRITEBACK3();
 void TESTLS();
 
 void TESTDELETE();
+
+void TESTFIND();

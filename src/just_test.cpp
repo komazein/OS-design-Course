@@ -37,27 +37,7 @@ void CREATE_MULTIPLE_DIRS_RECURSIVELY()
     }
 
 }
-void TESTWRITEBACK()
-{
-    file_system_manager fs;
-    for(int i = 0; i < 10; i++){
-        string test_name = "test" + to_string(i);
-        fs.command_mkdir(test_name);
-    }
-    string next_root="test0";
-    fs.command_cd(next_root);
-    for(int i = 20; i < 30; i++){
-        string test_name = "test" + to_string(i);
-        fs.command_mkdir(test_name);
-    }
-    next_root="test25";
-    fs.command_cd(next_root);
-    for(int i = 20; i < 30; i++){
-        string test_name = "test" + to_string(i);
-        fs.command_mkdir(test_name);
-    }
-    fs.Exit();
-}
+
 
 
 
@@ -96,15 +76,70 @@ void TESTLS()
     fs.command_cd(next_root);
     fs.command_ls();
 }
+void TESTWRITEBACK()
+{
+    file_system_manager fs;
+    for(int i = 0; i < 15; i++){
+        string test_name = "test" + to_string(i);
+        fs.command_mkdir(test_name);
+    }
+    string next_root="test0";
+    fs.command_cd(next_root);
+    for(int i = 20; i < 30; i++){
+        string test_name = "test" + to_string(i);
+        fs.command_mkdir(test_name);
+    }
+    next_root="test25";
+    fs.command_cd(next_root);
+    for(int i = 60; i < 70; i++){
+        string test_name = "test" + to_string(i);
+        fs.command_mkdir(test_name);
+    }
+    next_root="..";
+    fs.command_cd(next_root);
+
+    fs.command_ls();
+    next_root="test26";
+    fs.command_cd(next_root);
+    for(int i = 60; i < 70; i++){
+        string test_name = "test" + to_string(i);
+        fs.command_mkdir(test_name);
+    }
+    next_root="../..";
+    fs.command_cd(next_root);
+    for(int i = 60; i < 70; i++){
+        string test_name = "test" + to_string(i);
+        fs.command_mkdir(test_name);
+    }
+    fs.Exit();
+}
+
 
 void TESTDELETE()
 {
     TESTWRITEBACK();
+    int I;
+    cin>>I;
     file_system_manager fs;
-    string del_root="test0";
-    fs.command_delete(del_root);
+    for(int i=0;i<min(I,9);i++)
+    {
+        string del_root="test"+to_string(i);
+        fs.command_delete(del_root);
+    }
     fs.Exit();
 }
+
+void TESTFIND()
+{
+    TESTWRITEBACK();
+
+    file_system_manager fs;
+    string name="test61";
+    fs.command_find(name, false);
+    fs.Exit();
+}
+
+
 /*
 void func()
 {

@@ -411,7 +411,7 @@ public:
      * 
      * 
      */
-    void del_tree(dentry* dentry_root,vector<pair<inode*,size_t>>&del_nodes);
+    void del_tree(dentry* dentry_root,vector<pair<inode, size_t>>&del_nodes);
 
 
     /**

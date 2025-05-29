@@ -22,6 +22,8 @@ void file_system_manager::command_cd(std::string& dirname)
     /// TODO: 实际上是退回到用户目录下
     if(dirname.empty()) { current_dir_ = dir_tree_->get_root(); }       
 
+    cout <<current_dir_->get_name()<<current_dir_->get_subdir().size() <<endl;
+
     dentry* new_dir = dir_tree_->name_travesal(dirname, current_dir_);
     if (new_dir) {
         current_dir_ = new_dir;
@@ -94,6 +96,9 @@ void file_system_manager::command_find(std::string& filename, bool fuzzy)
     vector<string> foundPath;
 
     dir_tree_->findNameInDirtree(filename, current_dir_, current_dir_, fuzzy, foundPath);
+
+    
+
     if (foundPath.size() != 0) {
         spdlog::info("File '{}' found in '{}'", filename, current_dir_->get_name());
         printPath(foundPath);
@@ -115,7 +120,6 @@ void file_system_manager::command_touch(std::string& filename)
 //TODO: finish func of delete file
 void file_system_manager::command_delete(std::string& filename)
 {
-    cout<<"============================================"<<endl;
     cout<<bs_->getfreeblocknum()<<endl;
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot delete file '{}'", filename);
@@ -123,7 +127,6 @@ void file_system_manager::command_delete(std::string& filename)
     }
     dir_tree_->free_dir(filename,current_dir_);
     cout<<bs_->getfreeblocknum()<<endl;
-    cout<<"============================================"<<endl;
 }
 
 //TODO: finish func of cat file

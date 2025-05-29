@@ -302,7 +302,7 @@ size_t blockScheduler::treeFindLastBlock(size_t now_block_id,size_t n)
     else
         return treeFindLastBlock(temp,n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx);
 }
-void blockScheduler::freeblock(vector<pair<inode*,size_t>>&del_nodes,inode&par,size_t primsizeofchild)
+void blockScheduler::freeblock(vector<pair<inode, size_t>>&del_nodes,inode&par,size_t primsizeofchild)
 {
     vector<size_t>need;
     vector<size_t>emptyvec;
@@ -310,12 +310,21 @@ void blockScheduler::freeblock(vector<pair<inode*,size_t>>&del_nodes,inode&par,s
         need.push_back(getlastblockID(primsizeofchild,par));
     for(size_t i=0;i<del_nodes.size();i++)
     {
-        if(del_nodes[i].first->i_type==DIR)
-            getallBlockDIR(*del_nodes[i].first,del_nodes[i].second,need);
+        if(del_nodes[i].first.i_type==DIR)
+            getallBlockDIR(del_nodes[i].first,del_nodes[i].second,need);
         else
-            getallBlockSIM(*del_nodes[i].first,need,emptyvec);
-        sb->freeinode(del_nodes[i].first->i_num);
+            getallBlockSIM(del_nodes[i].first,need,emptyvec);
+        sb->freeinode(del_nodes[i].first.i_num);
     }
+    sb->releaseblock(need.size(),need);
+    return;
+}
+void blockScheduler::freeSIMFILE(inode&ino)/////////未测试
+{
+    vector<size_t>need;
+    vector<size_t>emptyvec;
+    getallBlockSIM(ino,need,emptyvec);
+    sb->freeinode(ino.i_num);
     sb->releaseblock(need.size(),need);
     return;
 }

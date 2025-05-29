@@ -54,12 +54,13 @@ public:
     bool writeSIMfromBLOCK(inode&id,char*a);//写文件的外部接口，完成重新分配磁盘块号后交由writeBlocknumFORsim实现
 
     void SIMwriteBK(vector<size_t>newlist,size_t n,char*a);//根据读取的磁盘块号获取字符串
-    void freeblock(vector<pair<inode*,size_t>>&del_nodes,inode&par,size_t primsizeofchild);
+    void freeblock(vector<pair<inode,size_t>>&del_nodes,inode&par,size_t primsizeofchild);
     size_t getfreeblocknum();
     void ReWrinode(inode &ino,bool read);
     void writesuperblock();
     void freeinode(size_t ino);
     void load(dirTree*dir_tree_);
+    void freeSIMFILE(inode&ino);
 private:
     super_block* sb;
     dirTree* dirtree_;

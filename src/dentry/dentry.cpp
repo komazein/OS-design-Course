@@ -229,7 +229,9 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
 
         if(name == ".."){
             // 如果有到上一级目录
-            dentry_next = search->get_parent();     // 回退到上一级
+            //dentry_next = search->get_parent();     // 回退到上一级
+            search = search->get_parent();     // 回退到上一级
+            
             continue;
         }
 
@@ -340,6 +342,7 @@ bool dirTree::has_child_test(dentry* dentry_node)
     // 首先扫描此节点中的所有child(如果有的话)
     if(dentry_node->get_flag() == FIRST_LOAD_TO_MEMORY){
         // 保证此时的child全部加载进入内存中了
+
         if(!dentry_node->has_subdir()) { return true; } // 此时确实无子节点了
         else { return false; }      // 存在则有子节点
     }  
@@ -350,14 +353,29 @@ bool dirTree::has_child_test(dentry* dentry_node)
 
         // 此时如果已经获得了子目录项
         vector<dir_entry> dir_entries;              // 假定已经返回了目录项
+        ///////////////////////////
+        // 此时待删除的dentry_node还没有加载进它的全部子, 所以他的inode为空, 所以先要加载它的子
+        // 访问此inode的磁盘, 获取它的全部孩子并创建
 
-        bs->loadchild(dir_entries, *dentry_node->get_inode());
-        cout<<"LSchildnum"<<dir_entries.size()<<endl;
-        dentry_node->add_subdir(dir_entries);       // 加入子
+        /// TODO: 获取dentry_node的inode
+        inode* new_inode = (inode*)malloc(sizeof(inode));
+        new_inode->i_num = dentry_node->get_inode_num();
+        bs->ReWrinode(*new_inode, true);
+        dentry_node->set_inode(new_inode);
         
+        // cout <<"++++++++++++++(((((((((((((())))))))))))))\n";
+        // exit(1);
+        if(dentry_node->get_type()==DIR)
+        {
+            bs->loadchild(dir_entries, *dentry_node->get_inode());
+            dentry_node->add_subdir(dir_entries);       // 加入子
+        }
+        dentry_node->set_flag(FIRST_LOAD_TO_MEMORY);
         // 此时检查是否加入了新的
         if(!dentry_node->has_subdir())  { return true; }
-        else { return false; }      // 加入了新的
+        else {  
+            return false;
+               }      // 加入了新的
     }
 
 }
@@ -437,12 +455,15 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
 
 void dirTree::findNameInDirtree(const string& filename, dentry* work_dir, dentry* cur_dentry, bool fuzzy, vector<string>& name_list)
 {
-    if(work_dir != cur_dentry && has_child_test(work_dir) == false){
+    if(has_child_test(cur_dentry) && work_dir != cur_dentry){
         // 如果此时已经查找到了最根部, 才算最终完成
-        if(has_string(filename, work_dir->get_name(), fuzzy)){
+        cout<<"getyezi"<<filename<<"   "<<cur_dentry->get_name()<<endl;
+        if(has_string(filename, cur_dentry->get_name(), fuzzy)){
             string path;
             get_full_path(path, work_dir, cur_dentry);
+           
 
+            name_list.push_back(path);/////////////////////////////////
             if(!path.empty()){
                 if(fuzzy){
                     spdlog::debug("Find a new file/dir name '{}' has '{}'", cur_dentry->get_name(), filename);
@@ -457,12 +478,13 @@ void dirTree::findNameInDirtree(const string& filename, dentry* work_dir, dentry
     }
 
     // 检查当前节点是否满足名称条件
-    if(work_dir != cur_dentry && has_string(filename, work_dir->get_name(), fuzzy)){
+    cout<<"notget"<<filename<<"   "<<cur_dentry->get_name()<<endl;
+    if(has_string(filename, work_dir->get_name(), fuzzy) && work_dir != cur_dentry){
         string path;
         get_full_path(path, work_dir, cur_dentry);
 
         if(!path.empty()){
-            name_list.push_back(path);
+            name_list.push_back(path);//////////////////////////////////
             if(fuzzy){
                 spdlog::debug("Find a new file/dir name '{}' has '{}'", cur_dentry->get_name(), filename);
             }
@@ -473,12 +495,17 @@ void dirTree::findNameInDirtree(const string& filename, dentry* work_dir, dentry
         }
     }
 
+
     auto sub_dir = cur_dentry->get_subdir();
     for(auto& [name, dentry_node] : sub_dir){
-
+        cout << "(((((((((((((((((99999)))))))))))))))))\n";
+        cout << name << " "  << endl;
+        cout << "(((((((((((((((((99999)))))))))))))))))\n";
         // 对此节点的所有子节点进行查找
-        findNameInDirtree(filename, work_dir, cur_dentry, fuzzy, name_list);
+        findNameInDirtree(filename, work_dir, dentry_node, fuzzy, name_list);        
     }
+
+
 }
 
 
@@ -501,21 +528,26 @@ bool dirTree::has_string(const string& name1, const string& name2, bool fuzzy)
 void dirTree::get_full_path(string& path, dentry* work_dir, dentry* cur_dentry)
 {
     auto search_dentry = cur_dentry;
+    bool is_root = false;
 
-    if(work_dir == root_){
-        path = "/";
-        return;
-    }
+    // if(work_dir == root_){
+    //     path = "/";
+    //     return;
+    // }
 
     if(work_dir == nullptr) { return; }
 
-    path = work_dir->get_name();
+    //path = work_dir->get_name();
 
     while(search_dentry != nullptr && search_dentry != work_dir){
 
         search_dentry = search_dentry->get_parent();
+        if(search_dentry->get_name()!="/"){
+            is_root = true;
+            path = search_dentry->get_name() + "/" + path;
+        }
+            
 
-        path = search_dentry->get_name() + "/" + path;
     }
 
     if(search_dentry == nullptr) { // 保证有意外的终止条件(即向上遍历完了所有节点, 甚至在根节点之上)
@@ -524,19 +556,30 @@ void dirTree::get_full_path(string& path, dentry* work_dir, dentry* cur_dentry)
         return;
     }
 
-    path = search_dentry->get_name() + "/" + path;
+    path = path  + cur_dentry->get_name();
+    if(!is_root){
+        path = "./" + path;
+    }
 }
 
 
-void dirTree::del_tree(dentry* dentry_root,vector<pair<inode*,size_t>>&del_nodes)
+void dirTree::del_tree(dentry* dentry_root,vector<pair<inode ,size_t>>&del_nodes)
 {
     if(!dentry_root) { return; }        // 仅仅是保证安全性, 应该不会执行此语句
 
-    if(has_child_test(dentry_root)) {       // 此时已经完成了子树的完整构建
+    if(!has_child_test(dentry_root)) {       // 此时已经完成了子树的完整构建
+
+
         // 如果此时有子节点
         auto& sub_dirs = dentry_root->get_subdir();
+
+        
+
         // 遍历并递归删除所有子节点
-        del_nodes.emplace_back(dentry_root->get_inode(),sub_dirs.size());
+        del_nodes.push_back({*dentry_root->get_inode(),sub_dirs.size()});
+
+
+
         for (auto& [name, child_node] : sub_dirs) {
             del_tree(child_node,del_nodes);       // 递归删除子
 
@@ -549,7 +592,10 @@ void dirTree::del_tree(dentry* dentry_root,vector<pair<inode*,size_t>>&del_nodes
         }
 
         dentry_root->clear_child();         // 必须释放完所有的子才能调用清空child_哈希表
+    }else{
+        del_nodes.push_back({*dentry_root->get_inode(),0});
     }
+    
 
     /// TODO——: 1. 通知I/O回收此块
 
@@ -579,20 +625,47 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
     // 需要更新父的表项
     // dentry* parent_node = work_dir/*->get_parent()*/;
 
+    auto child_node = work_dir->get_subdir()[name];     ///////////////// ATTENTION
+
+    if(child_node->get_type()!=DIR)
+    {
+        if(child_node->get_inode()==nullptr)
+        {
+            inode* new_inode = (inode*)malloc(sizeof(inode));
+            new_inode->i_num = child_node->get_inode_num();
+            bs->ReWrinode(*new_inode, true);
+            child_node->set_inode(new_inode);
+        }
+        bs->freeSIMFILE(*child_node->get_inode());
+        spdlog::info("Deleted FILE '{}' under '{}'", name, work_dir->get_name());
+        return true;
+    }
     size_t pri_parent_num_of_children=work_dir->get_subdir().size();
 
-    vector<pair<inode*,size_t>>del_nodes;
+    vector<pair<inode, size_t>>del_nodes;
 
 
-    auto child_node = name_travesal(name, work_dir);
 
+
+
+
+    // auto child_node = name_travesal(name, work_dir);
+
+    
+
+    
+    // string child_name = child_node->get_name();
+
+   
     del_tree(child_node,del_nodes);     // 此时可以删除树
 
     cout<<"del_nodes"<<del_nodes.size()<<endl;
 
-    work_dir->erase_subdir(child_node->get_name());        // 待删除节点的根节点移除此项
+
+    work_dir->erase_subdir(name);        // 待删除节点的根节点移除此项
     
     work_dir->set_dirty(true);                           // 设置父的节点脏位
+
 
     
 
@@ -602,11 +675,14 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
 
     dentry_replacer_->Erase(child_node);                      // dentry_replacer清除
 
-    
+    for(int i=0;i<del_nodes.size();i++)
+    {
+        cout<<i<<" "<<del_nodes[i].first.i_num<<" "<<del_nodes[i].second<<endl;
+    }
 
     bs->freeblock(del_nodes,*work_dir->get_inode(),pri_parent_num_of_children);
 
-    spdlog::debug("Deleted subdir '{}' under '{}'", name, work_dir->get_name());
+    spdlog::info("Deleted subdir '{}' under '{}'", name, work_dir->get_name());
 
     return true;
 }

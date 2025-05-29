@@ -1,6 +1,8 @@
+
 #pragma once
 
 #include "dentry.h"
+#include "ddq.h"
 
 class file_manager {
 
@@ -45,6 +47,14 @@ class file_manager {
      * if the file does not exist, create it
     */
     void writeFile(std::string& filename, std::string& content, dentry* current_dir);
+
+    /*
+    * @brief create a hard link to a file
+    * @param filename the name of the file to link
+    * @param current_dir the current directory
+    * create a hard link to a file in the current directory
+    */
+    void fileHardLink(std::string& source_path, std::string& target_path);
 
     
     

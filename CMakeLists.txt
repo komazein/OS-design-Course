@@ -19,6 +19,7 @@ set(MAIN_SOURCES
     src/block/ddq.cpp
     src/dentry/dentry.cpp
     src/shell/file_system_manager.cpp
+    # src/parse/lex.yy.cc
     src/shell/tool.cpp
 )
 
