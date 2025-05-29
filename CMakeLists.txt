@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(OS_ZWKL)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # 可执行文件输出到项目根目录的bin文件夹
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)   
 
@@ -20,6 +24,7 @@ set(SOURCES
     src/dentry/dentry.cpp
     src/parse/lex.yy.cc
     src/shell/file_system_manager.cpp
+    src/file/filemanager.cpp
     src/shell/tool.cpp
 )
 

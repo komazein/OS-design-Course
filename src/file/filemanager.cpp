@@ -1,5 +1,5 @@
 
-#include "../include/filemanager.h"
+#include "filemanager.h"
 #include <spdlog/spdlog.h>
 
 void file_manager::openFile(std::string& filename, dentry* current_dir)
@@ -92,10 +92,12 @@ void file_manager::readFile(std::string& filename, dentry* current_dir)
     }
 
     // check if the file is open
-    for (const auto& f : open_files_) {
+    for (auto& f : open_files_) {
         if (f.f_path == file_entry->get_name()) {
             // read the file content and print it to the console
             // here we just print a message, in real implementation, we would read the content from disk
+            auto bs = dir_tree_->get_bs();
+            bs->readSIMfromBLOCK(*f.f_inode);
             spdlog::info("Reading file '{}': [Content would be displayed here]", filename);
             return;
         }
