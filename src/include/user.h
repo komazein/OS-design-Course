@@ -17,8 +17,11 @@ class user {
          
         void authorize(dentry* accessed_file, user* authorized_user);
            
+        void fomat();
+        
+        void createUser();
 
-
+        
 
 
 

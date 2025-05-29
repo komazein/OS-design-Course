@@ -1,4 +1,4 @@
-# OS_ZXY
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 100# OS_ZXY
 
 ## 环境要求
 

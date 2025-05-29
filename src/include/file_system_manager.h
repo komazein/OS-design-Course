@@ -85,6 +85,13 @@ class file_system_manager{
          */
         void command_cat(std::string& filename);
 
+        /**
+         * @brief write content to file
+         * @param filename file name
+         * @param content content to write
+         */
+        void command_edit(std::string& filename, std::string& content);
+
         // shell commmand for user
         void exit();
 

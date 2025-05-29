@@ -97,7 +97,8 @@ void file_manager::readFile(std::string& filename, dentry* current_dir)
             // read the file content and print it to the console
             // here we just print a message, in real implementation, we would read the content from disk
             auto bs = dir_tree_->get_bs();
-            bs->readSIMfromBLOCK(*f.f_inode);
+            char* fileContents = bs->readSIMfromBLOCK(*f.f_inode);
+            printf("Reading file '%s': %s\n", filename.c_str(), fileContents);
             spdlog::info("Reading file '{}': [Content would be displayed here]", filename);
             return;
         }

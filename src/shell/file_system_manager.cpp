@@ -113,18 +113,35 @@ void file_system_manager::command_touch(std::string& filename)
         spdlog::warn("Current directory is not set. Cannot create file '{}'", filename);
         exit();
     }
+    // Check if the file already exists
+    if(current_dir_->find_subdir(filename) != nullptr) {
+        spdlog::warn("File '{}' already exists in '{}'", filename, current_dir_->get_name());
+        return;
+    }
+    
+    
+    dir_tree_->alloc_dir(filename, current_dir_, nullptr, SIM_FILE);
+    spdlog::info("File '{}' created successfully in '{}'", filename, current_dir_->get_name());
 
 }
 
 //TODO: finish func of delete file
-void file_system_manager::command_delete(std::string& filename)
-{
-    if (current_dir_ == nullptr) {
-        spdlog::warn("Current directory is not set. Cannot delete file '{}'", filename);
-        exit();
-    }
+// void file_system_manager::command_delete(std::string& filename)
+// {
+//     if (current_dir_ == nullptr) {
+//         spdlog::warn("Current directory is not set. Cannot delete file '{}'", filename);
+//         exit();
+//     }
 
-}
+//     // Check if the file exists
+//     if(current_dir_->find_subdir(filename) == nullptr) {
+//         spdlog::warn("File '{}' not found in '{}'", filename, current_dir_->get_name());
+//         return;
+//     }
+
+    
+
+// }
 
 //TODO: finish func of cat file
 void file_system_manager::command_cat(std::string& filename)
@@ -134,6 +151,24 @@ void file_system_manager::command_cat(std::string& filename)
         exit();
     }
 
+}
+
+void file_system_manager::command_edit(std::string& filename, std::string& content)
+{
+    if (current_dir_ == nullptr) {
+        spdlog::warn("Current directory is not set. Cannot edit file '{}'", filename);
+        exit();
+    }
+
+    // Check if the file exists
+    dentry* file_entry = current_dir_->find_subdir(filename);
+    if (file_entry == nullptr) {
+        spdlog::warn("File '{}' not found in '{}'", filename, current_dir_->get_name());
+        return;
+    }
+
+    // Call file manager to edit the file
+    file_manager_->writeFile(filename, content, current_dir_);
 }
 
 void file_system_manager::exit()

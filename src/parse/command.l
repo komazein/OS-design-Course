@@ -43,7 +43,7 @@ mkdir[ \t]+[a-zA-Z0-9_/.\-]+ {
     fileSystem->command_mkdir(arg);
 }
 
-chdir[ \t]+[a-zA-Z0-9_/.\-]+ {
+chdir[ \t]+([a-zA-Z0-9_\./\-]+) {
     sscanf(yytext, "chdir %s", arg_c);
     std::string arg(arg_c);
     fileSystem->command_cd(arg);
@@ -68,7 +68,7 @@ lkdir[ \t]+[a-zA-Z0-9_/.\-]+[ \t]+[a-zA-Z0-9_/.\-]+ {
 }
 
 
-ln[ \t]+([a-zA-Z0-9_/.\-]+)[ \t]+([a-zA-Z0-9_/.\-]+) {
+lndir[ \t]+([a-zA-Z0-9_/.\-]+)[ \t]+([a-zA-Z0-9_/.\-]+) {
     char src[256], dest[256];
     sscanf(yytext, "ln %255s %255s", src, dest);
     std::string arg1(src);
@@ -89,11 +89,7 @@ touch[ \t]+[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+ {
     fileSystem->command_touch(arg);
 }
 
-delete[ \t]+[a-zA-Z0-9_/.\-]+ {
-    sscanf(yytext, "delete %s", arg_c);
-    std::string arg(arg_c);
-    fileSystem->command_delete(arg);
-}
+
 
 cat[ \t]+[a-zA-Z0-9_/.\-]+ {
     sscanf(yytext, "cat %s", arg_c);
@@ -101,18 +97,30 @@ cat[ \t]+[a-zA-Z0-9_/.\-]+ {
     fileSystem->command_cat(arg);
 }
 
+edit[ \t]+([a-zA-Z0-9_\./\-]+)[ \t]+(.+) {
+    std::string full(yytext);
+    size_t first_space = full.find_first_of(" \t");
+    size_t second_space = full.find_first_of(" \t", first_space + 1);
+
+    std::string filename = full.substr(first_space + 1, second_space - first_space - 1);
+    std::string content = full.substr(second_space + 1);
+
+    fileSystem->command_edit(filename, content);  
+}
+
+
 
 
 exit {
-    fileSystem->exit();
+    file_system_manager->exit();
 }
 
 format {
-    fileSystem->format();
+    file_system_manager->format();
 }
 
 help {
-    fileSystem->help();
+    file_system_manager->help();
 }
 
 
