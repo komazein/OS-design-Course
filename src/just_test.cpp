@@ -54,6 +54,35 @@ void TESTWRITEBACK()
 }
 
 
+
+void TESTWRITEBACK2()
+{
+    file_system_manager fs;
+    string next_root="test0";
+    fs.command_cd(next_root);
+    next_root="test20";
+    fs.command_cd(next_root);
+    string test_name="test10086";
+    fs.command_mkdir(test_name);
+    fs.Exit();
+}
+
+void TESTWRITEBACK3()
+{
+    file_system_manager fs;
+    string next_root="test0";
+    fs.command_cd(next_root);
+    string test_name="test10086";
+    fs.command_mkdir(test_name);
+    fs.command_cd(test_name);
+    fs.command_mkdir(test_name);
+    // string test_name="test10086";
+    // //fs.command_mkdir(test_name);
+    // next_root=test_name;
+    // fs.command_cd(next_root);
+    // fs.command_mkdir(test_name);
+    fs.Exit();
+}
 /*
 void func()
 {

@@ -17,7 +17,6 @@ int main()
 
     bs_->new_disk();
     bs_->writesuperblock();
-    bs_->ReWrinode(*dir_tree_->get_root()->get_inode(),false);
     dir_entry par;
     vector<dir_entry>temp;
     dir_tree_->get_root()->getDir_entry(par,temp);

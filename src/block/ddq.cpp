@@ -321,6 +321,7 @@ void blockScheduler::freeblock(vector<pair<inode*,size_t>>&del_nodes,inode&par,s
 }
 void blockScheduler::writechild(dir_entry par,vector<dir_entry>&a,inode &id,size_t num)
 {
+    ReWrinode(id,false);
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+id.i_block[0]*512,SEEK_SET);
     fwrite(&par,sizeof(dir_entry),1,fp);

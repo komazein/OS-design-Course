@@ -108,13 +108,16 @@ public:
     // 获得磁盘存储格式的dir_entery
     void getDir_entry(dir_entry& par, vector<dir_entry>& child);
 
+    // 设置inode
+    void set_inode(inode* new_inode) { d_inode_ = new_inode; }
+
 
 
 private:
     
     string d_name_;                  // 当前目录项名
 
-    inode* d_inode_;                // 指向 inode
+    inode* d_inode_{nullptr};                // 指向 inode
     
     size_t d_inode_num_;            // 当前节点的inode编号
     
@@ -469,7 +472,19 @@ public:
     blockScheduler* get_bs() { return bs; }
 
 
-    void load_root(inode*root_inode);
+    void load_root(inode* root_inode);
+
+
+    /**
+     * 
+     * @brief 添加软链接
+     * 
+     * @param sourse_dir 一个已经存在的文件目录/文件, 被软连接的对象
+     * 
+     * @param target_dir 链接的目标文件
+     */
+    bool add_soft_link(string& sourse_dir, string& target_dir, dentry* work_dir);
+
 
 private:
 

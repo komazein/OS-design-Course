@@ -135,6 +135,7 @@ void file_system_manager::Exit()
 {
     size_t counter = 0;
     dir_tree_->cut_tree(dir_tree_->get_root(), counter);
+    bs_->writesuperblock();
     spdlog::info("Exiting shell...");
     
     // Perform any necessary cleanup here

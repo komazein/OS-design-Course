@@ -11,12 +11,13 @@
 
 void dentry::add_subdir(vector<dir_entry>& dir_entries)
 {
+    cout<<dir_entries.size()<<endl;
     for(auto& dir_entry : dir_entries){
         dentry* child_dentry = new dentry(dir_entry.name, dir_entry.inode_num, this);
         d_child_[dir_entry.name] = child_dentry;
 
         // 日志显示
-        spdlog::debug("Added subdir '{}' (inode={}) under '{}'", 
+        spdlog::info("Added subdir '{}' (inode={}) under '{}'", 
             dir_entry.name, dir_entry.inode_num, d_name_);
     }
 }
@@ -90,13 +91,15 @@ void dentry::getDir_entry(dir_entry&par,vector<dir_entry>&child)
     strcpy(par.name,parname.c_str());
     par.type=get_inode()->i_type;
     for(auto&[name, dentry_node] : get_subdir()){
-
         dir_entry temp;
         strcpy(temp.name,name.c_str());
         temp.inode_num=dentry_node->get_inode_num();
+        cout<<"=========="<<endl;
+        exit(1);
         temp.type=dentry_node->get_inode()->i_type;
         child.push_back(temp);
     }
+    
 }
 
 
@@ -204,13 +207,25 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
 
     stringstream ss(path);      // 字符串分割
 
+    bool start = true;      // 只有第一个以'/'开头的才表示绝对路径, 后面可能是这样的形式: a/b/, 此时最后这个就得忽略
+
     string name;        // 存储分割的字符串
     while(getline(ss, name, '/')){
 
         dentry* dentry_next;
 
-        if(name == "."){
-            // 如果有当前路径的标识, 自动跳过
+        if(name.empty() && start == true){
+            // 如果此时以"/"为开始的路径名, 则说明为绝对路径
+            // 从root_开始查找
+            dentry_next = get_root();
+            start = false;
+            continue;
+        }
+
+        start = false;  
+
+        if(name == "." || (name.empty() && start == false)){
+            // 如果有当前路径的标识或者最后的/(见上), 自动跳过
             continue;
         }
 
@@ -238,7 +253,7 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
                     
                     /// 此处进行I/O操作获得子目录项存入dir_entries
                     vector<dir_entry> dir_entries;              // 假定已经返回了目录项
-
+                    
                     bs->loadchild(dir_entries, *search->get_inode());
 
                     search->add_subdir(dir_entries);        // 此时已经加入了, 重新查找
@@ -264,7 +279,13 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
 
         // 否则继续找子节点中是否有这个路径
     }
-
+    if(search->get_inode()==nullptr)
+    {
+        inode*temp=(inode*)malloc(sizeof(inode));
+        temp->i_num=search->get_inode_num();
+        search->set_inode(temp);
+        bs->ReWrinode(*search->get_inode(),true);
+    }
     spdlog::info("Traversal success: reached '{}'", search->get_name());
 
     return search;
@@ -278,6 +299,27 @@ bool dirTree::add_hash(string& name, dentry* parent, dentry* dentry_node)
 
 bool dirTree::name_search_test(string& name, dentry* work_dir/*, bool update_hash*/)
 {
+    if(work_dir->get_flag() == UNLOAD_CHILD_FROM_DISK) {   
+
+        spdlog::info("In order to ensure '{}' whether have '{}',loading it's children from disk.", work_dir->get_name(), name);
+        /// TODO_finish:此处进行I/O操作获得子目录项存入dir_entries
+        vector<dir_entry> dir_entries;              // 假定已经返回了目录项
+
+        bs->loadchild(dir_entries, *work_dir->get_inode());
+
+        for(int i=0;i<dir_entries.size();i++)
+        {
+            cout<<dir_entries[i].name<<" ";
+        }
+        cout<<endl;
+
+        work_dir->set_flag(FIRST_LOAD_TO_MEMORY);
+        
+        work_dir->add_subdir(dir_entries);       // 这时加入了新的子节点
+        
+        auto new_add_dir = work_dir->find_subdir(name);
+        if(new_add_dir != nullptr)  { return false; }       
+    }
     // 首先初步利用哈希查找是否存在该目录项(保证不能重名)
     if(hash_search(name, work_dir)) { return false; }
 
@@ -288,21 +330,7 @@ bool dirTree::name_search_test(string& name, dentry* work_dir/*, bool update_has
     
     // 最后保证磁盘中确实无此目录
 
-    if(work_dir->get_flag() == UNLOAD_CHILD_FROM_DISK) {   
-
-        spdlog::info("In order to ensure '{}' whether have '{}',loading it's children from disk.", work_dir->get_name(), name);
-        /// TODO_finish:此处进行I/O操作获得子目录项存入dir_entries
-        vector<dir_entry> dir_entries;              // 假定已经返回了目录项
-        
-        bs->loadchild(dir_entries, *work_dir->get_inode());
-        work_dir->set_flag(FIRST_LOAD_TO_MEMORY);
-        
-        work_dir->add_subdir(dir_entries);       // 这时加入了新的子节点
-        
-        auto new_add_dir = work_dir->find_subdir(name);
-        if(new_add_dir != nullptr)  { return false; }       
-
-    }
+    
 
     return true;        // 没找到同名的节点
 }
@@ -387,15 +415,13 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
 
     dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir);
     new_node->set_flag(FIRST_LOAD_TO_MEMORY);
-    
+    new_node->set_dirty(true);//////////////check_it after consider SIM_FILE
+
     work_dir->add_single_subdir(new_node);      // 为当前工作路径加入新的子目录
 
     // 此目录被修改(因为增加了目录项), 所以设置脏位为true
     work_dir->set_dirty(true);
 
-
-    // 此目录被修改(因为增加了目录项), 所以设置脏位为true
-    work_dir->set_dirty(true);
 
     // 还需要更新全局哈希
     cache_->add_dentry(name, new_node, work_dir);
@@ -586,10 +612,31 @@ void dirTree::cut_tree(dentry* dentry_node, size_t& counter)
 
     if(!dentry_node) { return; }        //仅为安全性检查, 正常不会执行
 
-    if(dentry_node->has_subdir()) {
-
         auto& sub_dirs = dentry_node->get_subdir();         // 获取其子
         
+
+        // 此时根据脏位判断是否需要写回disk中
+        if(dentry_node->get_dirty()){
+
+            // dirtry : true 需要写回disk中
+            /// TODO: 通知bs刷盘
+            dir_entry par;
+            vector<dir_entry>child;
+            dentry_node->getDir_entry(par,child);
+            cout<<"child_num"<<child.size()<<endl;
+            
+            if(par.type==DIR)
+                bs->writechild(par,child,*dentry_node->get_inode(),dentry_node->get_subdir().size());
+            else
+                bs->ReWrinode(*dentry_node->get_inode(),false);
+            // bs->writeBlocknumFOR>sim();//mulu
+            //writeinode
+            spdlog::info("Before recycle the '{}' node, write back to disk.", 
+                    dentry_node->get_name());
+
+        }
+
+
         // 递归删除所有的子节点
         for (auto& [name, child_node] : sub_dirs) {
             cache_->erase_dentry(name, dentry_node);  // 在 child 被 delete 前移除哈希映射
@@ -600,31 +647,14 @@ void dirTree::cut_tree(dentry* dentry_node, size_t& counter)
 
             cut_tree(child_node, counter);           // 释放节点
         }
-
         dentry_node->clear_child();         // 必须释放完所有的子才能调用清空child_哈希表
-    }
 
-    // 此时根据脏位判断是否需要写回disk中
-    if(dentry_node->get_dirty()){
-
-        // dirtry : true 需要写回disk中
-        /// TODO: 通知bs刷盘
-        bs->ReWrinode(*dentry_node->get_inode(),false);
-        dir_entry par;
-        vector<dir_entry>child;
-        dentry_node->getDir_entry(par,child);
-        bs->writechild(par,child,*dentry_node->get_inode(),dentry_node->get_subdir().size());
-        // bs->writeBlocknumFOR>sim();//mulu
-        //writeinode
-        spdlog::info("Before recycle the '{}' node, write back to disk.", 
-                dentry_node->get_name());
-
-    }
+    
     if(dentry_node->get_parent() != nullptr){
         spdlog::info("Free the '{}' node under '{}' for memory free.", 
             dentry_node->get_name(), dentry_node->get_parent()->get_name());
     }
-    
+
     delete dentry_node;
     
     ++counter;      // 统计删除的个数  
@@ -677,4 +707,24 @@ size_t dirTree::cut_dirTree()
     }
 
     return counter;
+}
+
+bool dirTree::add_soft_link(string& sourse_dir, string& target_dir, dentry* work_dir)
+{
+    // 首先查找sourse_dir是否存在
+    auto sourse_dir_dentry = name_travesal(sourse_dir, work_dir);
+
+    if(sourse_dir_dentry == nullptr){
+        spdlog::warn("Add hard link failed. Because of the '{}' doesn't exists.", sourse_dir);
+        return false;
+    }
+
+    auto sourse_inode = sourse_dir_dentry->get_inode();
+    
+    
+
+    // 为软连接新建文件, 此文件仅为LINK类型, 内容记录sourse_dir的绝对路径
+
+    return true;
+
 }
