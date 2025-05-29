@@ -661,7 +661,7 @@ void blockScheduler::SIMwriteBK(vector<size_t>newlist,size_t n,char*a)
     }
     fclose(fp);
 }
-void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,char*a,char*a)
+void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,char*a)
 {
     size_t num=(id.i_size+511)/512;
     vector<size_t>newlist;

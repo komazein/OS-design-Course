@@ -2,7 +2,7 @@
 #include <spdlog/spdlog.h>
 
 
-void shell_manager::command_mkdir(std::string& dirname) {
+void file_system_manager::command_mkdir(std::string& dirname) {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
         exit();
@@ -68,24 +68,27 @@ void file_system_manager::command_rm(std::string& dirname)
 }
 
 //TODO: finish func of symbolic link dir
-void file_system_manager::command_lkdir(std::string& dirname)
+void file_system_manager::command_lkdir(std::string& source_path, std::string& target_path)
 {
     if (current_dir_ == nullptr) {
-        spdlog::warn("Current directory is not set. Cannot create symbolic link '{}'", dirname);
+        spdlog::warn("Current directory is not set. Cannot create symbolic link in the path '{}'", target_path);
+        exit();
+    }
+    // implementation of symbolic link creation
+}
+
+
+void file_system_manager::command_lndir(std::string& source_path, std::string& target_path)
+{
+    if (current_dir_ == nullptr) {
+        spdlog::warn("Current directory is not set. Cannot create hard link in path '{}'", target_path);
         exit();
     }
 
+    file_manager_->fileHardLink(source_path, target_path);
+    spdlog::info("Hard link created from '{}' to '{}'", source_path, target_path);
 }
 
-//TODO: finish func of hard link dir
-void file_system_manager::command_lndir(std::string& dirname)
-{
-    if (current_dir_ == nullptr) {
-        spdlog::warn("Current directory is not set. Cannot create hard link '{}'", dirname);
-        exit();
-    }
-
-}
 
 void file_system_manager::command_find(std::string& filename)
 {

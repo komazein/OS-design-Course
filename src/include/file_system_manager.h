@@ -1,4 +1,5 @@
 #pragma once
+#include "filemanager.h"
 #include "tool.h"
 #include "dentry.h"
 #include "ddq.h"
@@ -51,13 +52,13 @@ class file_system_manager{
          * @brief ����������������
          * @param dirname Ŀ���ļ���Ŀ¼
          */
-        void command_lkdir(std::string& dirname);
+        void command_lkdir(std::string& source_path, std::string& target_path);
 
         /**
          * @brief ����Ӳ��������
          * @param dirname Ŀ���ļ���Ŀ¼
          */
-        void command_lndir(std::string& dirname);
+        void command_lndir(std::string& source_path, std::string& target_path);
 
         /**
          * @brief �����ļ�����

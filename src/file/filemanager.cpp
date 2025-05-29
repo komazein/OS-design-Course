@@ -75,6 +75,7 @@ void file_manager::closeFile(std::string& filename, dentry* current_dir)
     spdlog::info("File '{}' is not currently open", filename);
 }
 
+//TODO: implement readFile
 void file_manager::readFile(std::string& filename, dentry* current_dir)
 {
     if (current_dir == nullptr) {
@@ -101,4 +102,74 @@ void file_manager::readFile(std::string& filename, dentry* current_dir)
     }
 
     spdlog::warn("File '{}' is not currently open", filename);
+}
+
+//TODO: implement writeFile
+void file_manager::writeFile(std::string& filename, std::string& content, dentry* current_dir)
+{
+    if (current_dir == nullptr) {
+        spdlog::warn("Current directory is not set. Cannot write to file '{}'", filename);
+        return;
+    }
+
+    // get the file in the current directroy
+    dentry* file_entry = current_dir->find_subdir(filename);
+    // file not exist
+    if (file_entry == nullptr) {
+        spdlog::warn("File '{}' not found in current directory '{}'", filename, current_dir->get_name());
+        return;
+    }
+
+    // check if the file is open
+    for (auto& f : open_files_) {
+        if (f.f_path == file_entry->get_name()) {
+            // write the content to the file
+            // here we just print a message, in real implementation, we would write the content to disk
+            spdlog::info("Writing to file '{}': [Content: {}]", filename, content);
+            return;
+        }
+    }
+
+    spdlog::warn("File '{}' is not currently open", filename);
+}
+
+void file_manager::fileHardLink(std::string& source_path, std::string& target_path)
+{
+    if (current_dir_ == nullptr) {
+        spdlog::warn("Current directory is not set. Cannot create hard link for file path '{}'", source_path);
+        return;
+    }
+
+    // get the file in the current directroy
+    dentry* file_entry = dir_tree_->name_travesal(source_path, current_dir_);
+    // file not exist
+    if (file_entry == nullptr) {
+        spdlog::warn("File path '{}' not found in current directory '{}'", source_path, current_dir_->get_name());
+        return;
+    }
+
+    // create a hard link to the file
+    // here we just print a message, in real implementation, we would create a hard link on disk
+    // example:
+    // ln ./xxxx/xxx/file.txt ./xxxx/xxx/file_link.txt
+    // filename is file_link.txt and the parent directory path is ./xxxx/xxx/
+    std::string filename = target_path.substr(target_path.find_last_of('/') + 1);
+    std::string parent_dir_path = target_path.substr(0, target_path.find_last_of('/'));
+    if (parent_dir_path.empty()) {
+        parent_dir_path = "/"; // if no parent directory, use root
+    }
+
+    dentry* parent_dir = dir_tree_->name_travesal(parent_dir_path, current_dir_);
+    if(parent_dir == nullptr){
+        spdlog::warn("Parent directory '{}' not found for file path '{}'", parent_dir_path, source_path);
+        return;
+    }
+    // use alloc_dir create the hard link using the file_entry's inode
+    if(dir_tree_->alloc_dir(filename, parent_dir, file_entry->get_inode(), file_entry->get_inode()->i_type) == false) {
+        spdlog::warn("Failed to create hard link for file path '{}': file already exists", source_path);
+        return;
+    }
+    file_entry->get_inode()->di_link_count++; // increment link count
+
+    spdlog::info("Creating hard link for file path '{}'", source_path);
 }

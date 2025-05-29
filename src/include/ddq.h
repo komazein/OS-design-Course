@@ -1,3 +1,4 @@
+#pragma once
 #include"fs_types.h"
 #include"superblock.h"
 // #include"dentry.h"

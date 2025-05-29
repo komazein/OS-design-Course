@@ -46,6 +46,14 @@ class file_manager {
     */
     void writeFile(std::string& filename, std::string& content, dentry* current_dir);
 
+    /*
+    * @brief create a hard link to a file
+    * @param filename the name of the file to link
+    * @param current_dir the current directory
+    * create a hard link to a file in the current directory
+    */
+    void file_manager::fileHardLink(std::string& source_path, std::string& target_path);
+
     
     
     private:

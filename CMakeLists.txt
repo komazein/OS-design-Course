@@ -18,7 +18,12 @@ set(SOURCES
     src/block/superBlock.cpp            # if new *.cpp file add to the project, don't forget to add here
     src/block/ddq.cpp
     src/dentry/dentry.cpp
+    src/parse/lex.yy.cc
+    src/shell/file_system_manager.cpp
+    src/shell/tool.cpp
 )
 
 # 创建可执行文件
 add_executable(main ${SOURCES})
+
+target_link_libraries(main fl)

@@ -1,5 +1,11 @@
 #include "test.h"
 #include <spdlog/spdlog.h>
+
+
+
+
+
+
 // void func()
 // {
 //     LRUReplacer replacer;
@@ -118,17 +124,17 @@ void func2()
     auto it = dentry_table_.find({parent, name});
 }
 
-int yylex();
-void testFuncMkdir()
-{
-    file_system_manager sb;
 
-    while (1)
-    {
-        printf("[");
-        
-        printf("]$ ");
-        yylex();
-    }
+// void testFuncMkdir()
+// {
     
-}
+
+//     while (1)
+//     {
+//         printf("[");
+        
+//         printf("]$ ");
+//         yylex();
+//     }
+    
+// }
