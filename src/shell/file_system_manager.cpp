@@ -45,9 +45,10 @@ void file_system_manager::command_ls()
     for (const auto& pair : current_dir_->get_subdir()) {
         std::string subdir_name = pair.first;
         dentry* subdir = pair.second;
-        TYPE type = subdir->get_inode()->i_type;
+        TYPE type = subdir->get_type();
         printLsResult(subdir_name, type, ++resultNum); 
     }
+    cout<<endl;
 }
 
 void file_system_manager::command_rm(std::string& dirname)
@@ -114,11 +115,15 @@ void file_system_manager::command_touch(std::string& filename)
 //TODO: finish func of delete file
 void file_system_manager::command_delete(std::string& filename)
 {
+    cout<<"============================================"<<endl;
+    cout<<bs_->getfreeblocknum()<<endl;
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot delete file '{}'", filename);
         Exit();
     }
-
+    dir_tree_->free_dir(filename,current_dir_);
+    cout<<bs_->getfreeblocknum()<<endl;
+    cout<<"============================================"<<endl;
 }
 
 //TODO: finish func of cat file

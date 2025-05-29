@@ -15,19 +15,20 @@ class blockScheduler;
 class dentry
 {
 public:
-    dentry(string d_name, inode* d_inode, size_t d_inode_num, dentry* d_parent) //: 
-        //d_name_(d_name), d_inode_(d_inode), d_inode_num_(d_inode_num), d_parent_(d_parent) 
+    dentry(string d_name, inode* d_inode, size_t d_inode_num, dentry* d_parent,TYPE d_type) //: 
+        //d_name_(d_name), d_inode_(d_inode), d_inode_num_(d_inode_num), d_parent_(d_parent) ,d_type_(d_type)
     { 
         d_name_=d_name;
         d_inode_=d_inode;
         d_inode_num_=d_inode_num;
         d_parent_=d_parent; 
+        d_type_=d_type;
     }
 
     // 父节点初始化子节点时实例化子节点
     // param: 此时了解到的子节点信息只有名称和子节点inode号
-    dentry(string d_name, size_t d_inode_num, dentry* d_parent) : 
-        d_name_(d_name), d_inode_num_(d_inode_num), d_parent_(d_parent)   
+    dentry(string d_name, size_t d_inode_num, dentry* d_parent,TYPE d_type) : 
+        d_name_(d_name), d_inode_num_(d_inode_num), d_parent_(d_parent),d_type_(d_type)   
     { } 
 
     // ~dentry()     // 根节点管理子节点的释放
@@ -111,7 +112,7 @@ public:
     // 设置inode
     void set_inode(inode* new_inode) { d_inode_ = new_inode; }
 
-
+    TYPE get_type(){return d_type_;}
 
 private:
     
@@ -131,6 +132,8 @@ private:
     time_t d_time_;                 // 修改时间         (这个可以结合替换策略)
     
     uint16_t d_ref_;                // 引用计数
+
+    TYPE d_type_;
 };
 
 
@@ -470,7 +473,6 @@ public:
     size_t cut_dirTree();
 
     blockScheduler* get_bs() { return bs; }
-
 
     void load_root(inode* root_inode);
 

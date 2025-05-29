@@ -17,3 +17,7 @@ void TESTWRITEBACK();
 void TESTWRITEBACK2();
 
 void TESTWRITEBACK3();
+
+void TESTLS();
+
+void TESTDELETE();

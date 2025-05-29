@@ -13,7 +13,7 @@ void dentry::add_subdir(vector<dir_entry>& dir_entries)
 {
     cout<<dir_entries.size()<<endl;
     for(auto& dir_entry : dir_entries){
-        dentry* child_dentry = new dentry(dir_entry.name, dir_entry.inode_num, this);
+        dentry* child_dentry = new dentry(dir_entry.name, dir_entry.inode_num, this,dir_entry.type);
         d_child_[dir_entry.name] = child_dentry;
 
         // 日志显示
@@ -94,9 +94,7 @@ void dentry::getDir_entry(dir_entry&par,vector<dir_entry>&child)
         dir_entry temp;
         strcpy(temp.name,name.c_str());
         temp.inode_num=dentry_node->get_inode_num();
-        cout<<"=========="<<endl;
-        exit(1);
-        temp.type=dentry_node->get_inode()->i_type;
+        temp.type=dentry_node->get_type();
         child.push_back(temp);
     }
     
@@ -159,7 +157,7 @@ bool dcache::erase_dentry(const string& name, dentry* dentry_node)
 
 void dirTree::init_root(string root_name, size_t root_inode_num, inode* root_inode)
 {
-    root_ = new dentry(root_name, root_inode, root_inode_num, nullptr);     // root无父节点
+    root_ = new dentry(root_name, root_inode, root_inode_num, nullptr,DIR);     // root无父节点
 
     root_inode->i_type = DIR;
 
@@ -175,7 +173,7 @@ void dirTree::init_root(string root_name, size_t root_inode_num, inode* root_ino
 void dirTree::load_root(inode*root_inode)
 {
     string root_name="/";
-    auto node = new dentry(root_name, root_inode, root_inode->i_num, nullptr);
+    auto node = new dentry(root_name, root_inode, root_inode->i_num, nullptr,DIR);
     root_ = node;
   
 
@@ -354,7 +352,7 @@ bool dirTree::has_child_test(dentry* dentry_node)
         vector<dir_entry> dir_entries;              // 假定已经返回了目录项
 
         bs->loadchild(dir_entries, *dentry_node->get_inode());
-        
+        cout<<"LSchildnum"<<dir_entries.size()<<endl;
         dentry_node->add_subdir(dir_entries);       // 加入子
         
         // 此时检查是否加入了新的
@@ -413,7 +411,7 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
         return false;///块不够
     }
 
-    dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir);
+    dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir,type);
     new_node->set_flag(FIRST_LOAD_TO_MEMORY);
     new_node->set_dirty(true);//////////////check_it after consider SIM_FILE
 
@@ -540,13 +538,14 @@ void dirTree::del_tree(dentry* dentry_root,vector<pair<inode*,size_t>>&del_nodes
         // 遍历并递归删除所有子节点
         del_nodes.emplace_back(dentry_root->get_inode(),sub_dirs.size());
         for (auto& [name, child_node] : sub_dirs) {
+            del_tree(child_node,del_nodes);       // 递归删除子
+
             cache_->erase_dentry(name, dentry_root);  // 在 child 被 delete 前移除哈希映射
 
             // 更新replacer
             dcache_replacer_->Erase({dentry_root, name});
             dentry_replacer_->Erase(child_node);
 
-            del_tree(child_node,del_nodes);       // 递归删除子
         }
 
         dentry_root->clear_child();         // 必须释放完所有的子才能调用清空child_哈希表
@@ -587,9 +586,15 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
 
     auto child_node = name_travesal(name, work_dir);
 
+    del_tree(child_node,del_nodes);     // 此时可以删除树
+
+    cout<<"del_nodes"<<del_nodes.size()<<endl;
+
     work_dir->erase_subdir(child_node->get_name());        // 待删除节点的根节点移除此项
     
     work_dir->set_dirty(true);                           // 设置父的节点脏位
+
+    
 
     cache_->erase_dentry(name, work_dir);                   // 清除全局哈希
 
@@ -597,7 +602,7 @@ bool dirTree::free_dir(string& name, dentry* work_dir)
 
     dentry_replacer_->Erase(child_node);                      // dentry_replacer清除
 
-    del_tree(child_node,del_nodes);     // 此时可以删除树
+    
 
     bs->freeblock(del_nodes,*work_dir->get_inode(),pri_parent_num_of_children);
 

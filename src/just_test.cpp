@@ -50,6 +50,12 @@ void TESTWRITEBACK()
         string test_name = "test" + to_string(i);
         fs.command_mkdir(test_name);
     }
+    next_root="test25";
+    fs.command_cd(next_root);
+    for(int i = 20; i < 30; i++){
+        string test_name = "test" + to_string(i);
+        fs.command_mkdir(test_name);
+    }
     fs.Exit();
 }
 
@@ -81,6 +87,22 @@ void TESTWRITEBACK3()
     // next_root=test_name;
     // fs.command_cd(next_root);
     // fs.command_mkdir(test_name);
+    fs.Exit();
+}
+void TESTLS()
+{
+    file_system_manager fs;
+    string next_root="test0";
+    fs.command_cd(next_root);
+    fs.command_ls();
+}
+
+void TESTDELETE()
+{
+    TESTWRITEBACK();
+    file_system_manager fs;
+    string del_root="test0";
+    fs.command_delete(del_root);
     fs.Exit();
 }
 /*

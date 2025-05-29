@@ -886,7 +886,7 @@ void blockScheduler::load(dirTree*dir_tree_)
     auto root_inode=iget(true);
     fseek(fp,sizeof(super_block),SEEK_SET);
     fread(root_inode,sizeof(inode),1,fp);
-    
+    cout<<"freenum"<<getfreeblocknum()<<endl;
     //fclose(fp);
 
     ///////////////////////构建根节点
