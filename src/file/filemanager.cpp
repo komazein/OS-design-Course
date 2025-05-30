@@ -32,6 +32,7 @@ void file_manager::openFile(std::string& filename, dentry* current_dir)
     new_file.f_ref = 1;  // open the file, so reference count is 1
     //fd starts from 0 and is incremented for each new file opened
     new_file.fd = open_files_.size();  // fd is the index in the open_files_ vector
+    new_file.di_mode = file_entry->get_inode()->i_mode; // mode is the inode's mode
     
     open_files_.push_back(new_file);
     spdlog::info("File '{}' opened successfully", filename);
@@ -96,6 +97,11 @@ void file_manager::readFile(std::string& filename, dentry* current_dir)
         if (f.f_path == file_entry->get_name()) {
             // read the file content and print it to the console
             // here we just print a message, in real implementation, we would read the content from disk
+            if(f.di_mode.ownerMode[0] != 'r')
+            {
+                spdlog::warn("File '{}' is not readable", filename);
+                return;
+            }
             auto bs = dir_tree_->get_bs();
             char* fileContents = bs->readSIMfromBLOCK(*f.f_inode);
             printf("Reading file '%s': %s\n", filename.c_str(), fileContents);
@@ -128,6 +134,16 @@ void file_manager::writeFile(std::string& filename, std::string& content, dentry
         if (f.f_path == file_entry->get_name()) {
             // write the content to the file
             // here we just print a message, in real implementation, we would write the content to disk
+            if(f.di_mode.ownerMode[1] != 'w')
+            {
+                spdlog::warn("File '{}' is not writable", filename);
+                return;
+            }
+            auto bs = dir_tree_->get_bs();
+            if(!bs->writeSIMfromBLOCK(*f.f_inode, strdup(content.c_str()))) {
+                spdlog::error("Failed to write to file '{}': insufficient disk space or other error", filename);
+                return;
+            }
             spdlog::info("Writing to file '{}': [Content: {}]", filename, content);
             return;
         }

@@ -79,6 +79,7 @@ struct inode
     uint8_t i_uid;           // owner_id
     uint8_t i_gid;           // group_id
     size_t i_size;          // file size
+    ACL i_acl;            // access control list
     time_t	i_atime;
     time_t	i_ctime;
     time_t	i_mtime;
