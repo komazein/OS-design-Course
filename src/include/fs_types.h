@@ -33,6 +33,7 @@ const int ONLY_MULTI_SIM=1;//不能变
 const int ABLE_DIRECT_SIM = 12;
 const int ABLE_ONE_SIM=3;
 const int ABLE_MULTI_SIM=1;//不能变
+const int MAXPASSWOREDLEN=12;
 
 const string FILE_MODE_INIT= "-rwxr--r--";
 const string DIR_MODE_INIT = "drwxr--r--";
@@ -151,4 +152,9 @@ enum DFALG
 };
 
 
-
+struct d_user
+{
+    size_t uid;
+    size_t gid;
+    char d_password[MAXPASSWOREDLEN];
+};

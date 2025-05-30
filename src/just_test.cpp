@@ -153,7 +153,32 @@ void RECURSIVELY_CREATED_FILE_FIND()
     fs.command_find(name2, 1);
     fs.Exit();
 }
-
+void TESTNEWDISK()
+{
+    file_system_manager fs;
+    fs.command_ls();
+    string next_root="user0";
+    fs.command_cd(next_root);
+    next_root="test0";
+    fs.command_mkdir(next_root);
+    fs.Exit();
+}
+void TESTSOFTLINK()
+{
+    file_system_manager fs;
+    fs.command_ls();
+    string next_root="user0";
+    fs.command_cd(next_root);
+    next_root="test0";
+    fs.command_mkdir(next_root);
+    fs.command_cd(next_root);
+    string SIM_FILE ="liubindashou";
+    fs.command_touch(SIM_FILE);
+    next_root ="../../user1";
+    fs.command_cd(next_root);
+    
+    fs.Exit();
+}
 
 /*
 void func()

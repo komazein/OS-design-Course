@@ -166,6 +166,8 @@ void dirTree::init_root(string root_name, size_t root_inode_num, inode* root_ino
     root_inode->i_atime = cur_time;
     root_inode->i_ctime = cur_time;
     root_inode->i_mtime = cur_time;
+    root_->set_flag(FIRST_LOAD_TO_MEMORY);
+    root_->set_dirty(true);
 
     spdlog::info("Initialize the file system root dentry node");
 

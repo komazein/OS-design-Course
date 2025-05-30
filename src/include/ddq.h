@@ -61,6 +61,8 @@ public:
     void freeinode(size_t ino);
     void load(dirTree*dir_tree_);
     void freeSIMFILE(inode&ino);
+    string getUSERroot(string username,string passwoard,int&uid,int&gid);
+    void freshUSER();
 private:
     super_block* sb;
     dirTree* dirtree_;

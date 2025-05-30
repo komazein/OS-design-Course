@@ -910,3 +910,46 @@ void blockScheduler::load(dirTree*dir_tree_)
     //dirtree->load_root(root_inode);     // 创建根节点
     sb->load(root_inode,dir_tree_);
 }
+string blockScheduler::getUSERroot(string username,string passwoard,int&uid,int&gid)
+{
+    d_user tempuser;
+    if(username.size()!=1||passwoard.size()>MAXPASSWOREDLEN-3)
+        return "";
+    if(username[0]-'0'<USERNUM&&username[0]-'0'>=0)
+    {
+        size_t int_user_name=username[0]-'0';
+        FILE *fp=fopen("../disk.img","r+");
+        fseek(fp,sizeof(super_block)+sizeof(inode)*INODENUM+512*N_BLOCK+int_user_name*sizeof(d_user),SEEK_SET);
+        fread(&tempuser,sizeof(d_user),1,fp);
+        string str_pss_getfrom_disk=tempuser.d_password;
+        if(str_pss_getfrom_disk==passwoard)
+        {
+            uid=(int)tempuser.uid;
+            gid=(int)tempuser.gid;
+            string RETroot="user";
+            RETroot+=to_string(uid);
+            return RETroot;
+        }
+    }
+    return "";
+}
+void blockScheduler::freshUSER()
+{
+    FILE *fp=fopen("../disk.img","r+");
+    fseek(fp,sizeof(super_block)+sizeof(inode)*INODENUM+512*N_BLOCK,SEEK_SET);        
+    for(size_t i=0;i<USERNUM;i++)
+    {
+        d_user tempuser;
+        tempuser.uid= i;
+        string PASSroot="100";
+        PASSroot+=to_string(i);
+        tempuser.gid=(i>>1);
+        strcpy(tempuser.d_password,PASSroot.c_str());
+        fwrite(&tempuser,sizeof(d_user),1,fp);
+        string RETroot="user";
+        RETroot+=to_string(i);
+        dirtree_->alloc_dir(RETroot, dirtree_->get_root(), nullptr, DIR);
+    }
+    fclose(fp);
+    return;
+}
