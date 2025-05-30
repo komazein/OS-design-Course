@@ -29,5 +29,5 @@ public:
     void load(inode*root_inode,dirTree*dir_tree_);
     void freeinode(size_t ino);
     size_t getfreeBlocknum();
-    
+    size_t getfreeinodenum();
 };

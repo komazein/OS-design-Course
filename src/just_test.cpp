@@ -176,10 +176,49 @@ void TESTSOFTLINK()
     fs.command_touch(SIM_FILE);
     next_root ="../../user1";
     fs.command_cd(next_root);
-    
     fs.Exit();
 }
-
+void TESTFILE_R_W()
+{
+    file_system_manager fs;
+    fs.command_ls();
+    string next_root="user0";
+    fs.command_cd(next_root);
+    for(int i=0;i<10;i++)
+    {
+        string testdir_name="test"+to_string(i);
+        fs.command_mkdir(testdir_name);
+    }
+    string testdir_name="test"+to_string(1);
+    fs.command_cd(testdir_name);
+    string testSIM_name="test.txt";
+    fs.command_touch(testSIM_name);
+    char* test_char= (char*)malloc(100005*sizeof(char));
+    srand(time(NULL));
+    for(int I=1;I<71;I++)
+    {
+        for(int j=0;j<((I*20)%71)*512;j++)
+        {
+            test_char[j]=(rand())%26+'a';
+        }
+        test_char[((I*20)%71)*512-rand()%512]=0;
+        cout<<"len_of_test:"<<strlen(test_char)<<"   BLOCK"<<(strlen(test_char)+511)/512<<endl;
+        string str_ori=test_char;
+        fs.command_edit(testSIM_name,str_ori);
+        string get_str=fs.command_cat(testSIM_name);
+        if(str_ori==get_str)
+            cout<<"++++++++++++++++++++++++++++++pass"<<endl;
+        else
+        {
+            cout<<str_ori<<endl;
+            cout<<"==================================="<<endl;
+            cout<<get_str<<endl;
+            cout<<"------------------------------notpass"<<endl;
+            return;
+        }
+    }
+    fs.Exit();
+}
 /*
 void func()
 {

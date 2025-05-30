@@ -37,7 +37,7 @@ set(MAIN_SOURCES
     src/block/superBlock.cpp
     src/block/ddq.cpp
     src/dentry/dentry.cpp
-    src/parse/lex.yy.cc
+    # src/parse/lex.yy.cc
     src/shell/file_system_manager.cpp
     src/file/filemanager.cpp
     src/shell/tool.cpp

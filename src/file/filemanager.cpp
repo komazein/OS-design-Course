@@ -84,11 +84,12 @@ void file_manager::closeFile(std::string& filename, dentry* current_dir)
 }
 
 //TODO: implement readFile
-void file_manager::readFile(std::string& filename, dentry* current_dir)
+//void file_manager::readFile(std::string& filename, dentry* current_dir)
+string file_manager::readFile(std::string& filename, dentry* current_dir)
 {
     if (current_dir == nullptr) {
         spdlog::warn("Current directory is not set. Cannot read file '{}'", filename);
-        return;
+        return "";
     }
 
     // get the file in the current directroy
@@ -96,7 +97,7 @@ void file_manager::readFile(std::string& filename, dentry* current_dir)
     // file not exist
     if (file_entry == nullptr) {
         spdlog::warn("File '{}' not found in current directory '{}'", filename, current_dir->get_name());
-        return;
+        return "";
     }
 
     // check if the file is open
@@ -109,17 +110,18 @@ void file_manager::readFile(std::string& filename, dentry* current_dir)
             {
                 cout<< f.di_mode.ownerMode<<endl;
                 spdlog::warn("File '{}' is not readable", filename);
-                return;
+                return "";
             }
             auto bs = dir_tree_->get_bs();
             char* fileContents = bs->readSIMfromBLOCK(*f.f_inode);
-            printf("Reading file '%s': %s\n", filename.c_str(), fileContents);
-            spdlog::info("Reading file '{}': [Content would be displayed here]", filename);
-            return;
+            string RET=fileContents;
+            //printf("Reading file '%s': %s\n", filename.c_str(), fileContents);
+            //spdlog::info("Reading file '{}': [Content would be displayed here]", filename);
+            return RET;
         }
     }
 
-    spdlog::warn("File '{}' is not currently open", filename);
+    //spdlog::warn("File '{}' is not currently open", filename);
 }
 
 //TODO: implement writeFile
@@ -153,7 +155,8 @@ void file_manager::writeFile(std::string& filename, std::string& content, dentry
                 return;
             }
             file_entry->set_dirty(true);
-            spdlog::info("Writing to file '{}': [Content: {}]", filename, content);
+            spdlog::info("Writing to file '{}':", filename);
+            //spdlog::info("Writing to file '{}': [Content: {}]", filename, content);
             return;
         }
     }

@@ -35,7 +35,7 @@ class file_manager {
      * the main purpose of this function is to read the file content
      * and print it to the console, not to return the content
      */
-    void readFile(std::string& filename, dentry* current_dir);
+    string readFile(std::string& filename, dentry* current_dir);
     
     /** 
      * @brief write file

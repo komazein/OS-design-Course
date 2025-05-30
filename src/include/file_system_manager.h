@@ -176,8 +176,8 @@ class file_system_manager{
          * @brief ��ȡ�ļ���������
          * @param filename �ļ���
          */
-        void command_cat(std::string& filename);
-
+        string command_cat(std::string& filename);
+        //void command_cat(std::string& filename);
         /**
          * @brief write content to file
          * @param filename file name

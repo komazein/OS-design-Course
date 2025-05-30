@@ -1,6 +1,0 @@
-/home/kaku/Documents/OS_ZXY/build/CMakeFiles/main.dir
-/home/kaku/Documents/OS_ZXY/build/CMakeFiles/edit_cache.dir
-/home/kaku/Documents/OS_ZXY/build/CMakeFiles/rebuild_cache.dir
-/home/kaku/Documents/OS_ZXY/build/src/disk_formatting/CMakeFiles/dft.dir
-/home/kaku/Documents/OS_ZXY/build/src/disk_formatting/CMakeFiles/edit_cache.dir
-/home/kaku/Documents/OS_ZXY/build/src/disk_formatting/CMakeFiles/rebuild_cache.dir

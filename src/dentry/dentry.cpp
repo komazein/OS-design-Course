@@ -338,7 +338,13 @@ bool dirTree::name_search_test(string& name, dentry* work_dir/*, bool update_has
 
         vector<dir_entry> dir_entries;              // 假定已经返回了目录项
         
-        cout<<work_dir->get_inode()->i_num<<endl;
+        if(work_dir->get_inode()==nullptr)
+        {
+            inode*temp=(inode*)malloc(sizeof(inode));
+            temp->i_num=work_dir->get_inode_num();
+            work_dir->set_inode(temp);
+            bs->ReWrinode(*work_dir->get_inode(),true);
+        }
         bs->loadchild(dir_entries, *work_dir->get_inode());
 
 

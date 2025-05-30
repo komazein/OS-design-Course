@@ -7,7 +7,9 @@ void file_system_manager::command_mkdir(std::string& dirname) {
         Exit();
         
     }
+    cout<<"MKdir:freeblock&inode_num:"<<bs_->getfreeblocknum()<<" "<<bs_->getfreeinodenum()<<endl;
     bool result = dir_tree_->alloc_dir(dirname, current_dir_, nullptr, DIR);
+    cout<<"After:MKdir:freeblock&inode_num:"<<bs_->getfreeblocknum()<<" "<<bs_->getfreeinodenum()<<endl;
     // exit(1);
 }
 
@@ -29,6 +31,7 @@ void file_system_manager::command_cd(std::string& dirname)
         current_dir_ = new_dir;
         spdlog::info("Changed directory to '{}'", current_dir_->get_name());
     } else {
+        
         spdlog::warn("Directory '{}' not found in '{}'", dirname, current_dir_->get_name());
     }
 }
@@ -142,7 +145,8 @@ void file_system_manager::command_delete(std::string& filename)
 }
 
 //TODO: finish func of cat file
-void file_system_manager::command_cat(std::string& filename)
+//void file_system_manager::command_cat(std::string& filename)
+string file_system_manager::command_cat(std::string& filename)////////////////////////////
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot read file '{}'", filename);
@@ -153,15 +157,14 @@ void file_system_manager::command_cat(std::string& filename)
     dentry* file_entry = current_dir_->find_subdir(filename);
     if (file_entry == nullptr) {
         spdlog::warn("File '{}' not found in '{}'", filename, current_dir_->get_name());
-        return;
+        return "";
     }
 
     // Call file manager to edit the file
     file_manager_->openFile(filename, current_dir_);
-    file_manager_->readFile(filename, current_dir_);
+    string RET=file_manager_->readFile(filename, current_dir_);
     file_manager_->closeFile(filename, current_dir_);
-
-
+    return RET;
 }
 
 void file_system_manager::command_edit(std::string& filename, std::string& content)
@@ -179,9 +182,11 @@ void file_system_manager::command_edit(std::string& filename, std::string& conte
     }
     
     // Call file manager to edit the file
+    cout<<"Wr:freeblock&inode_num:"<<bs_->getfreeblocknum()<<" "<<bs_->getfreeinodenum()<<endl;
     file_manager_->openFile(filename, current_dir_);
     file_manager_->writeFile(filename, content, current_dir_);
     file_manager_->closeFile(filename, current_dir_);
+    cout<<"After:Wr:freeblock&inode_num:"<<bs_->getfreeblocknum()<<" "<<bs_->getfreeinodenum()<<endl;
 }
 
 void file_system_manager::Exit()
