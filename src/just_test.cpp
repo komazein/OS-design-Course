@@ -139,6 +139,21 @@ void TESTFIND()
     fs.Exit();
 }
 
+void RECURSIVELY_CREATED_FILE_FIND()
+{
+    file_system_manager fs;
+    for(int i = 0; i < 20; i++){
+        string test_name = "test" + to_string(i);
+        fs.command_mkdir(test_name);
+        fs.command_cd(test_name);
+    }
+    string name = "/";
+    fs.command_cd(name);            // cd到根节点
+    string name2 = "test";
+    fs.command_find(name2, 1);
+    fs.Exit();
+}
+
 
 /*
 void func()

@@ -1,12 +1,14 @@
 #include <algorithm> 
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_ttf.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
 #include <locale.h>
 #include <memory>
 #include <cstdlib>
 #include <wordexp.h>  // 新增路径解析头文件
-
+#include <string>
+#include <vector>
+using namespace std;
 
 // 窗口参数
 string user_name="user_name";

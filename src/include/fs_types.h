@@ -58,6 +58,16 @@ struct FILEMODE
     //for all above, r for read, w for write, x for execute, - for no permission
 };
 
+
+
+// 访问控制结构
+struct ACL
+{
+    uint8_t owner;
+    uint8_t group;
+    uint8_t other;
+};
+
 // inode磁盘结构
 struct dinode
 {
@@ -74,6 +84,9 @@ struct dinode
     size_t di_block[N_BLOCK]; // 存储逻辑块号
 };
 
+
+
+
 // 内存inode
 struct inode
 {
@@ -82,6 +95,7 @@ struct inode
     FILEMODE i_mode;        // file mode
     uint8_t i_uid;           // owner_id
     uint8_t i_gid;           // group_id
+    ACL acl;                // 权限表
     size_t i_size;          // file size
     time_t	i_atime;
     time_t	i_ctime;
@@ -116,13 +130,7 @@ struct block
     BTYPE mode;          // 索引块或数据块
 };
 
-// 访问控制结构
-struct ACL
-{
-    uint8_t owner;
-    uint8_t group;
-    uint8_t other;
-};
+
 
 // 目录项结构
 struct dir_entry

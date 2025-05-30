@@ -467,10 +467,12 @@ public:
      * 此操作会改变原先的树形结构, 会根本的释放dentry节点, 释放的原则就是最不常用的目录项
      * 并且要注意, 如果一个节点处于较为靠近头的位置, 其父辈节点也处于高的优先级, 同样不能置换
      * 
+     * @param cut_ratio 手动指定需要减的比例, 默认为0
+     * 
      * @return 成功释放的存储的目录项(dentry)的个数, 如果为0则说明释放失败
      * 
      */
-    size_t cut_dirTree();
+    size_t cut_dirTree(double cut_ratio);
 
     blockScheduler* get_bs() { return bs; }
 

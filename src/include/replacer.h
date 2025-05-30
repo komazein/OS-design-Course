@@ -107,7 +107,7 @@ template<typename T>
 void LRUReplacer<T>::InsertDir(T dentry_node)
 {
     // 按照从下到上的顺序进行插入
-    T cur_node = dentry_node;
+    T cur_node = dentry_node->get_parent();
     while(cur_node != nullptr){
         // 直到添加到根节点才结束
         Insert(cur_node);       // 加入到lru_list中

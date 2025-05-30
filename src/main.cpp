@@ -9,7 +9,7 @@ int main()
       // Test the mkdir command in the file system manager
 
     // Uncomment to run other tests
-    TESTFIND();
+    RECURSIVELY_CREATED_FILE_FIND();
 
     return 0;
 }

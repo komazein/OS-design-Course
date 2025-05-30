@@ -23,3 +23,5 @@ void TESTLS();
 void TESTDELETE();
 
 void TESTFIND();
+
+void RECURSIVELY_CREATED_FILE_FIND();

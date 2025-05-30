@@ -215,7 +215,7 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
         if(name.empty() && start == true){
             // 如果此时以"/"为开始的路径名, 则说明为绝对路径
             // 从root_开始查找
-            dentry_next = get_root();
+            search = get_root();                //////////////////////
             start = false;
             continue;
         }
@@ -273,7 +273,6 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
         // 此时添加进入lru_list, 因为此时算上一次最新的访问
         dentry_replacer_->InsertDir(search);
         dcache_replacer_->Insert({search, name});
-        dcache_replacer_->Insert({search, name});
 
         search = dentry_next;       // 继续寻找
 
@@ -288,6 +287,16 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
     }
     spdlog::info("Traversal success: reached '{}'", search->get_name());
 
+    if(search->get_type() == LINK){
+        // 如果为link, 则需要读出数据块内容(得到了绝对路径), 并转到那个绝对路径指向的地方
+        ///TODO: 读取数据块内容
+
+
+
+        string sourse_name;
+        search = name_travesal(sourse_name);         // 从/开始
+        spdlog::info("Traversal to the LINK point towards '{}'.", sourse_name);
+    }
     return search;
 
 }
@@ -363,8 +372,7 @@ bool dirTree::has_child_test(dentry* dentry_node)
         bs->ReWrinode(*new_inode, true);
         dentry_node->set_inode(new_inode);
         
-        // cout <<"++++++++++++++(((((((((((((())))))))))))))\n";
-        // exit(1);
+
         if(dentry_node->get_type()==DIR)
         {
             bs->loadchild(dir_entries, *dentry_node->get_inode());
@@ -478,8 +486,9 @@ void dirTree::findNameInDirtree(const string& filename, dentry* work_dir, dentry
     }
 
     // 检查当前节点是否满足名称条件
-    cout<<"notget"<<filename<<"   "<<cur_dentry->get_name()<<endl;
-    if(has_string(filename, work_dir->get_name(), fuzzy) && work_dir != cur_dentry){
+    // cout<<"notget    "<<filename<<"   "<<cur_dentry->get_name()<<endl;
+    // cout << has_string(filename, cur_dentry->get_name(), fuzzy) << endl;
+    if(has_string(filename, cur_dentry->get_name(), fuzzy) && work_dir != cur_dentry){
         string path;
         get_full_path(path, work_dir, cur_dentry);
 
@@ -530,24 +539,19 @@ void dirTree::get_full_path(string& path, dentry* work_dir, dentry* cur_dentry)
     auto search_dentry = cur_dentry;
     bool is_root = false;
 
-    // if(work_dir == root_){
-    //     path = "/";
-    //     return;
-    // }
-
     if(work_dir == nullptr) { return; }
 
-    //path = work_dir->get_name();
 
     while(search_dentry != nullptr && search_dentry != work_dir){
 
         search_dentry = search_dentry->get_parent();
         if(search_dentry->get_name()!="/"){
-            is_root = true;
+            is_root = false;
             path = search_dentry->get_name() + "/" + path;
         }
-            
-
+        else{
+            is_root = true;
+        }
     }
 
     if(search_dentry == nullptr) { // 保证有意外的终止条件(即向上遍历完了所有节点, 甚至在根节点之上)
@@ -559,6 +563,8 @@ void dirTree::get_full_path(string& path, dentry* work_dir, dentry* cur_dentry)
     path = path  + cur_dentry->get_name();
     if(!is_root){
         path = "./" + path;
+    }else{
+        path = "/" + path;
     }
 }
 
@@ -765,14 +771,42 @@ size_t dirTree::shrink_dcache()
 }
 
 
-size_t dirTree::cut_dirTree()
+size_t dirTree::cut_dirTree(double cut_ratio)
 {
     size_t counter = 0;
+
+    if(cut_ratio != 0){
+
+        // 获得需要剪枝的个数
+        size_t shrink_num = static_cast<size_t>(ceil(dentry_replacer_->get_cur_size() * cut_ratio));
+
+        while(counter < shrink_num && dentry_replacer_->get_cur_size() != 0){
+            auto vitim_opt = dentry_replacer_->Victim();        // 选出最久未使用的dentry节点, **释放其子**
+       
+            if(!vitim_opt.has_value()) { break; }           // 这时无节点可置换
+
+            dentry* vitimnode = vitim_opt.value();
+
+            auto child_nodes = vitimnode->get_subdir();
+
+            for(auto& [_, node] : child_nodes){      // 释放其子节点
+                cut_tree(node, counter);
+            }
+            
+            if(counter){        // 如果释放了其子节点, 则标记为此节点被剪枝
+                vitimnode->set_flag(UNLOAD_CHILD_FROM_DISK);
+            }
+        }
+        spdlog::info("Ultimate free '{}' dentry_nodes from memory, now currunt nodes size is '{}'", 
+                        counter, dentry_replacer_->get_cur_size());
+        return counter;
+    }
+    
     while(dentry_replacer_->get_cur_size() > dentry_replacer_->get_max_size()) {
 
         auto vitim_opt = dentry_replacer_->Victim();        // 选出最久未使用的dentry节点, **释放其子**
        
-        if(!vitim_opt.has_value()) break;
+        if(!vitim_opt.has_value()) { break; }           // 这时无节点可置换
 
         dentry* vitimnode = vitim_opt.value();
 
@@ -785,6 +819,9 @@ size_t dirTree::cut_dirTree()
         if(counter){        // 如果释放了其子节点, 则标记为此节点被剪枝
             vitimnode->set_flag(UNLOAD_CHILD_FROM_DISK);
         }
+
+        spdlog::info("Ultimate free '{}' dentry_nodes from memory, now currunt nodes size is '{}'", 
+                        counter, dentry_replacer_->get_cur_size());
     }
 
     return counter;
@@ -802,10 +839,44 @@ bool dirTree::add_soft_link(string& sourse_dir, string& target_dir, dentry* work
 
     auto sourse_inode = sourse_dir_dentry->get_inode();
     
-    
+
+    /// TODO__: 注意, 这里只考虑了a/b/c/d, 没有考虑a/b/c/d/的情况
+    string target_dir_prefix = target_dir;           // target_dir的去除最后一个/前的前缀字符串
+    if (!target_dir_prefix.empty() && target_dir_prefix.back() == '/') {
+        target_dir_prefix.pop_back();
+    }
+
+    size_t pos = target_dir.rfind('/');        // 找到最后一个/的位置
+
+    if (pos != string::npos) {
+        target_dir_prefix = target_dir.substr(0, pos);   
+    }
+    else{
+        /// TODO: 有错误的输入
+        spdlog::error("Invalid path input");
+        return false;
+    }
+
+    string basename = target_dir.substr(pos + 1);
+
+    auto target_dir_dentry = name_travesal(target_dir_prefix, work_dir);
+   
 
     // 为软连接新建文件, 此文件仅为LINK类型, 内容记录sourse_dir的绝对路径
+    if(!alloc_dir(basename, target_dir_dentry, nullptr, LINK)){
+        return false;       // 失败
+    }
 
+
+    string store_name;          // 存储进文件的路径名称(绝对路径)
+    get_full_path(store_name, root_, target_dir_dentry);
+
+    ///TODO: 将store_name写入文件中
+    char* c_store_name = (char*)malloc(store_name.size() + 1);
+    strcpy(c_store_name, store_name.c_str());
+    if(!bs->writeSIMfromBLOCK(*target_dir_dentry->get_inode(), c_store_name)){
+        spdlog::error("Error occur when write link file back to disk.");
+        return false;
+    }
     return true;
-
 }
