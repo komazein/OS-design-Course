@@ -29,7 +29,7 @@ void super_block::load(inode*root_inode,dirTree*dir_tree_)
 
 void super_block::newdisk()
 {
-    int LEFT=BLOCKSIZE-1;//第0块给根节点
+    int LEFT=DATANUM-1;//第0块给根节点
     s_block_num=LEFT;//初始化剩余块号
     s_inode_num=INODENUM-1;//初始化剩余inode,第0个分配根节点
     for(int i=0;i<s_inode_num;i++)

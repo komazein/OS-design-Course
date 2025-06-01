@@ -63,6 +63,7 @@ public:
     void freeSIMFILE(inode&ino);
     string getUSERroot(string username,string passwoard,int&uid,int&gid);
     void freshUSER();
+    size_t getfreeinodenum();
 private:
     super_block* sb;
     dirTree* dirtree_;
