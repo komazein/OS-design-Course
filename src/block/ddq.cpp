@@ -475,6 +475,7 @@ void blockScheduler::getallBlockDIR(inode &id,size_t num,vector<size_t>&a)
 }
 void blockScheduler::getblockTree(size_t block_id,size_t n,vector<size_t>&a,vector<size_t>&forSIMfile,TYPE type)
 {
+    // cout<<"rn"<<n<<endl;
     queue<pair<size_t,size_t>>tree;//防止递归产生文件错误
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+block_id*512,SEEK_SET);
@@ -487,6 +488,7 @@ void blockScheduler::getblockTree(size_t block_id,size_t n,vector<size_t>&a,vect
             {
                 size_t blk_id;
                 fread(&blk_id,sizeof(size_t),1,fp);
+                // cout<<"nk::"<<block_id<<"bk::::: "<<blk_id<<" "<<ftell(fp)<<endl;
                 a.push_back(blk_id);
                 forSIMfile.push_back(blk_id);
             }
@@ -525,6 +527,7 @@ void blockScheduler::getblockTree(size_t block_id,size_t n,vector<size_t>&a,vect
             {
                 fread(&temp_block_id,sizeof(size_t),1,fp);
                 a.push_back(temp_block_id);
+                // cout<<"temp:"<<temp_block_id<<endl;
                 forSIMfile.push_back(temp_block_id);
             }
             else
@@ -547,6 +550,7 @@ void blockScheduler::getblockTree(size_t block_id,size_t n,vector<size_t>&a,vect
         if(type==DIR)
             fseek(fp,sizeof(dir_entry)-sizeof(size_t),SEEK_CUR);
         fread(&temp_block_id,sizeof(size_t),1,fp);
+        // cout<<"now:"<<block_id<<" "<<temp_block_id<<endl;
         tree.push({temp_block_id,(size_t)(n-treenum*mayx-(treenum*MAXnumInBlock)*mayMx)});
         a.push_back(temp_block_id);
     }
@@ -618,6 +622,7 @@ void blockScheduler::getallBlockSIM(inode &id,vector<size_t>&a,vector<size_t>&fo
         num-=MAXnumInBlock;
     }
     a.push_back(id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM]);
+    // cout<<"::"<<id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM]<<endl;
     getblockTree(id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM],num,a,forSIMfile,SIM_FILE);
     // for(int i=0;i<forSIMfile.size();i++)
     //     cout<<"("<<i<<","<<forSIMfile[i]<<")";
@@ -632,6 +637,9 @@ char*blockScheduler::readSIMfromBLOCK(inode&id)
     FILE *fp=fopen("../disk.img","r+");
     size_t num=id.i_size;
     size_t delta=0;
+    // for(size_t i=0;i<real_block_id.size();i++)
+    //     cout<<real_block_id[i]<<" ";
+    // cout<<endl;
     for(size_t i=0;i<real_block_id.size();i++)
     {
         fseek(fp,real_block_id[i]*512+sizeof(super_block)+sizeof(inode)*INODENUM,SEEK_SET);
@@ -677,11 +685,13 @@ bool blockScheduler::writeSIMfromBLOCK(inode&id,char*a)
 }
 void blockScheduler::SIMwriteBK(vector<size_t>newlist,size_t n,char*a)
 {
+    // cout<<",,,"<<newlist.size()<<endl;
     size_t now_byte=n;
     FILE *fp=fopen("../disk.img","r+");
     size_t delta=0;
     for(int i=0;i<newlist.size();i++)
     {
+        // cout<<i<<","<<newlist[i]<<endl;
         fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+newlist[i]*512,SEEK_SET);
         fwrite(&a[delta],sizeof(char),min(now_byte,(size_t)512),fp);
         delta+=min(now_byte,(size_t)512);
@@ -692,6 +702,10 @@ void blockScheduler::SIMwriteBK(vector<size_t>newlist,size_t n,char*a)
 void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,char*a)
 {
     size_t num=(id.i_size+511)/512;
+    // cout<<"writeBlocknumFORsim"<<endl;
+    // for(int i=0;i<all.size();i++)
+    //     cout<<all[i]<<" ";
+    // cout<<endl;
     vector<size_t>newlist;
     for(size_t i=0;i<min((size_t)ONLY_DIRECT_SIM,num);i++)
     {
@@ -746,18 +760,18 @@ void blockScheduler::writeBlocknumFORsim(vector<size_t>&all,size_t n,inode&id,ch
         num-=MAXnumInBlock;
     }
     id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM]=all[all.size()-1];
+    // cout<<"WR_last:iblock"<<id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM]<<endl;
     all.erase(all.end()-1);
-    simwriteTree(id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM],all,MAXnumInBlock,newlist);
+    simwriteTree(id.i_block[ABLE_DIRECT_SIM-ABLE_MULTI_SIM],all,num,newlist);
     size_t now_byte=n;
     FILE *fp=fopen("../disk.img","r+");
-    for(int i=0;i<newlist.size();i++)
-        
-    for(int i=0;i<newlist.size();i++)
-    {
-        fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+newlist[i]*512,SEEK_SET);
-        fwrite(a,sizeof(char),max(now_byte,(size_t)512),fp);
-        now_byte-=max(now_byte,(size_t)512);
-    }
+    // cout<<"get_new_list"<<endl;
+    // for(int i=0;i<newlist.size();i++)
+    // {
+    //     cout<<newlist[i]<<" ";
+    // }
+    // cout<<endl;
+    SIMwriteBK(newlist,id.i_size,a);
 }
 void blockScheduler::simwriteTree(size_t block_id,vector<size_t>&all,size_t n,vector<size_t>&newlist)
 {
@@ -766,11 +780,13 @@ void blockScheduler::simwriteTree(size_t block_id,vector<size_t>&all,size_t n,ve
     FILE *fp=fopen("../disk.img","r+");
     fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+block_id*512,SEEK_SET);
     dir_entry temp;
+    // cout<<"n:"<<n<<endl;
     if(n<=MAXnumInBlock)
     {
         for(size_t i=0;i<n;i++)
         {
             fwrite(&all[all.size()-1],sizeof(size_t),1,fp);
+            // cout<<"nk::"<<block_id<<"bk::::: "<<all[all.size()-1]<<" "<<ftell(fp)<<endl;
             newlist.push_back(all[all.size()-1]);
             all.erase(all.end());
         }
@@ -800,7 +816,6 @@ void blockScheduler::simwriteTree(size_t block_id,vector<size_t>&all,size_t n,ve
         mayMx--;
         mayH++;
     }
-    // cout<<mayx<<" "<<mayH<<" "<<mayMx<<endl;
     for(int i=0;i<mayx;i++)
     {
         if(treenum==1)
@@ -860,6 +875,10 @@ size_t blockScheduler::getfreeblocknum()
 {
     return sb->getfreeBlocknum();
 }
+size_t blockScheduler::getfreeinodenum()
+{
+    return sb->getfreeinodenum();
+}
 void blockScheduler::ReWrinode(inode &ino,bool read)
 {
     FILE *fp=fopen("../disk.img","r+");
@@ -915,7 +934,7 @@ string blockScheduler::getUSERroot(string username,string passwoard,int&uid,int&
     {
         size_t int_user_name=username[0]-'0';
         FILE *fp=fopen("../disk.img","r+");
-        fseek(fp,sizeof(super_block)+sizeof(inode)*INODENUM+512*N_BLOCK+int_user_name*sizeof(d_user),SEEK_SET);
+        fseek(fp,sizeof(super_block)+sizeof(inode)*INODENUM+512*DATANUM+int_user_name*sizeof(d_user),SEEK_SET);
         fread(&tempuser,sizeof(d_user),1,fp);
         string str_pss_getfrom_disk=tempuser.d_password;
         if(str_pss_getfrom_disk==passwoard)
@@ -932,7 +951,7 @@ string blockScheduler::getUSERroot(string username,string passwoard,int&uid,int&
 void blockScheduler::freshUSER()
 {
     FILE *fp=fopen("../disk.img","r+");
-    fseek(fp,sizeof(super_block)+sizeof(inode)*INODENUM+512*N_BLOCK,SEEK_SET);        
+    fseek(fp,sizeof(super_block)+sizeof(inode)*INODENUM+512*DATANUM,SEEK_SET);        
     for(size_t i=0;i<USERNUM;i++)
     {
         d_user tempuser;
