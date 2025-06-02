@@ -156,3 +156,7 @@ void super_block::freeinode(size_t ino)
     stack_inode[s_inode_num]=ino;
     s_inode_num++;
 }
+size_t super_block::getfreeinodenum()
+{
+    return s_inode_num;
+}
