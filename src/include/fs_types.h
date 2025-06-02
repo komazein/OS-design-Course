@@ -40,6 +40,13 @@ enum TYPE
     DIR,          // 那么这个inode中存储的就是其下的目录项(包含目录项名称, 以及他们对应的inode号)
     LINK
 };
+struct ACL
+{
+    uint8_t owner;
+    uint8_t group;
+    uint8_t other;
+};
+
 
 // 文件控制信息
 // symbolic notification of file mode
@@ -69,6 +76,7 @@ struct dinode
     uint32_t di_flag;         // file flag
     size_t di_block[N_BLOCK]; // 存储逻辑块号
 };
+
 
 // 内存inode
 struct inode
@@ -113,13 +121,6 @@ struct block
     BTYPE mode;          // 索引块或数据块
 };
 
-// 访问控制结构
-struct ACL
-{
-    uint8_t owner;
-    uint8_t group;
-    uint8_t other;
-};
 
 // 目录项结构
 struct dir_entry

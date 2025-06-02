@@ -92,6 +92,10 @@ class file_system_manager{
          */
         void command_edit(std::string& filename, std::string& content);
 
+        dentry* getCurrentDir() {
+            return current_dir_;
+        }
+
         // shell commmand for user
         void exit();
 

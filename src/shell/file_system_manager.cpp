@@ -7,7 +7,7 @@ void file_system_manager::command_mkdir(std::string& dirname) {
         spdlog::warn("Current directory is not set. Cannot create directory '{}'", dirname);
         exit();
     }
-    
+
     bool result = dir_tree_->alloc_dir(dirname, current_dir_, nullptr, DIR);
     if(result){
         spdlog::info("Directory '{}' created successfully in '{}'", dirname, current_dir_->get_name());
@@ -44,12 +44,16 @@ void file_system_manager::command_ls()
     spdlog::info("Listing contents of directory '{}':", current_dir_->get_name());
     
     int resultNum = 0;
+    string returnMessage;
     for (const auto& pair : current_dir_->get_subdir()) {
         std::string subdir_name = pair.first;
         dentry* subdir = pair.second;
-        TYPE type = subdir->get_inode()->i_type;
-        printLsResult(subdir_name, type, ++resultNum); 
+        returnMessage += subdir_name + " ";
+        //TYPE type = subdir->get_inode()->i_type;
+        //printLsResult(subdir_name, type, ++resultNum); 
     }
+    cout << returnMessage << endl;
+    
 }
 
 void file_system_manager::command_rm(std::string& dirname)
@@ -75,6 +79,7 @@ void file_system_manager::command_lkdir(std::string& source_path, std::string& t
         exit();
     }
     // implementation of symbolic link creation
+    
 }
 
 
