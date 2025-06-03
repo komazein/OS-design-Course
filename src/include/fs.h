@@ -6,3 +6,5 @@
 #include "ddq.h"
 #include "replacer.h"
 #include "file_system_manager.h"
+#include "log_global.h"
+#include "user.h"

@@ -1,4 +1,4 @@
-# Install script for directory: /home/kaku/Documents/OS_ZXY/src/disk_formatting
+# Install script for directory: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/disk_formatting
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

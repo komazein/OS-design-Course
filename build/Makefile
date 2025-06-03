@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kaku/Documents/OS_ZXY
+CMAKE_SOURCE_DIR = /home/luacpo/OSKSEND/KAKU2/OS-design-Course
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kaku/Documents/OS_ZXY/build
+CMAKE_BINARY_DIR = /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kaku/Documents/OS_ZXY/build/CMakeFiles /home/kaku/Documents/OS_ZXY/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kaku/Documents/OS_ZXY/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -262,6 +262,30 @@ src/just_test.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/just_test.cpp.s
 .PHONY : src/just_test.cpp.s
 
+src/log_global.o: src/log_global.cpp.o
+.PHONY : src/log_global.o
+
+# target to build an object file
+src/log_global.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/log_global.cpp.o
+.PHONY : src/log_global.cpp.o
+
+src/log_global.i: src/log_global.cpp.i
+.PHONY : src/log_global.i
+
+# target to preprocess a source file
+src/log_global.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/log_global.cpp.i
+.PHONY : src/log_global.cpp.i
+
+src/log_global.s: src/log_global.cpp.s
+.PHONY : src/log_global.s
+
+# target to generate assembly for a file
+src/log_global.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/log_global.cpp.s
+.PHONY : src/log_global.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -358,6 +382,30 @@ src/shell/tool.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/shell/tool.cpp.s
 .PHONY : src/shell/tool.cpp.s
 
+src/user/user.o: src/user/user.cpp.o
+.PHONY : src/user/user.o
+
+# target to build an object file
+src/user/user.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/user/user.cpp.o
+.PHONY : src/user/user.cpp.o
+
+src/user/user.i: src/user/user.cpp.i
+.PHONY : src/user/user.i
+
+# target to preprocess a source file
+src/user/user.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/user/user.cpp.i
+.PHONY : src/user/user.cpp.i
+
+src/user/user.s: src/user/user.cpp.s
+.PHONY : src/user/user.s
+
+# target to generate assembly for a file
+src/user/user.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/user/user.cpp.s
+.PHONY : src/user/user.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -383,6 +431,9 @@ help:
 	@echo "... src/just_test.o"
 	@echo "... src/just_test.i"
 	@echo "... src/just_test.s"
+	@echo "... src/log_global.o"
+	@echo "... src/log_global.i"
+	@echo "... src/log_global.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
@@ -395,6 +446,9 @@ help:
 	@echo "... src/shell/tool.o"
 	@echo "... src/shell/tool.i"
 	@echo "... src/shell/tool.s"
+	@echo "... src/user/user.o"
+	@echo "... src/user/user.i"
+	@echo "... src/user/user.s"
 .PHONY : help
 
 

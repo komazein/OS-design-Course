@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)  # 建议升级到较新版本
 project(OS_ZWKL)
 
 # 设置C++标准
-set (CMAKE_CXX_COMPILER "/usr/bin/g++")
+# set (CMAKE_CXX_COMPILER "/usr/bin/g++")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -41,6 +41,9 @@ set(MAIN_SOURCES
     src/shell/file_system_manager.cpp
     src/file/filemanager.cpp
     src/shell/tool.cpp
+    src/log_global.cpp
+    src/user/user.cpp
+    # src/MSG/MSG.cpp
 )
 
 # 创建主程序可执行文件（必须在target_link_libraries之前）

@@ -1,4 +1,5 @@
 #include "dentry.h"
+#include "user.h"
 #include <spdlog/spdlog.h>
 #include"ddq.h"
 
@@ -170,6 +171,10 @@ void dirTree::init_root(string root_name, size_t root_inode_num, inode* root_ino
     root_->set_dirty(true);
 
     spdlog::info("Initialize the file system root dentry node");
+    // g_logger->info("Initialize the file system root dentry node");
+    string tnam="spppp";
+    size_t tp=10086;
+    // msg->msglog(INFO, "Initialize the file system root dentry node , {}, {}",tnam,tp);
 
 }
 void dirTree::load_root(inode*root_inode)
@@ -295,13 +300,19 @@ dentry* dirTree::name_travesal(string& path, dentry* work_dir)
         // 否则继续找子节点中是否有这个路径
     }
     ////if(search->get_inode()==nullptr)已经删了,报错再恢复
-    spdlog::info("Traversal success: reached '{}'", search->get_name());
-
     if(search->get_type() == SIM_FILE){
         spdlog::error("You are trying to step into a file '{}'!", search->get_name());
         return nullptr;
     }
-
+    spdlog::info("Traversal success: reached '{}'", search->get_name());
+    if(search->get_inode()==nullptr)
+    {
+        inode*temp=(inode*)malloc(sizeof(inode));
+        temp->i_num= search->get_inode_num();
+        search->set_inode(temp);
+        bs->ReWrinode(*search->get_inode(),true);
+    }
+    
     if(search->get_type() == LINK){
         // 如果为link, 则需要读出数据块内容(得到了绝对路径), 并转到那个绝对路径指向的地方
         ///TODO: 读取数据块内容
@@ -347,7 +358,6 @@ bool dirTree::name_search_test(string& name, dentry* work_dir/*, bool update_has
             cout<<dir_entries[i].name<<" ";
         }
         cout<<endl;
-
         work_dir->set_flag(FIRST_LOAD_TO_MEMORY);
         
         work_dir->add_subdir(dir_entries);       // 这时加入了新的子节点
@@ -383,6 +393,7 @@ bool dirTree::has_child_test(dentry* dentry_node)
     else{       // 此时得去磁盘中查找看是否有子节点
 
         spdlog::info("In order to ensure '{}' whether have children node, loading it's children from disk.", dentry_node->get_name());
+        
         /// TODO_finish:此处调用磁盘I/O控制器申请获得此目录的子目录项
 
         // 此时如果已经获得了子目录项
@@ -392,12 +403,12 @@ bool dirTree::has_child_test(dentry* dentry_node)
         // 访问此inode的磁盘, 获取它的全部孩子并创建
 
         /// TODO: 获取dentry_node的inode
-        inode* new_inode = (inode*)malloc(sizeof(inode));
-        new_inode->i_num = dentry_node->get_inode_num();
-        bs->ReWrinode(*new_inode, true);
-        dentry_node->set_inode(new_inode);
-        
-
+        if(dentry_node->get_inode()==nullptr){
+            inode* new_inode = (inode*)malloc(sizeof(inode));
+            new_inode->i_num = dentry_node->get_inode_num();
+            bs->ReWrinode(*new_inode, true);
+            dentry_node->set_inode(new_inode);
+        }
         if(dentry_node->get_type()==DIR)
         {
             bs->loadchild(dir_entries, *dentry_node->get_inode());
@@ -417,9 +428,39 @@ bool dirTree::has_child_test(dentry* dentry_node)
     }
 
 }
+bool dirTree::alloc_dir_HARD(string& name, dentry* work_dir,inode* new_allocate_inode)
+{    
+    if(!name_search_test(name, work_dir)) { 
+        spdlog::warn("Directory allocation failed: '{}' already exists in '{}'", name, work_dir->get_name());
+        return false; 
+    }
+    bool ableGetBlock= bs->creatFILE(work_dir->get_subdir().size(),*work_dir->get_inode(),*new_allocate_inode);
+    if(ableGetBlock==false)
+    {
+        spdlog::warn("NO FREE BLOCK");
+        return false;///块不够
+    }
+    dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir,new_allocate_inode->i_type);
+
+    work_dir->add_single_subdir(new_node);
+    cout<<work_dir->get_name()<<" "<<new_node->get_name()<<endl;
+    // 还需要更新全局哈希
+    cache_->add_dentry(name, new_node, work_dir);
+
+    cout<<new_node->get_name()<<"  ;   "<<work_dir->get_name()<<endl;
+    // 加入到lru_list中
+    dentry_replacer_->InsertDir(new_node);
+    dcache_replacer_->Insert({work_dir, name});
+
+    new_allocate_inode->di_link_count++;
+
+    
+    spdlog::info("Allocated new directory '{}' under '{}', inode={}", 
+                 name, work_dir->get_name(), new_allocate_inode->i_num);
+    return true;
+}
 bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode, TYPE type)
 {
-    
     if(!name_search_test(name, work_dir)) { 
         spdlog::warn("Directory allocation failed: '{}' already exists in '{}'", name, work_dir->get_name());
         return false; 
@@ -457,6 +498,7 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     new_allocate_inode->i_atime = cur_time;
     new_allocate_inode->i_ctime = cur_time;
     new_allocate_inode->i_mtime = cur_time;
+    new_allocate_inode->i_acl.owner = 1 <<  (logInUser->getUid() - 1);
     
     ///  .....
     bool ableGetBlock= bs->creatFILE(work_dir->get_subdir().size(),*work_dir->get_inode(),*new_allocate_inode);
@@ -491,6 +533,69 @@ bool dirTree::alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode
     return true;
 }
 
+bool dirTree::alloc_dir_init(string& name, dentry* work_dir,inode* new_allocate_inode, TYPE type,size_t uid)
+{
+    if(!name_search_test(name, work_dir)) { 
+        spdlog::warn("Directory allocation failed: '{}' already exists in '{}'", name, work_dir->get_name());
+        return false; 
+    }  // 如果找到了同名的, 则分配新目录失败
+    new_allocate_inode = bs->iget(false);
+    if(new_allocate_inode == nullptr){
+        spdlog::warn("NO FREE INODE");
+        return false;
+    }
+    
+
+    /// TODO_finish: 完善inode的信息
+    auto cur_time = get_time();
+
+    new_allocate_inode->i_type = type;
+    if(new_allocate_inode->i_type == SIM_FILE || new_allocate_inode->i_type == LINK){
+        //new_allocate_inode->i_size = 0;
+        new_allocate_inode->i_mode = {'-',"rwx","r--","r--" };
+    }
+    if(new_allocate_inode->i_type == DIR){
+        //new_allocate_inode->i_size = 1;
+        new_allocate_inode->i_mode = {'d',"rwx","r--","r--" };
+    }
+    new_allocate_inode->i_size = 0;
+    new_allocate_inode->i_atime = cur_time;
+    new_allocate_inode->i_ctime = cur_time;
+    new_allocate_inode->i_mtime = cur_time;
+    new_allocate_inode->i_acl.owner = 1 <<  (uid - 1);
+    
+    ///  .....
+    bool ableGetBlock= bs->creatFILE(work_dir->get_subdir().size(),*work_dir->get_inode(),*new_allocate_inode);
+    
+    if(ableGetBlock==false)
+    {
+        bs->freeinode(new_allocate_inode->i_num);
+        spdlog::warn("NO FREE BLOCK");
+        return false;///块不够
+    }
+
+    dentry* new_node = new dentry(name, new_allocate_inode, new_allocate_inode->i_num, work_dir,type);
+    new_node->set_flag(FIRST_LOAD_TO_MEMORY);
+    new_node->set_dirty(true);//////////////check_it after consider SIM_FILE
+
+    work_dir->add_single_subdir(new_node);      // 为当前工作路径加入新的子目录
+
+    // 此目录被修改(因为增加了目录项), 所以设置脏位为true
+    work_dir->set_dirty(true);
+
+
+    // 还需要更新全局哈希
+    cache_->add_dentry(name, new_node, work_dir);
+
+    // 加入到lru_list中
+    dentry_replacer_->InsertDir(new_node);
+    dcache_replacer_->Insert({work_dir, name});
+
+    spdlog::info("Allocated new directory '{}' under '{}', inode={}", 
+                 name, work_dir->get_name(), new_allocate_inode->i_num);
+
+    return true;
+}
 
 void dirTree::findNameInDirtree(const string& filename, dentry* work_dir, dentry* cur_dentry, bool fuzzy, vector<string>& name_list)
 {
@@ -610,9 +715,9 @@ void dirTree::del_tree(dentry* dentry_root,vector<pair<inode ,size_t>>&del_nodes
 {
     if(!dentry_root) { return; }        // 仅仅是保证安全性, 应该不会执行此语句
 
-    if(!has_child_test(dentry_root)) {       // 此时已经完成了子树的完整构建
+    if(!has_child_test(dentry_root)&&dentry_root->get_inode()->di_link_count==0) {       // 此时已经完成了子树的完整构建
 
-
+        //dentry_root->get_inode()->di_link_count==0表明此时并非硬链接
         // 如果此时有子节点
         auto& sub_dirs = dentry_root->get_subdir();
 
@@ -635,7 +740,12 @@ void dirTree::del_tree(dentry* dentry_root,vector<pair<inode ,size_t>>&del_nodes
         }
 
         dentry_root->clear_child();         // 必须释放完所有的子才能调用清空child_哈希表
-    }else{
+    }
+    else if(dentry_root->get_inode()->di_link_count>=1)
+    {
+        dentry_root->get_inode()->di_link_count--;
+    }
+    else{
         del_nodes.push_back({*dentry_root->get_inode(),0});
     }
     

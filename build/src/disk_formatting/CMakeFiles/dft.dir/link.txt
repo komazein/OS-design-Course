@@ -1,1 +1,1 @@
-/usr/bin/g++ -rdynamic CMakeFiles/dft.dir/disk_formatting.cpp.o CMakeFiles/dft.dir/__/block/superBlock.cpp.o CMakeFiles/dft.dir/__/block/ddq.cpp.o CMakeFiles/dft.dir/__/dentry/dentry.cpp.o -o /home/kaku/Documents/OS_ZXY/bin/dft 
+/usr/bin/c++ -rdynamic CMakeFiles/dft.dir/disk_formatting.cpp.o CMakeFiles/dft.dir/__/block/superBlock.cpp.o CMakeFiles/dft.dir/__/block/ddq.cpp.o CMakeFiles/dft.dir/__/dentry/dentry.cpp.o -o /home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/dft 

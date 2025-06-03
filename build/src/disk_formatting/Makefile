@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kaku/Documents/OS_ZXY
+CMAKE_SOURCE_DIR = /home/luacpo/OSKSEND/KAKU2/OS-design-Course
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kaku/Documents/OS_ZXY/build
+CMAKE_BINARY_DIR = /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,14 +87,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/kaku/Documents/OS_ZXY/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/kaku/Documents/OS_ZXY/build/CMakeFiles /home/kaku/Documents/OS_ZXY/build/src/disk_formatting//CMakeFiles/progress.marks
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/disk_formatting/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kaku/Documents/OS_ZXY/build/CMakeFiles 0
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/src/disk_formatting//CMakeFiles/progress.marks
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/disk_formatting/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/disk_formatting/clean
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/disk_formatting/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +103,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/disk_formatting/preinstall
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/disk_formatting/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/disk_formatting/preinstall
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/disk_formatting/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/kaku/Documents/OS_ZXY/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 src/disk_formatting/CMakeFiles/dft.dir/rule:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/disk_formatting/CMakeFiles/dft.dir/rule
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/disk_formatting/CMakeFiles/dft.dir/rule
 .PHONY : src/disk_formatting/CMakeFiles/dft.dir/rule
 
 # Convenience name for target.
@@ -127,7 +127,7 @@ dft: src/disk_formatting/CMakeFiles/dft.dir/rule
 
 # fast build rule for target.
 dft/fast:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/build
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/build
 .PHONY : dft/fast
 
 __/block/ddq.o: __/block/ddq.cpp.o
@@ -135,7 +135,7 @@ __/block/ddq.o: __/block/ddq.cpp.o
 
 # target to build an object file
 __/block/ddq.cpp.o:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/ddq.cpp.o
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/ddq.cpp.o
 .PHONY : __/block/ddq.cpp.o
 
 __/block/ddq.i: __/block/ddq.cpp.i
@@ -143,7 +143,7 @@ __/block/ddq.i: __/block/ddq.cpp.i
 
 # target to preprocess a source file
 __/block/ddq.cpp.i:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/ddq.cpp.i
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/ddq.cpp.i
 .PHONY : __/block/ddq.cpp.i
 
 __/block/ddq.s: __/block/ddq.cpp.s
@@ -151,7 +151,7 @@ __/block/ddq.s: __/block/ddq.cpp.s
 
 # target to generate assembly for a file
 __/block/ddq.cpp.s:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/ddq.cpp.s
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/ddq.cpp.s
 .PHONY : __/block/ddq.cpp.s
 
 __/block/superBlock.o: __/block/superBlock.cpp.o
@@ -159,7 +159,7 @@ __/block/superBlock.o: __/block/superBlock.cpp.o
 
 # target to build an object file
 __/block/superBlock.cpp.o:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/superBlock.cpp.o
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/superBlock.cpp.o
 .PHONY : __/block/superBlock.cpp.o
 
 __/block/superBlock.i: __/block/superBlock.cpp.i
@@ -167,7 +167,7 @@ __/block/superBlock.i: __/block/superBlock.cpp.i
 
 # target to preprocess a source file
 __/block/superBlock.cpp.i:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/superBlock.cpp.i
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/superBlock.cpp.i
 .PHONY : __/block/superBlock.cpp.i
 
 __/block/superBlock.s: __/block/superBlock.cpp.s
@@ -175,7 +175,7 @@ __/block/superBlock.s: __/block/superBlock.cpp.s
 
 # target to generate assembly for a file
 __/block/superBlock.cpp.s:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/superBlock.cpp.s
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/block/superBlock.cpp.s
 .PHONY : __/block/superBlock.cpp.s
 
 __/dentry/dentry.o: __/dentry/dentry.cpp.o
@@ -183,7 +183,7 @@ __/dentry/dentry.o: __/dentry/dentry.cpp.o
 
 # target to build an object file
 __/dentry/dentry.cpp.o:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/dentry/dentry.cpp.o
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/dentry/dentry.cpp.o
 .PHONY : __/dentry/dentry.cpp.o
 
 __/dentry/dentry.i: __/dentry/dentry.cpp.i
@@ -191,7 +191,7 @@ __/dentry/dentry.i: __/dentry/dentry.cpp.i
 
 # target to preprocess a source file
 __/dentry/dentry.cpp.i:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/dentry/dentry.cpp.i
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/dentry/dentry.cpp.i
 .PHONY : __/dentry/dentry.cpp.i
 
 __/dentry/dentry.s: __/dentry/dentry.cpp.s
@@ -199,7 +199,7 @@ __/dentry/dentry.s: __/dentry/dentry.cpp.s
 
 # target to generate assembly for a file
 __/dentry/dentry.cpp.s:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/dentry/dentry.cpp.s
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/__/dentry/dentry.cpp.s
 .PHONY : __/dentry/dentry.cpp.s
 
 disk_formatting.o: disk_formatting.cpp.o
@@ -207,7 +207,7 @@ disk_formatting.o: disk_formatting.cpp.o
 
 # target to build an object file
 disk_formatting.cpp.o:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/disk_formatting.cpp.o
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/disk_formatting.cpp.o
 .PHONY : disk_formatting.cpp.o
 
 disk_formatting.i: disk_formatting.cpp.i
@@ -215,7 +215,7 @@ disk_formatting.i: disk_formatting.cpp.i
 
 # target to preprocess a source file
 disk_formatting.cpp.i:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/disk_formatting.cpp.i
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/disk_formatting.cpp.i
 .PHONY : disk_formatting.cpp.i
 
 disk_formatting.s: disk_formatting.cpp.s
@@ -223,7 +223,7 @@ disk_formatting.s: disk_formatting.cpp.s
 
 # target to generate assembly for a file
 disk_formatting.cpp.s:
-	cd /home/kaku/Documents/OS_ZXY/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/disk_formatting.cpp.s
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(MAKE) $(MAKESILENT) -f src/disk_formatting/CMakeFiles/dft.dir/build.make src/disk_formatting/CMakeFiles/dft.dir/disk_formatting.cpp.s
 .PHONY : disk_formatting.cpp.s
 
 # Help Target
@@ -258,6 +258,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/kaku/Documents/OS_ZXY/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

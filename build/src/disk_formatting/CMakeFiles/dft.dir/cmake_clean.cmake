@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kaku/Documents/OS_ZXY/bin/dft"
-  "/home/kaku/Documents/OS_ZXY/bin/dft.pdb"
+  "/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/dft"
+  "/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/dft.pdb"
   "CMakeFiles/dft.dir/__/block/ddq.cpp.o"
   "CMakeFiles/dft.dir/__/block/ddq.cpp.o.d"
   "CMakeFiles/dft.dir/__/block/superBlock.cpp.o"

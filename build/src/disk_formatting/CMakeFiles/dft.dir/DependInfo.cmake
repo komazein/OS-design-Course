@@ -8,10 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/kaku/Documents/OS_ZXY/src/block/ddq.cpp" "src/disk_formatting/CMakeFiles/dft.dir/__/block/ddq.cpp.o" "gcc" "src/disk_formatting/CMakeFiles/dft.dir/__/block/ddq.cpp.o.d"
-  "/home/kaku/Documents/OS_ZXY/src/block/superBlock.cpp" "src/disk_formatting/CMakeFiles/dft.dir/__/block/superBlock.cpp.o" "gcc" "src/disk_formatting/CMakeFiles/dft.dir/__/block/superBlock.cpp.o.d"
-  "/home/kaku/Documents/OS_ZXY/src/dentry/dentry.cpp" "src/disk_formatting/CMakeFiles/dft.dir/__/dentry/dentry.cpp.o" "gcc" "src/disk_formatting/CMakeFiles/dft.dir/__/dentry/dentry.cpp.o.d"
-  "/home/kaku/Documents/OS_ZXY/src/disk_formatting/disk_formatting.cpp" "src/disk_formatting/CMakeFiles/dft.dir/disk_formatting.cpp.o" "gcc" "src/disk_formatting/CMakeFiles/dft.dir/disk_formatting.cpp.o.d"
+  "/home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/block/ddq.cpp" "src/disk_formatting/CMakeFiles/dft.dir/__/block/ddq.cpp.o" "gcc" "src/disk_formatting/CMakeFiles/dft.dir/__/block/ddq.cpp.o.d"
+  "/home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/block/superBlock.cpp" "src/disk_formatting/CMakeFiles/dft.dir/__/block/superBlock.cpp.o" "gcc" "src/disk_formatting/CMakeFiles/dft.dir/__/block/superBlock.cpp.o.d"
+  "/home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/dentry/dentry.cpp" "src/disk_formatting/CMakeFiles/dft.dir/__/dentry/dentry.cpp.o" "gcc" "src/disk_formatting/CMakeFiles/dft.dir/__/dentry/dentry.cpp.o.d"
+  "/home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/disk_formatting/disk_formatting.cpp" "src/disk_formatting/CMakeFiles/dft.dir/disk_formatting.cpp.o" "gcc" "src/disk_formatting/CMakeFiles/dft.dir/disk_formatting.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

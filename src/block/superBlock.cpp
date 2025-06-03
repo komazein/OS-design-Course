@@ -63,14 +63,12 @@ void super_block::newdisk()
             // cout<<endl;
             
             base=0;
-
+            
             FILE *fp=fopen("../disk.img","r+");
             fseek(fp,sizeof(super_block)+INODENUM*sizeof(inode)+IN*512,SEEK_SET);//写回第IN快磁盘
             fwrite(s_free_num, sizeof(int),S_FREE_NUM,fp);
             fclose(fp);
-
-
-
+            
         }
         // else
         // {
@@ -86,6 +84,7 @@ void super_block::newdisk()
     // dentry temp_root;
     // temp_root.init(name,temp_inode,NULL,0);//////////缺参数
     // s_root=&temp_root;
+    
 }
 bool super_block::getblock(int n,vector<size_t>&a)
 {

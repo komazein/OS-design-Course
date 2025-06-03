@@ -3,6 +3,11 @@
 #include "dentry.h"
 #include "ddq.h"
 #include "filemanager.h"
+#include "user.h"
+
+class user;
+class dirTree;
+
 
 // class file_system_manager{
 
@@ -104,14 +109,17 @@ class file_system_manager{
         dentry* current_dir_;  
         file_manager * file_manager_;
         blockScheduler* bs_; 
+        user* logInUser_;
     
     public:
         file_system_manager() {
             dir_tree_ = new dirTree;
 
             bs_ = new blockScheduler(dir_tree_);
-
             dir_tree_->set_bs(bs_);
+
+            logInUser_= new user(dir_tree_);
+            dir_tree_->set_user(logInUser_);
          
             bs_->load(dir_tree_);
             current_dir_ = dir_tree_->get_root();
@@ -185,6 +193,17 @@ class file_system_manager{
          */
         void command_edit(std::string& filename, std::string& content);
 
+        void command_athrz(std::string& filename, int uid);
+
+        void command_rathrz(std::string& filename, int uid);
+
+
+
+
+        dentry* getCurrentDir()  { return current_dir_; }
+
+        blockScheduler* get_bs() { return bs_; }
+
         // shell commmand for user
         void Exit();
 
@@ -192,4 +211,7 @@ class file_system_manager{
 
         void help();
 
+        bool CMPuser(string username_,string password_);
+
+        int get_uid() { return logInUser_->getUid(); }
 };

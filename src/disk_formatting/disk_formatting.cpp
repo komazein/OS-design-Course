@@ -1,5 +1,6 @@
 #include <fs.h>
 
+
 int main()
 {
 
@@ -8,7 +9,6 @@ int main()
 
     blockScheduler* bs_; 
 
-
     dir_tree_ = new dirTree;
 
     bs_ = new blockScheduler(dir_tree_);
@@ -16,7 +16,6 @@ int main()
     dir_tree_->set_bs(bs_);
 
     // file_system_manager  fs;
-
 
 
     bs_->new_disk();

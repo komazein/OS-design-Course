@@ -2,6 +2,10 @@
 #include "fs_types.h"
 #include <spdlog/logger.h>
 #include "replacer.h"
+// #include "user.h"
+// #include "MSG.h"
+class user;
+// extern user* logInUser;
 
 struct inode;        // 前向声明
 class super_block;   // 前向声明
@@ -99,7 +103,6 @@ public:
 
     // 获取inode
     inode* get_inode()  { return d_inode_; }
-
     // 获取脏标志
     bool get_dirty()    { return dirty_; }
 
@@ -134,6 +137,7 @@ private:
     uint16_t d_ref_;                // 引用计数
 
     TYPE d_type_;
+    user* logInUser;
 };
 
 
@@ -240,7 +244,7 @@ public:
         delete dentry_replacer_;
         delete cache_;
     }
-
+    void set_user(user* logInUser) { this-> logInUser= logInUser; }
     void set_bs(blockScheduler* bs) { this->bs = bs; }
     /**
      * 
@@ -402,6 +406,9 @@ public:
      */
     bool alloc_dir(string& name, dentry* work_dir,inode* new_allocate_inode, TYPE type);
     
+    bool alloc_dir_init(string& name, dentry* work_dir,inode* new_allocate_inode, TYPE type,size_t uid);
+
+    bool alloc_dir_HARD(string& name, dentry* work_dir,inode* new_allocate_inode);
 
     /**
      * 
@@ -503,6 +510,7 @@ private:
     blockScheduler* bs;                 // 与磁盘I/O调度器的接口
 
     time_t cur_time;                    // 当前时间, 需要外部的全局计数器模块获取时间
+    user* logInUser;
 };  
 
 

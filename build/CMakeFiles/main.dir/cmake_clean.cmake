@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/kaku/Documents/OS_ZXY/bin/main"
-  "/home/kaku/Documents/OS_ZXY/bin/main.pdb"
+  "/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main"
+  "/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main.pdb"
   "CMakeFiles/main.dir/src/block/ddq.cpp.o"
   "CMakeFiles/main.dir/src/block/ddq.cpp.o.d"
   "CMakeFiles/main.dir/src/block/superBlock.cpp.o"
@@ -11,6 +11,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/main.dir/src/file/filemanager.cpp.o.d"
   "CMakeFiles/main.dir/src/just_test.cpp.o"
   "CMakeFiles/main.dir/src/just_test.cpp.o.d"
+  "CMakeFiles/main.dir/src/log_global.cpp.o"
+  "CMakeFiles/main.dir/src/log_global.cpp.o.d"
   "CMakeFiles/main.dir/src/main.cpp.o"
   "CMakeFiles/main.dir/src/main.cpp.o.d"
   "CMakeFiles/main.dir/src/parse/lex.yy.cc.o"
@@ -19,6 +21,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o.d"
   "CMakeFiles/main.dir/src/shell/tool.cpp.o"
   "CMakeFiles/main.dir/src/shell/tool.cpp.o.d"
+  "CMakeFiles/main.dir/src/user/user.cpp.o"
+  "CMakeFiles/main.dir/src/user/user.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

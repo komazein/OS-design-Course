@@ -11,6 +11,7 @@ void file_manager::openFile(std::string& filename, dentry* current_dir)
     }
 
     // finding the file in the current directroy
+    dir_tree_->has_child_test(current_dir);
     dentry* file_entry = current_dir->find_subdir(filename);
     if (file_entry == nullptr) {
         spdlog::warn("File '{}' not found in current directory '{}'", filename, current_dir->get_name());
@@ -161,43 +162,82 @@ void file_manager::writeFile(std::string& filename, std::string& content, dentry
     spdlog::warn("File '{}' is not currently open", filename);
 }
 
-void file_manager::fileHardLink(std::string& source_path, std::string& target_path)
+void file_manager::fileHardLink(std::string& source_path, std::string& target_path, int cur_uid, dentry* work_dir)
 {
     if (current_dir_ == nullptr) {
         spdlog::warn("Current directory is not set. Cannot create hard link for file path '{}'", source_path);
         return;
     }
 
-    // get the file in the current directroy
-    dentry* file_entry = dir_tree_->name_travesal(source_path, current_dir_);
-    // file not exist
-    if (file_entry == nullptr) {
-        spdlog::warn("File path '{}' not found in current directory '{}'", source_path, current_dir_->get_name());
-        return;
-    }
+    std::string filename_source;
+    // std::string parent_dir_path_source = source_path.substr(0, source_path.find_last_of('/'));
+    size_t last_slash_source = source_path.find_last_of('/');
+    std::string parent_dir_path_source;
+    dentry* old_SIM_FILE;
+    dentry* parent_dir;
+    if (last_slash_source != std::string::npos) {
+        parent_dir_path_source = target_path.substr(0, last_slash_source);
+        filename_source = source_path.substr(source_path.find_last_of('/') + 1);
+        // get the file in the current directroy
+        dentry* file_entry = dir_tree_->name_travesal(parent_dir_path_source, current_dir_);
+        // file not exist
+        if (file_entry == nullptr) {
+            spdlog::warn("File path '{}' not found in current directory '{}'", parent_dir_path_source, current_dir_->get_name());
+            return;
+        }
+        dir_tree_->has_child_test(file_entry);
+        old_SIM_FILE=file_entry->get_subdir()[filename_source];
+        if(old_SIM_FILE==nullptr)
+        {
+            spdlog::warn("File '{}' not found in current directory '{}'", filename_source, parent_dir_path_source);
+            return;
+        }
+        
+    } else {
+        filename_source = source_path;             // 直接是文件名
 
+        dir_tree_->has_child_test(work_dir);
+        old_SIM_FILE = work_dir->get_subdir()[source_path];
+
+        if(old_SIM_FILE==nullptr)
+        {
+            spdlog::warn("File '{}' not found in current directory '{}'", filename_source, work_dir->get_name());
+            return;
+        }
+    }
+    if(old_SIM_FILE->get_inode()==nullptr)
+    {
+        inode*temp=(inode*)malloc(sizeof(inode));
+        temp->i_num=old_SIM_FILE->get_inode_num();
+        old_SIM_FILE->set_inode(temp);
+        dir_tree_->get_bs()->ReWrinode(*old_SIM_FILE->get_inode(),true);
+    }
     // create a hard link to the file
     // here we just print a message, in real implementation, we would create a hard link on disk
     // example:
     // ln ./xxxx/xxx/file.txt ./xxxx/xxx/file_link.txt
     // filename is file_link.txt and the parent directory path is ./xxxx/xxx/
     std::string filename = target_path.substr(target_path.find_last_of('/') + 1);
-    std::string parent_dir_path = target_path.substr(0, target_path.find_last_of('/'));
-    if (parent_dir_path.empty()) {
-        parent_dir_path = "/"; // if no parent directory, use root
+    size_t last_slash = target_path.find_last_of('/');
+    std::string parent_dir_path;
+    if (last_slash != std::string::npos) {
+        parent_dir_path = target_path.substr(0, last_slash);
+        parent_dir =dir_tree_->name_travesal(parent_dir_path, current_dir_);
+    } else {
+        filename = target_path;             // 直接是文件名
+        parent_dir = work_dir;
     }
 
-    dentry* parent_dir = dir_tree_->name_travesal(parent_dir_path, current_dir_);
-    if(parent_dir == nullptr){
-        spdlog::warn("Parent directory '{}' not found for file path '{}'", parent_dir_path, source_path);
+    if(parent_dir->get_inode()->i_uid != cur_uid){
+        spdlog::error("Can't hard link one directory to others directory");
         return;
     }
+    
     // use alloc_dir create the hard link using the file_entry's inode
-    if(dir_tree_->alloc_dir(filename, parent_dir, file_entry->get_inode(), file_entry->get_inode()->i_type) == false) {
+    if(dir_tree_->alloc_dir_HARD(filename, parent_dir, old_SIM_FILE->get_inode()) == false) {
         spdlog::warn("Failed to create hard link for file path '{}': file already exists", source_path);
         return;
     }
-    file_entry->get_inode()->di_link_count++; // increment link count
 
-    spdlog::info("Creating hard link for file path '{}'", source_path);
+    spdlog::info("Hard link created from '{}' to '{}'", source_path, target_path);
 }

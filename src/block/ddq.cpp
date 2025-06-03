@@ -885,9 +885,33 @@ void blockScheduler::ReWrinode(inode &ino,bool read)
     fseek(fp,sizeof(super_block)+sizeof(inode)*ino.i_num,SEEK_SET);
     cout<<"ino_inum"<<ino.i_num<<" "<<read<<" "<<endl;
     if(read)
-        fread(&ino,sizeof(inode),1,fp);
+    {
+        auto it=inode_hash.find(ino.i_num);
+        if(it!=inode_hash.end())
+        {
+            (*it).second.second++;
+            ino=*((*it).second.first);
+        }
+        else
+        {
+            fread(&ino,sizeof(inode),1,fp);
+            inode_hash.emplace(ino.i_num,pair(ino,1));
+        }
+    }
     else
-        fwrite(&ino,sizeof(inode),1,fp);
+    {
+        auto it=inode_hash.find(ino.i_num);
+        if(it!=inode_hash.end())
+        {
+            (*it).second.second++;
+            ino=*((*it).second.first);
+        }
+        else
+        {
+            fread(&ino,sizeof(inode),1,fp);
+            inode_hash.emplace(ino.i_num,pair(ino,1));
+        }
+    }
     fclose(fp);
     return;
 }
@@ -930,11 +954,11 @@ string blockScheduler::getUSERroot(string username,string passwoard,int&uid,int&
     d_user tempuser;
     if(username.size()!=1||passwoard.size()>MAXPASSWOREDLEN-3)
         return "";
-    if(username[0]-'0'<USERNUM&&username[0]-'0'>=0)
+    if(username[0]-'0'<=USERNUM&&username[0]-'0'>=1)
     {
         size_t int_user_name=username[0]-'0';
         FILE *fp=fopen("../disk.img","r+");
-        fseek(fp,sizeof(super_block)+sizeof(inode)*INODENUM+512*DATANUM+int_user_name*sizeof(d_user),SEEK_SET);
+        fseek(fp,sizeof(super_block)+sizeof(inode)*INODENUM+512*DATANUM+(int_user_name-1)*sizeof(d_user),SEEK_SET);
         fread(&tempuser,sizeof(d_user),1,fp);
         string str_pss_getfrom_disk=tempuser.d_password;
         if(str_pss_getfrom_disk==passwoard)
@@ -955,15 +979,15 @@ void blockScheduler::freshUSER()
     for(size_t i=0;i<USERNUM;i++)
     {
         d_user tempuser;
-        tempuser.uid= i;
+        tempuser.uid= i+1;
         string PASSroot="100";
-        PASSroot+=to_string(i);
-        tempuser.gid=(i>>1);
+        PASSroot+=to_string(i+1);
+        tempuser.gid=(i>>1)+1;
         strcpy(tempuser.d_password,PASSroot.c_str());
         fwrite(&tempuser,sizeof(d_user),1,fp);
         string RETroot="user";
-        RETroot+=to_string(i);
-        dirtree_->alloc_dir(RETroot, dirtree_->get_root(), nullptr, DIR);
+        RETroot+=to_string(i+1);
+        dirtree_->alloc_dir_init(RETroot, dirtree_->get_root(), nullptr, DIR,i+1);
     }
     fclose(fp);
     return;

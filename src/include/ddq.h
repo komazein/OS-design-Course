@@ -1,6 +1,7 @@
 #pragma once
 #include"fs_types.h"
 #include"superblock.h"
+#include<unordered_map>
 // #include"dentry.h"
 class blockScheduler
 {
@@ -67,5 +68,6 @@ public:
 private:
     super_block* sb;
     dirTree* dirtree_;
+    unordered_map<size_t,pair<inode*,size_t>>inode_hash;
 };
 

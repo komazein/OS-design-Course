@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kaku/Documents/OS_ZXY
+CMAKE_SOURCE_DIR = /home/luacpo/OSKSEND/KAKU2/OS-design-Course
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kaku/Documents/OS_ZXY/build
+CMAKE_BINARY_DIR = /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/main.dir/depend.make
@@ -70,130 +70,158 @@ include CMakeFiles/main.dir/progress.make
 include CMakeFiles/main.dir/flags.make
 
 CMakeFiles/main.dir/src/main.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/src/main.cpp.o: /home/kaku/Documents/OS_ZXY/src/main.cpp
+CMakeFiles/main.dir/src/main.cpp.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/main.cpp
 CMakeFiles/main.dir/src/main.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kaku/Documents/OS_ZXY/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main.dir/src/main.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/main.cpp.o -MF CMakeFiles/main.dir/src/main.cpp.o.d -o CMakeFiles/main.dir/src/main.cpp.o -c /home/kaku/Documents/OS_ZXY/src/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main.dir/src/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/main.cpp.o -MF CMakeFiles/main.dir/src/main.cpp.o.d -o CMakeFiles/main.dir/src/main.cpp.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/main.cpp
 
 CMakeFiles/main.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/main.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kaku/Documents/OS_ZXY/src/main.cpp > CMakeFiles/main.dir/src/main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/main.cpp > CMakeFiles/main.dir/src/main.cpp.i
 
 CMakeFiles/main.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/main.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kaku/Documents/OS_ZXY/src/main.cpp -o CMakeFiles/main.dir/src/main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/main.cpp -o CMakeFiles/main.dir/src/main.cpp.s
 
 CMakeFiles/main.dir/src/just_test.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/src/just_test.cpp.o: /home/kaku/Documents/OS_ZXY/src/just_test.cpp
+CMakeFiles/main.dir/src/just_test.cpp.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/just_test.cpp
 CMakeFiles/main.dir/src/just_test.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kaku/Documents/OS_ZXY/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/src/just_test.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/just_test.cpp.o -MF CMakeFiles/main.dir/src/just_test.cpp.o.d -o CMakeFiles/main.dir/src/just_test.cpp.o -c /home/kaku/Documents/OS_ZXY/src/just_test.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/src/just_test.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/just_test.cpp.o -MF CMakeFiles/main.dir/src/just_test.cpp.o.d -o CMakeFiles/main.dir/src/just_test.cpp.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/just_test.cpp
 
 CMakeFiles/main.dir/src/just_test.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/just_test.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kaku/Documents/OS_ZXY/src/just_test.cpp > CMakeFiles/main.dir/src/just_test.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/just_test.cpp > CMakeFiles/main.dir/src/just_test.cpp.i
 
 CMakeFiles/main.dir/src/just_test.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/just_test.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kaku/Documents/OS_ZXY/src/just_test.cpp -o CMakeFiles/main.dir/src/just_test.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/just_test.cpp -o CMakeFiles/main.dir/src/just_test.cpp.s
 
 CMakeFiles/main.dir/src/block/superBlock.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/src/block/superBlock.cpp.o: /home/kaku/Documents/OS_ZXY/src/block/superBlock.cpp
+CMakeFiles/main.dir/src/block/superBlock.cpp.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/block/superBlock.cpp
 CMakeFiles/main.dir/src/block/superBlock.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kaku/Documents/OS_ZXY/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/src/block/superBlock.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/block/superBlock.cpp.o -MF CMakeFiles/main.dir/src/block/superBlock.cpp.o.d -o CMakeFiles/main.dir/src/block/superBlock.cpp.o -c /home/kaku/Documents/OS_ZXY/src/block/superBlock.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/src/block/superBlock.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/block/superBlock.cpp.o -MF CMakeFiles/main.dir/src/block/superBlock.cpp.o.d -o CMakeFiles/main.dir/src/block/superBlock.cpp.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/block/superBlock.cpp
 
 CMakeFiles/main.dir/src/block/superBlock.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/block/superBlock.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kaku/Documents/OS_ZXY/src/block/superBlock.cpp > CMakeFiles/main.dir/src/block/superBlock.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/block/superBlock.cpp > CMakeFiles/main.dir/src/block/superBlock.cpp.i
 
 CMakeFiles/main.dir/src/block/superBlock.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/block/superBlock.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kaku/Documents/OS_ZXY/src/block/superBlock.cpp -o CMakeFiles/main.dir/src/block/superBlock.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/block/superBlock.cpp -o CMakeFiles/main.dir/src/block/superBlock.cpp.s
 
 CMakeFiles/main.dir/src/block/ddq.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/src/block/ddq.cpp.o: /home/kaku/Documents/OS_ZXY/src/block/ddq.cpp
+CMakeFiles/main.dir/src/block/ddq.cpp.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/block/ddq.cpp
 CMakeFiles/main.dir/src/block/ddq.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kaku/Documents/OS_ZXY/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/main.dir/src/block/ddq.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/block/ddq.cpp.o -MF CMakeFiles/main.dir/src/block/ddq.cpp.o.d -o CMakeFiles/main.dir/src/block/ddq.cpp.o -c /home/kaku/Documents/OS_ZXY/src/block/ddq.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/main.dir/src/block/ddq.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/block/ddq.cpp.o -MF CMakeFiles/main.dir/src/block/ddq.cpp.o.d -o CMakeFiles/main.dir/src/block/ddq.cpp.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/block/ddq.cpp
 
 CMakeFiles/main.dir/src/block/ddq.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/block/ddq.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kaku/Documents/OS_ZXY/src/block/ddq.cpp > CMakeFiles/main.dir/src/block/ddq.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/block/ddq.cpp > CMakeFiles/main.dir/src/block/ddq.cpp.i
 
 CMakeFiles/main.dir/src/block/ddq.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/block/ddq.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kaku/Documents/OS_ZXY/src/block/ddq.cpp -o CMakeFiles/main.dir/src/block/ddq.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/block/ddq.cpp -o CMakeFiles/main.dir/src/block/ddq.cpp.s
 
 CMakeFiles/main.dir/src/dentry/dentry.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/src/dentry/dentry.cpp.o: /home/kaku/Documents/OS_ZXY/src/dentry/dentry.cpp
+CMakeFiles/main.dir/src/dentry/dentry.cpp.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/dentry/dentry.cpp
 CMakeFiles/main.dir/src/dentry/dentry.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kaku/Documents/OS_ZXY/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/main.dir/src/dentry/dentry.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/dentry/dentry.cpp.o -MF CMakeFiles/main.dir/src/dentry/dentry.cpp.o.d -o CMakeFiles/main.dir/src/dentry/dentry.cpp.o -c /home/kaku/Documents/OS_ZXY/src/dentry/dentry.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/main.dir/src/dentry/dentry.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/dentry/dentry.cpp.o -MF CMakeFiles/main.dir/src/dentry/dentry.cpp.o.d -o CMakeFiles/main.dir/src/dentry/dentry.cpp.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/dentry/dentry.cpp
 
 CMakeFiles/main.dir/src/dentry/dentry.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/dentry/dentry.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kaku/Documents/OS_ZXY/src/dentry/dentry.cpp > CMakeFiles/main.dir/src/dentry/dentry.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/dentry/dentry.cpp > CMakeFiles/main.dir/src/dentry/dentry.cpp.i
 
 CMakeFiles/main.dir/src/dentry/dentry.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/dentry/dentry.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kaku/Documents/OS_ZXY/src/dentry/dentry.cpp -o CMakeFiles/main.dir/src/dentry/dentry.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/dentry/dentry.cpp -o CMakeFiles/main.dir/src/dentry/dentry.cpp.s
 
 CMakeFiles/main.dir/src/parse/lex.yy.cc.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/src/parse/lex.yy.cc.o: /home/kaku/Documents/OS_ZXY/src/parse/lex.yy.cc
+CMakeFiles/main.dir/src/parse/lex.yy.cc.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/parse/lex.yy.cc
 CMakeFiles/main.dir/src/parse/lex.yy.cc.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kaku/Documents/OS_ZXY/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/main.dir/src/parse/lex.yy.cc.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/parse/lex.yy.cc.o -MF CMakeFiles/main.dir/src/parse/lex.yy.cc.o.d -o CMakeFiles/main.dir/src/parse/lex.yy.cc.o -c /home/kaku/Documents/OS_ZXY/src/parse/lex.yy.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/main.dir/src/parse/lex.yy.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/parse/lex.yy.cc.o -MF CMakeFiles/main.dir/src/parse/lex.yy.cc.o.d -o CMakeFiles/main.dir/src/parse/lex.yy.cc.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/parse/lex.yy.cc
 
 CMakeFiles/main.dir/src/parse/lex.yy.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/parse/lex.yy.cc.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kaku/Documents/OS_ZXY/src/parse/lex.yy.cc > CMakeFiles/main.dir/src/parse/lex.yy.cc.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/parse/lex.yy.cc > CMakeFiles/main.dir/src/parse/lex.yy.cc.i
 
 CMakeFiles/main.dir/src/parse/lex.yy.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/parse/lex.yy.cc.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kaku/Documents/OS_ZXY/src/parse/lex.yy.cc -o CMakeFiles/main.dir/src/parse/lex.yy.cc.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/parse/lex.yy.cc -o CMakeFiles/main.dir/src/parse/lex.yy.cc.s
 
 CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o: /home/kaku/Documents/OS_ZXY/src/shell/file_system_manager.cpp
+CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/shell/file_system_manager.cpp
 CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kaku/Documents/OS_ZXY/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o -MF CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o.d -o CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o -c /home/kaku/Documents/OS_ZXY/src/shell/file_system_manager.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o -MF CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o.d -o CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/shell/file_system_manager.cpp
 
 CMakeFiles/main.dir/src/shell/file_system_manager.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/shell/file_system_manager.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kaku/Documents/OS_ZXY/src/shell/file_system_manager.cpp > CMakeFiles/main.dir/src/shell/file_system_manager.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/shell/file_system_manager.cpp > CMakeFiles/main.dir/src/shell/file_system_manager.cpp.i
 
 CMakeFiles/main.dir/src/shell/file_system_manager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/shell/file_system_manager.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kaku/Documents/OS_ZXY/src/shell/file_system_manager.cpp -o CMakeFiles/main.dir/src/shell/file_system_manager.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/shell/file_system_manager.cpp -o CMakeFiles/main.dir/src/shell/file_system_manager.cpp.s
 
 CMakeFiles/main.dir/src/file/filemanager.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/src/file/filemanager.cpp.o: /home/kaku/Documents/OS_ZXY/src/file/filemanager.cpp
+CMakeFiles/main.dir/src/file/filemanager.cpp.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/file/filemanager.cpp
 CMakeFiles/main.dir/src/file/filemanager.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kaku/Documents/OS_ZXY/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/main.dir/src/file/filemanager.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/file/filemanager.cpp.o -MF CMakeFiles/main.dir/src/file/filemanager.cpp.o.d -o CMakeFiles/main.dir/src/file/filemanager.cpp.o -c /home/kaku/Documents/OS_ZXY/src/file/filemanager.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/main.dir/src/file/filemanager.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/file/filemanager.cpp.o -MF CMakeFiles/main.dir/src/file/filemanager.cpp.o.d -o CMakeFiles/main.dir/src/file/filemanager.cpp.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/file/filemanager.cpp
 
 CMakeFiles/main.dir/src/file/filemanager.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/file/filemanager.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kaku/Documents/OS_ZXY/src/file/filemanager.cpp > CMakeFiles/main.dir/src/file/filemanager.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/file/filemanager.cpp > CMakeFiles/main.dir/src/file/filemanager.cpp.i
 
 CMakeFiles/main.dir/src/file/filemanager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/file/filemanager.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kaku/Documents/OS_ZXY/src/file/filemanager.cpp -o CMakeFiles/main.dir/src/file/filemanager.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/file/filemanager.cpp -o CMakeFiles/main.dir/src/file/filemanager.cpp.s
 
 CMakeFiles/main.dir/src/shell/tool.cpp.o: CMakeFiles/main.dir/flags.make
-CMakeFiles/main.dir/src/shell/tool.cpp.o: /home/kaku/Documents/OS_ZXY/src/shell/tool.cpp
+CMakeFiles/main.dir/src/shell/tool.cpp.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/shell/tool.cpp
 CMakeFiles/main.dir/src/shell/tool.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/kaku/Documents/OS_ZXY/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/main.dir/src/shell/tool.cpp.o"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/shell/tool.cpp.o -MF CMakeFiles/main.dir/src/shell/tool.cpp.o.d -o CMakeFiles/main.dir/src/shell/tool.cpp.o -c /home/kaku/Documents/OS_ZXY/src/shell/tool.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/main.dir/src/shell/tool.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/shell/tool.cpp.o -MF CMakeFiles/main.dir/src/shell/tool.cpp.o.d -o CMakeFiles/main.dir/src/shell/tool.cpp.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/shell/tool.cpp
 
 CMakeFiles/main.dir/src/shell/tool.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/shell/tool.cpp.i"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/kaku/Documents/OS_ZXY/src/shell/tool.cpp > CMakeFiles/main.dir/src/shell/tool.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/shell/tool.cpp > CMakeFiles/main.dir/src/shell/tool.cpp.i
 
 CMakeFiles/main.dir/src/shell/tool.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/shell/tool.cpp.s"
-	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/kaku/Documents/OS_ZXY/src/shell/tool.cpp -o CMakeFiles/main.dir/src/shell/tool.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/shell/tool.cpp -o CMakeFiles/main.dir/src/shell/tool.cpp.s
+
+CMakeFiles/main.dir/src/log_global.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/src/log_global.cpp.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/log_global.cpp
+CMakeFiles/main.dir/src/log_global.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/main.dir/src/log_global.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/log_global.cpp.o -MF CMakeFiles/main.dir/src/log_global.cpp.o.d -o CMakeFiles/main.dir/src/log_global.cpp.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/log_global.cpp
+
+CMakeFiles/main.dir/src/log_global.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/log_global.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/log_global.cpp > CMakeFiles/main.dir/src/log_global.cpp.i
+
+CMakeFiles/main.dir/src/log_global.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/log_global.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/log_global.cpp -o CMakeFiles/main.dir/src/log_global.cpp.s
+
+CMakeFiles/main.dir/src/user/user.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/src/user/user.cpp.o: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/user/user.cpp
+CMakeFiles/main.dir/src/user/user.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/main.dir/src/user/user.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/src/user/user.cpp.o -MF CMakeFiles/main.dir/src/user/user.cpp.o.d -o CMakeFiles/main.dir/src/user/user.cpp.o -c /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/user/user.cpp
+
+CMakeFiles/main.dir/src/user/user.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/main.dir/src/user/user.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/user/user.cpp > CMakeFiles/main.dir/src/user/user.cpp.i
+
+CMakeFiles/main.dir/src/user/user.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/main.dir/src/user/user.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/luacpo/OSKSEND/KAKU2/OS-design-Course/src/user/user.cpp -o CMakeFiles/main.dir/src/user/user.cpp.s
 
 # Object files for target main
 main_OBJECTS = \
@@ -205,27 +233,31 @@ main_OBJECTS = \
 "CMakeFiles/main.dir/src/parse/lex.yy.cc.o" \
 "CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o" \
 "CMakeFiles/main.dir/src/file/filemanager.cpp.o" \
-"CMakeFiles/main.dir/src/shell/tool.cpp.o"
+"CMakeFiles/main.dir/src/shell/tool.cpp.o" \
+"CMakeFiles/main.dir/src/log_global.cpp.o" \
+"CMakeFiles/main.dir/src/user/user.cpp.o"
 
 # External object files for target main
 main_EXTERNAL_OBJECTS =
 
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/src/main.cpp.o
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/src/just_test.cpp.o
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/src/block/superBlock.cpp.o
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/src/block/ddq.cpp.o
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/src/dentry/dentry.cpp.o
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/src/parse/lex.yy.cc.o
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/src/file/filemanager.cpp.o
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/src/shell/tool.cpp.o
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/build.make
-/home/kaku/Documents/OS_ZXY/bin/main: CMakeFiles/main.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/kaku/Documents/OS_ZXY/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable /home/kaku/Documents/OS_ZXY/bin/main"
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/main.cpp.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/just_test.cpp.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/block/superBlock.cpp.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/block/ddq.cpp.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/dentry/dentry.cpp.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/parse/lex.yy.cc.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/shell/file_system_manager.cpp.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/file/filemanager.cpp.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/shell/tool.cpp.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/log_global.cpp.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/src/user/user.cpp.o
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/build.make
+/home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main: CMakeFiles/main.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable /home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/main.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-CMakeFiles/main.dir/build: /home/kaku/Documents/OS_ZXY/bin/main
+CMakeFiles/main.dir/build: /home/luacpo/OSKSEND/KAKU2/OS-design-Course/bin/main
 .PHONY : CMakeFiles/main.dir/build
 
 CMakeFiles/main.dir/clean:
@@ -233,6 +265,6 @@ CMakeFiles/main.dir/clean:
 .PHONY : CMakeFiles/main.dir/clean
 
 CMakeFiles/main.dir/depend:
-	cd /home/kaku/Documents/OS_ZXY/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/kaku/Documents/OS_ZXY /home/kaku/Documents/OS_ZXY /home/kaku/Documents/OS_ZXY/build /home/kaku/Documents/OS_ZXY/build /home/kaku/Documents/OS_ZXY/build/CMakeFiles/main.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/luacpo/OSKSEND/KAKU2/OS-design-Course /home/luacpo/OSKSEND/KAKU2/OS-design-Course /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build /home/luacpo/OSKSEND/KAKU2/OS-design-Course/build/CMakeFiles/main.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/main.dir/depend
 

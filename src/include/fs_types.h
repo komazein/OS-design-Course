@@ -96,7 +96,7 @@ struct inode
     FILEMODE i_mode;        // file mode
     uint8_t i_uid;           // owner_id
     uint8_t i_gid;           // group_id
-    ACL acl;                // 权限表
+    ACL i_acl;                // 权限表
     size_t i_size;          // file size
     time_t	i_atime;
     time_t	i_ctime;

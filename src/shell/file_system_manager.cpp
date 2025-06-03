@@ -1,5 +1,6 @@
 #include "file_system_manager.h"
 #include <spdlog/spdlog.h>
+#include "log_global.h"
 
 void file_system_manager::command_mkdir(std::string& dirname) {
     if (current_dir_ == nullptr) {
@@ -7,7 +8,11 @@ void file_system_manager::command_mkdir(std::string& dirname) {
         Exit();
         
     }
+    uint8_t owner= current_dir_->get_inode()->i_acl.owner;
+    if(owner >> (logInUser_->getUid() - 1) & 1)
     bool result = dir_tree_->alloc_dir(dirname, current_dir_, nullptr, DIR);
+    else
+        spdlog::warn("user '{}' has no authorization to build directory '{}'", logInUser_->getUid(), dirname);
     // exit(1);
 }
 
@@ -40,6 +45,7 @@ void file_system_manager::command_ls()
         Exit();
     }
 
+    g_logger->info("Listing contents of directory '{}':", current_dir_->get_name());
     spdlog::info("Listing contents of directory '{}':", current_dir_->get_name());
     
     int resultNum = 0;
@@ -60,10 +66,18 @@ void file_system_manager::command_rm(std::string& dirname)
         Exit();
     }
 
-    bool result = dir_tree_->free_dir(dirname, current_dir_);
-    if (!result) {
-        spdlog::warn("Directory '{}' not found in '{}'", dirname, current_dir_->get_name());
+    uint8_t owner = current_dir_->get_inode()->i_acl.owner;
+    if(owner >> (logInUser_->getUid() - 1) & 1)
+    {
+        cout<<"("<<bs_->getfreeblocknum()<<","<<bs_->getfreeinodenum()<<")";
+        bool result = dir_tree_->free_dir(dirname, current_dir_);
+        if (!result) {
+            spdlog::warn("Directory '{}' not found in '{}'", dirname, current_dir_->get_name());
+        }
+        cout<<"("<<bs_->getfreeblocknum()<<","<<bs_->getfreeinodenum()<<")";
     }
+    else
+        spdlog::warn("user '{}' has no authorization to remove directory '{}'", logInUser_->getUid(), dirname);
 }
 
 void file_system_manager::command_lkdir(std::string& source_path, std::string& target_path)
@@ -73,7 +87,11 @@ void file_system_manager::command_lkdir(std::string& source_path, std::string& t
         
     }
     
-    dir_tree_->add_soft_link(source_path, target_path, current_dir_);
+    uint8_t owner = current_dir_->get_inode()->i_acl.owner;
+    if(owner >> (logInUser_->getUid() - 1) & 1)
+        dir_tree_->add_soft_link(source_path, target_path, current_dir_);
+    else
+        spdlog::warn("user '{}' has no authorization to link directory path '{}'", logInUser_->getUid(), source_path);
     
 }
 
@@ -83,9 +101,23 @@ void file_system_manager::command_lndir(std::string& source_path, std::string& t
         spdlog::warn("Current directory is not set. Cannot create hard link in path '{}'", target_path);
         Exit();
     }
-
-    file_manager_->fileHardLink(source_path, target_path);
-    spdlog::info("Hard link created from '{}' to '{}'", source_path, target_path);
+    if(current_dir_->get_inode()==nullptr)
+    {
+        inode* new_inode = (inode*)malloc(sizeof(inode));
+        new_inode->i_num = current_dir_->get_inode_num();
+        get_bs()->ReWrinode(*new_inode, true);
+        current_dir_->set_inode(new_inode);
+    }
+    uint8_t owner = current_dir_->get_inode()->i_acl.owner;
+    // if(owner >> (logInUser_->getUid() - 1) & 1)
+    // {   
+    //     file_manager_->fileHardLink(source_path, target_path, logInUser_->getUid(), current_dir_);
+    // }
+    // else
+    // {
+    //     spdlog::warn("user '{}' has no authorization to link directory path '{}'", logInUser_->getUid(), source_path);
+    // }
+    file_manager_->fileHardLink(source_path, target_path, logInUser_->getUid(), current_dir_);
 }
 
 void file_system_manager::command_find(std::string& filename, bool fuzzy)
@@ -123,9 +155,15 @@ void file_system_manager::command_touch(std::string& filename)
         return;
     }
     
-    
-    dir_tree_->alloc_dir(filename, current_dir_, nullptr, SIM_FILE);
-    spdlog::info("File '{}' created successfully in '{}'", filename, current_dir_->get_name());
+    uint8_t owner = current_dir_->get_inode()->i_acl.owner;
+    if(owner >> (logInUser_->getUid() - 1) & 1)
+    {
+        dir_tree_->alloc_dir(filename, current_dir_, nullptr, SIM_FILE);
+    }
+    else
+    {
+        spdlog::warn("user '{}' has no authorization to build file '{}'", logInUser_->getUid(), filename);
+    }
 
 }
 
@@ -150,6 +188,7 @@ void file_system_manager::command_cat(std::string& filename)
     }
     
     // Check if the file exists
+    dir_tree_->has_child_test(current_dir_);
     dentry* file_entry = current_dir_->find_subdir(filename);
     if (file_entry == nullptr) {
         spdlog::warn("File '{}' not found in '{}'", filename, current_dir_->get_name());
@@ -172,16 +211,25 @@ void file_system_manager::command_edit(std::string& filename, std::string& conte
     }
 
     // Check if the file exists
+    dir_tree_->has_child_test(current_dir_);
     dentry* file_entry = current_dir_->find_subdir(filename);
     if (file_entry == nullptr) {
         spdlog::warn("File '{}' not found in '{}'", filename, current_dir_->get_name());
         return;
     }
     
-    // Call file manager to edit the file
-    file_manager_->openFile(filename, current_dir_);
-    file_manager_->writeFile(filename, content, current_dir_);
-    file_manager_->closeFile(filename, current_dir_);
+    uint8_t owner = current_dir_->get_inode()->i_acl.owner;
+    if(owner >> (logInUser_->getUid() - 1) & 1)
+    {
+        // Call file manager to edit the file
+        file_manager_->openFile(filename, current_dir_);
+        file_manager_->writeFile(filename, content, current_dir_);
+        file_manager_->closeFile(filename, current_dir_);
+    }
+    else
+    {
+         spdlog::warn("user '{}' has no authorization to edit file '{}'", logInUser_->getUid(), filename);
+    }
 }
 
 void file_system_manager::Exit()
@@ -195,6 +243,41 @@ void file_system_manager::Exit()
     // add any cleanup code if needed
     // print any manual or help information
 }
+bool file_system_manager::CMPuser(string username_,string password_)
+{
+    int uid_,gid_;
+    string x=bs_->getUSERroot(username_,password_,uid_,gid_);
+    if(x=="")
+        return false;
+    logInUser_->setprivate(username_,password_,uid_,gid_);
+    return true;
+}
+
+void file_system_manager::command_athrz(std::string& filename, int uid)
+{
+    auto dentry_entry = dir_tree_->name_travesal(filename, current_dir_);
+    if(dentry_entry == nullptr)
+    {
+        spdlog::warn("Can not fine file '{}'", filename);
+    }
+
+    logInUser_->authorize(dentry_entry, uid);
+}
+
+void file_system_manager::command_rathrz(std::string& filename, int uid)
+{
+    auto dentry_entry = dir_tree_->name_travesal(filename, current_dir_);
+    if(dentry_entry == nullptr)
+    {
+        spdlog::warn("Can not fine file '{}'", filename);
+    }
+
+    logInUser_->recoverAuthorization(dentry_entry, uid);
+}
+
+
+
+
 
 void file_system_manager::format()
 {

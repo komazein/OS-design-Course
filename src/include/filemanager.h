@@ -2,6 +2,8 @@
 
 #include "dentry.h"
 #include "ddq.h"
+class dirTree;
+class dentry;
 
 class file_manager {
 
@@ -53,7 +55,7 @@ class file_manager {
     * @param current_dir the current directory
     * create a hard link to a file in the current directory
     */
-    void fileHardLink(std::string& source_path, std::string& target_path);
+    void fileHardLink(std::string& source_path, std::string& target_path, int cur_uid, dentry* work_dir);
 
     
     
