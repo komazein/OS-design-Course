@@ -765,7 +765,7 @@ YY_RULE_SETUP
 #line 71 "command.l"
 {
     char src[256], dest[256];
-    sscanf(yytext, "ln %255s %255s", src, dest);
+    sscanf(yytext, "lndir %255s %255s", src, dest);
     std::string arg1(src);
     std::string arg2(dest);
     fileSystem->command_lndir(arg1, arg2);

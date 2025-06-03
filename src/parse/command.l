@@ -70,7 +70,7 @@ lkdir[ \t]+([a-zA-Z0-9_/\-]+)[ \t]+([a-zA-Z0-9_/\-]+) {
 
 lndir[ \t]+([a-zA-Z0-9_/.\-]+)[ \t]+([a-zA-Z0-9_/.\-]+) {
     char src[256], dest[256];
-    sscanf(yytext, "ln %255s %255s", src, dest);
+    sscanf(yytext, "lndir %255s %255s", src, dest);
     std::string arg1(src);
     std::string arg2(dest);
     fileSystem->command_lndir(arg1, arg2);
