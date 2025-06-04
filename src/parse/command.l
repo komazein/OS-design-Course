@@ -16,10 +16,9 @@ User subroutines
 #include <string.h>
 #include <string>
 #include "file_system_manager.h"
-
+#include "log_global.h"
 char arg_c[64];  // args for commands
 extern file_system_manager* fileSystem;  // to be set from outside
-extern user* logInUser;
 enum TokenType {
     COMMAND = 1,   // keyword
     NAME,          // file or dir name
@@ -102,7 +101,7 @@ touch[ \t]+[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+ {
 cat[ \t]+[a-zA-Z0-9_/.\-]+ {
     sscanf(yytext, "cat %s", arg_c);
     std::string arg(arg_c);
-    logInUser->AuthorizedCat(arg);
+    fileSystem->command_cat(arg);
 }
 
 edit[ \t]+([a-zA-Z0-9_\./\-]+)[ \t]+(.+) {
@@ -113,21 +112,29 @@ edit[ \t]+([a-zA-Z0-9_\./\-]+)[ \t]+(.+) {
     std::string filename = full.substr(first_space + 1, second_space - first_space - 1);
     std::string content = full.substr(second_space + 1);
 
-    logInUser->AuthorizedEdit(filename, content);  
+    fileSystem->command_edit(filename, content);  
 }
 
 chmod[ \t]+[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+[ \t]+user[0-9]+ {
-    char filename[100];
+    char filename_c[100];
     int userid;
-    sscanf(yytext, "chmod %s user%d", filename, &userid);
-    logInUser->authorize(filename, userid);
+    sscanf(yytext, "chmod %s user%d", filename_c, &userid);
+    std::string filename(filename_c);
+    fileSystem->command_athrz(filename, userid);
 }
 
 rcmod[ \t]+[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+[ \t]+user[0-9]+ {
-    char filename[100];
+    char filename_c[100];
     int userid;
-    sscanf(yytext, "rcmod %s user%d", filename, &userid);
-    logInUser->arecoverAuthorization(filename, userid);
+    sscanf(yytext, "rcmod %s user%d", filename_c, &userid);
+    std::string filename(filename_c);
+    fileSystem->command_rathrz(filename, userid);
+}
+
+execute[ \t]+[a-zA-Z0-9_/.-]+\.exe {
+    sscanf(yytext, "execute %s", arg_c);
+    std::string filename(arg_c);
+    fileSystem->command_exe(filename);
 }
 
 
@@ -147,7 +154,12 @@ help {
 
 \n      { return 0; }
 
-.*      { printf("syntax error for undeclared command: %s\n", yytext); }
+.*      {
+     printf("syntax error for undeclared command: %s\n", yytext);
+     std::string command(yytext);
+     g_logger->warn("syntax error for undeclared command: '{}' ", command);
+
+}
 
 %%
 // Optional user-defined functions go here

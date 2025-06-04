@@ -37,7 +37,7 @@ class user {
         * This function checks if the user has permission to access the file
         * and recover the authorization for the user through the ACL (Access Control List) of the file.
         */
-        void recoverAuthorization(std::string& accessed_file, user* authorized_user);
+        void recoverAuthorization(std::string& accessed_file, int authorized_user_id);
         
         /*
         * @brief Read a file with authorization

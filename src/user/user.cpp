@@ -31,7 +31,7 @@ void user::authorize(std::string& accessed_file, int authorized_user_id)
     }
 }
 
-void user::recoverAuthorization(std::string& accessed_file, user* authorized_user)
+void user::recoverAuthorization(std::string& accessed_file, int authorized_user_id)
 {
     auto cur_dir = fileSystem->getCurrentDir();
 
@@ -43,7 +43,7 @@ void user::recoverAuthorization(std::string& accessed_file, user* authorized_use
     }
     
     ACL acl = dentry_node->get_inode()->i_acl;
-    int uid = authorized_user->uid_;
+    int uid = authorized_user_id;
 
     // Check if the user is not the owner of the file
     // owner bit is 0 which represents the user has not right and no need to recover

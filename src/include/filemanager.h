@@ -48,6 +48,16 @@ class file_manager {
     void writeFile(std::string& filename, std::string& content, dentry* current_dir);
 
     /*
+    * @brief execute file
+    * @param filename the name of the file to execute
+    * @param current_dir the current directory
+    * execute a file in the current directory
+    * this function is used to execute a file, it will check if the file is executable
+    * and if the file is open, then execute the file, it will calculate the result of assembly code
+    */
+    void executeFile(std::string& filename, dentry* current_dir);
+
+    /*
     * @brief create a hard link to a file
     * @param filename the name of the file to link
     * @param current_dir the current directory
@@ -55,7 +65,12 @@ class file_manager {
     */
     void fileHardLink(std::string& source_path, std::string& target_path);
 
-    
+    /*
+    * @brief execute assembly code
+    * @param code the assembly code to execute
+    * this function is used to execute assembly code, it will parse the code and execute it
+    */
+    void executeAssembly(std::string& code); 
     
     private:
         dirTree* dir_tree_;  

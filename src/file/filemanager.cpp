@@ -1,6 +1,6 @@
 
 #include "filemanager.h"
-#include <spdlog/spdlog.h>
+#include <spdlog/spdlog.h> 
 
 void file_manager::openFile(std::string& filename, dentry* current_dir)
 {
@@ -145,6 +145,111 @@ void file_manager::writeFile(std::string& filename, std::string& content, dentry
                 return;
             }
             spdlog::info("Writing to file '{}': [Content: {}]", filename, content);
+            return;
+        }
+    }
+
+    spdlog::warn("File '{}' is not currently open", filename);
+}
+
+void file_manager::executeAssembly(std::string& code)
+{
+    unordered_map<char, int> registers = {{'A', 0}, {'B', 0}, {'C', 0}, {'D', 0}};
+    vector<string> instructions;
+    stringstream ss(code);
+    string token;
+
+    
+    while (getline(ss, token, ';')) {
+        if (!token.empty()) {
+            instructions.push_back(token);
+        }
+    }
+
+    // 执行每条指令
+    for (const string& instr : instructions) {
+        stringstream iss(instr);
+        cout << instr << endl;
+        string op;
+        char dst;
+        string src;
+     
+        iss >> op; // 读取操作码
+
+        if (op == "ADD" || op == "SUB" || op == "MUT" || op == "DIV" || op == "ST") {
+            iss >> dst >> src;
+            cout << dst <<" "<<src<<endl;
+            int num=0;
+            if(src[0]>='A'&&src[0]<='D'&&src.size()==1)
+                num=registers[src[0]];
+            else
+            {
+                int start=(src[0]=='-');
+                for(int i=start;i<src.size();i++)
+                {
+                    if(src[i]<='9'&&src[i]>='0')
+                        num=10*num+src[i]-'0';
+                    else
+                        return ;
+                }
+                if(start)
+                    num*=-1;
+            }
+            if (op == "ADD") registers[dst] += num;
+            else if (op == "SUB") registers[dst] -= num;
+            else if (op == "MUT") registers[dst] *= num;
+            else if (op == "DIV"){
+                if(num == 0)
+                    return ;
+                registers[dst] /= num;
+            }
+            else if (op == "ST" ) registers[dst] = num;
+        } 
+        else if (op == "RET") {
+            iss >> dst; 
+            cout << "The result of assembly code execution is: " << registers[dst] << endl;
+        }
+        else
+            return ;
+    }
+
+
+}
+
+void file_manager::executeFile(std::string& filename, dentry* current_dir)
+{
+    if (current_dir == nullptr) {
+        spdlog::warn("Current directory is not set. Cannot execute file '{}'", filename);
+        return;
+    }
+
+    // get the file in the current directroy
+    dentry* file_entry = current_dir->find_subdir(filename);
+    // file not exist
+    if (file_entry == nullptr) {
+        spdlog::warn("File '{}' not found in current directory '{}'", filename, current_dir->get_name());
+        return;
+    }
+
+    // check if the file is open
+    for (auto& f : open_files_) {
+        if (f.f_path == file_entry->get_name()) {
+            // execute the file
+            // here we just print a message, in real implementation, we would execute the file
+            if(f.di_mode.ownerMode[2] != 'x')
+            {
+                spdlog::warn("File '{}' is not executable", filename);
+                return;
+            }
+            auto bs = dir_tree_->get_bs();
+            char* assemblyCode = bs->readSIMfromBLOCK(*f.f_inode);
+            if (assemblyCode == nullptr) {
+                spdlog::error("Failed to read assembly code from file '{}'", filename);
+                return;
+            }
+            std::string code(assemblyCode);
+            executeAssembly(code); // execute the assembly code
+            spdlog::info("Executing file '{}': [Execution would be performed here]", filename);
             return;
         }
     }
