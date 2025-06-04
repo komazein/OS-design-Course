@@ -1,0 +1,6 @@
+/home/ming/OS_fin/build/CMakeFiles/main.dir
+/home/ming/OS_fin/build/CMakeFiles/edit_cache.dir
+/home/ming/OS_fin/build/CMakeFiles/rebuild_cache.dir
+/home/ming/OS_fin/build/src/disk_formatting/CMakeFiles/dft.dir
+/home/ming/OS_fin/build/src/disk_formatting/CMakeFiles/edit_cache.dir
+/home/ming/OS_fin/build/src/disk_formatting/CMakeFiles/rebuild_cache.dir
