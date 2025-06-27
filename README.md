@@ -25,7 +25,7 @@ make
 ```bash
 cd bin
 
-./hello
+./main
 ```
 
 ## 测试
